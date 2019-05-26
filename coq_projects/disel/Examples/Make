@@ -1,0 +1,28 @@
+-Q . DiSeL
+
+-arg -w -arg -notation-overridden
+-arg -w -arg -local-declaration
+-arg -w -arg -redundant-canonical-projection
+-arg -w -arg -projection-no-head-constant
+
+Calculator/CalculatorInvariant.v
+Calculator/DelegatingCalculatorServer.v
+Calculator/SimpleCalculatorServers.v
+Calculator/CalculatorClientLib.v
+Calculator/CalculatorProtocol.v
+Calculator/SimpleCalculatorApp.v
+Calculator/CalculatorServerLib.v
+SeqLib.v
+LockResource/ResourceProtocol.v
+LockResource/LockProtocol.v
+TwoPhaseCommit/SimpleTPCApp.v
+TwoPhaseCommit/TwoPhaseInductiveInv.v
+TwoPhaseCommit/TwoPhaseClient.v
+TwoPhaseCommit/TwoPhaseInductiveProof.v
+TwoPhaseCommit/TwoPhaseParticipant.v
+TwoPhaseCommit/TwoPhaseProtocol.v
+TwoPhaseCommit/TwoPhaseCoordinator.v
+Greeter/Greeter.v
+Querying/QueryPlusTPC.v
+Querying/QueryProtocol.v
+Querying/QueryHooked.v

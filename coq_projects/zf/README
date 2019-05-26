@@ -1,0 +1,13 @@
+
+
+La contribution ZF fournit une implantation des axiomes de
+Zermelo-Fraenkel intuitioniste.  Elle contient :
+
+- un repertoire src avec les sources (fich .v)
+- un makefile pour la compilation et l'installation de la librairie.
+
+Se reporter a INSTALL pour faire l'installation (il faut
+essentiellement modifier deux variables dans makefile et src/makefile
+pour indiquer le chemin de coqc). 
+
+

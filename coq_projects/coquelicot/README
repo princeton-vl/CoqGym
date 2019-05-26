@@ -1,0 +1,8 @@
+This library provides vernacular files containing a formalization of real
+analysis for Coq. It is a conservative extension of the standard library Reals
+with a focus on usability.
+
+This package is free software; you can redistribute it and/or modify it under the
+terms of GNU Lesser General Public License (see the COPYING file). Authors are
+Sylvie Boldo <sylvie.boldo@inria.fr>, Catherine Lelay <catherine.lelay@inria.fr>,
+and Guillaume Melquiond <guillaume.melquiond@inria.fr>.

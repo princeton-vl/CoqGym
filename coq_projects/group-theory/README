@@ -1,0 +1,15 @@
+This development of group theory was started at the Newton Institute in 
+August 1995. It was prompted by the need to have conventional mathematical
+proofs to test the work of Yann Coscoy on producing text from the Coq 
+proof objects.
+
+
+It turns out that it is also a good testing ground for naive set theory.
+I followed the notations and numbering of W.R. Scott, Group Theory,
+Dover Books ISBN 0-486-65377-3
+
+Theorem 1.6.4 takes only three lines to prove in that book...
+
+
+Gilles Kahn
+January 1996

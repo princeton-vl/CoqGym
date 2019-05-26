@@ -1,0 +1,50 @@
+/* 
+	nosideLayout.css 
+	overwrites existing classes/id's/elements for specific layout
+*/
+#wrapper {
+	margin-right: 0px; /* account for left menu - but there is none. */
+	position: relative;
+}
+#content {
+	position: relative;
+	margin:0 -209px 0 0;
+	padding:0;
+	width: 100%;
+	min-width:760px;
+	float: left;
+	clear:none;
+	background-color:#FFFFFF;
+	overflow: visible;
+}
+#mainContent {
+	margin:0 15px 25px 0px;
+	padding:15px 25px 15px 25px;
+	min-height:300px;
+	height:100%;
+}
+.three-column #mainContent {
+	margin:0 15px 25px 0px;
+	padding:15px 25px 15px 25px;
+	width: 69%;
+	float:left;
+	clear:none;
+	background-color:#FFFFFF;
+}
+* html .three-column #mainContent {
+	width:68%;
+}
+.three-column #rightColumn {
+	margin:30px 7px 20px 0px;
+	padding:0;
+	float:left;
+	/*width:174px;*/
+	width: 17%;
+	background-color:#FFFFFF;
+}
+h1 {
+	/* margin:0; */
+	/* padding:0.75em 0; */
+	/* font-size:1.99em; */
+	color: #990000;
+}

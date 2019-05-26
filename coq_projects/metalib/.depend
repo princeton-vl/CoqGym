@@ -1,0 +1,44 @@
+AssocList.vo AssocList.glob AssocList.v.beautified: AssocList.v
+AssocList.vio: AssocList.v
+CoqEqDec.vo CoqEqDec.glob CoqEqDec.v.beautified: CoqEqDec.v
+CoqEqDec.vio: CoqEqDec.v
+CoqFSetDecide.vo CoqFSetDecide.glob CoqFSetDecide.v.beautified: CoqFSetDecide.v
+CoqFSetDecide.vio: CoqFSetDecide.v
+CoqFSetInterface.vo CoqFSetInterface.glob CoqFSetInterface.v.beautified: CoqFSetInterface.v
+CoqFSetInterface.vio: CoqFSetInterface.v
+CoqListFacts.vo CoqListFacts.glob CoqListFacts.v.beautified: CoqListFacts.v
+CoqListFacts.vio: CoqListFacts.v
+CoqUniquenessTac.vo CoqUniquenessTac.glob CoqUniquenessTac.v.beautified: CoqUniquenessTac.v
+CoqUniquenessTac.vio: CoqUniquenessTac.v
+CoqUniquenessTacEx.vo CoqUniquenessTacEx.glob CoqUniquenessTacEx.v.beautified: CoqUniquenessTacEx.v
+CoqUniquenessTacEx.vio: CoqUniquenessTacEx.v
+FSetExtra.vo FSetExtra.glob FSetExtra.v.beautified: FSetExtra.v
+FSetExtra.vio: FSetExtra.v
+FSetWeakNotin.vo FSetWeakNotin.glob FSetWeakNotin.v.beautified: FSetWeakNotin.v
+FSetWeakNotin.vio: FSetWeakNotin.v
+LibDefaultSimp.vo LibDefaultSimp.glob LibDefaultSimp.v.beautified: LibDefaultSimp.v
+LibDefaultSimp.vio: LibDefaultSimp.v
+LibLNgen.vo LibLNgen.glob LibLNgen.v.beautified: LibLNgen.v
+LibLNgen.vio: LibLNgen.v
+LibTactics.vo LibTactics.glob LibTactics.v.beautified: LibTactics.v
+LibTactics.vio: LibTactics.v
+MetatheoryAtom.vo MetatheoryAtom.glob MetatheoryAtom.v.beautified: MetatheoryAtom.v
+MetatheoryAtom.vio: MetatheoryAtom.v
+Metatheory.vo Metatheory.glob Metatheory.v.beautified: Metatheory.v
+Metatheory.vio: Metatheory.v
+AssumeList.vo AssumeList.glob AssumeList.v.beautified: AssumeList.v
+AssumeList.vio: AssumeList.v
+MetatheoryAlt.vo MetatheoryAlt.glob MetatheoryAlt.v.beautified: MetatheoryAlt.v
+MetatheoryAlt.vio: MetatheoryAlt.v
+Fsub_LetSum_Definitions.vo Fsub_LetSum_Definitions.glob Fsub_LetSum_Definitions.v.beautified: Fsub_LetSum_Definitions.v
+Fsub_LetSum_Definitions.vio: Fsub_LetSum_Definitions.v
+Fsub_LetSum_Infrastructure.vo Fsub_LetSum_Infrastructure.glob Fsub_LetSum_Infrastructure.v.beautified: Fsub_LetSum_Infrastructure.v
+Fsub_LetSum_Infrastructure.vio: Fsub_LetSum_Infrastructure.v
+Fsub_LetSum_Lemmas.vo Fsub_LetSum_Lemmas.glob Fsub_LetSum_Lemmas.v.beautified: Fsub_LetSum_Lemmas.v
+Fsub_LetSum_Lemmas.vio: Fsub_LetSum_Lemmas.v
+Fsub_LetSum_Soundness.vo Fsub_LetSum_Soundness.glob Fsub_LetSum_Soundness.v.beautified: Fsub_LetSum_Soundness.v
+Fsub_LetSum_Soundness.vio: Fsub_LetSum_Soundness.v
+CoqIntro.vo CoqIntro.glob CoqIntro.v.beautified: CoqIntro.v
+CoqIntro.vio: CoqIntro.v
+STLCsol.vo STLCsol.glob STLCsol.v.beautified: STLCsol.v
+STLCsol.vio: STLCsol.v

@@ -1,0 +1,8 @@
+-R . PropCalc
+
+a_base.v
+b_soundness.v
+c_completeness.v
+d_hilbert_calculus.v
+e_sequent_calculus.v
+f_cut_elimination.v

@@ -1,0 +1,86 @@
+# -----------------------------------------------------------------------------
+# Generic generated file patterns
+# -----------------------------------------------------------------------------
+
+Thumbs.db
+.DS_Store
+.svn
+
+*~
+#*#
+*.bak
+*.BAK
+*.orig
+*.prof
+*.rej
+
+*.hi
+*.hi-boot
+*.o-boot
+*.p_o
+*.t_o
+*.debug_o
+*.thr_o
+*.thr_p_o
+*.thr_debug_o
+*.o
+*.vo
+*.a
+*.o.cmd
+*.depend*
+.#*
+log
+tags
+
+# -----------------------------------------------------------------------------
+# Haskell leftovers
+# -----------------------------------------------------------------------------
+
+dist
+cabal-dev
+*.o
+*.hi
+*.chi
+*.chs.h
+*.dyn_o
+*.dyn_hi
+.virtualenv
+.hpc
+.hsenv
+.cabal-sandbox/
+cabal.sandbox.config
+*.prof
+*.aux
+*.hp
+
+# -----------------------------------------------------------------------------
+#  Emacs-generated TeX files
+# -----------------------------------------------------------------------------
+
+_region_.*
+cv/*.out
+*.rel
+*.log
+*.blg
+*.aux
+*.bbl
+*.synctex.gz
+*.out.ps
+.#*
+
+# -----------------------------------------------------------------------------
+#  Coq-generated stuff
+# -----------------------------------------------------------------------------
+
+\#*\#
+*.vo
+*.v.d
+*.glob
+.coq-native
+Makefile.coq
+extraction/**/*.mli
+extraction/**/*.ml
+_build
+*.d.byte
+Makefile.coq.conf
+.coqdeps.d

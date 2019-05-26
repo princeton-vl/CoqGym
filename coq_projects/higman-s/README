@@ -1,0 +1,13 @@
+This contribution contains more or less the proof given by Monika Seisenberger in "An Inductive Version of Nash-Williams' Minimal-Bad-Sequence Argument for Higman's Lemma". Some changes where made in the "forest" functions, and some lemmas have been reformulated, still the essence of the proof remains the same. 
+
+Files : 
+- inductive_wqo.v : contains inductive definition of a well quasi ordering, 
+definition of function giving the bad subsequence of a sequence, and basic lemmas about bad and good sequences.
+
+- list_embeding.v : contains inductive definitions of embeding on lists and sorted lists, plus a collection of useful facts about these relations
+
+- tree.v : contains definitions of the tree structure & subtree relation, plus some facts about these.
+
+- higman_aux.v : contains relations defining the forest of a list of word (corresponding to functions forest, insert_tree and insert_forest in M. Seisenberger's paper). Most lemmas about forests are in thi file
+
+- higman.v : contains the main lemmas as given (or nearly) in the article, and the final result. 

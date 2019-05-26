@@ -1,0 +1,17 @@
+*.vo
+*.glob
+*.v.d
+*.cmi
+*.cmx
+*.cmxs
+*.native
+*.o
+*.aux
+Makefile.coq
+Makefile.opam.coq
+*~
+\#*
+.#*
+.dir-locals.el
+deps.dot
+deps.pdf

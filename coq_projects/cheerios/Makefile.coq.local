@@ -1,0 +1,11 @@
+include Makefile.ml-files
+
+$(MLPOSITIVE): runtime/coq/ExtractPositiveSerializer.v runtime/coq/ExtractPositiveSerializerDeps.vo
+	$(COQC) $(COQDEBUG) $(COQFLAGS) $(COQLIBS) runtime/coq/ExtractPositiveSerializer.v
+
+$(MLTREE): runtime/coq/ExtractTreeSerializer.v runtime/coq/ExtractTreeSerializerDeps.vo
+	$(COQC) $(COQDEBUG) $(COQFLAGS) $(COQLIBS) runtime/coq/ExtractTreeSerializer.v
+
+clean::
+	rm -f $(MLPOSITIVE) \
+	 $(MLTREE)

@@ -1,0 +1,18 @@
+Name: AMM11262
+Title: Problem 11262 of The American Mathematical Monthly
+Author: Milad Niqui (Coq files)
+Email: milad@cs.ru.nl
+Homepage: http://www.cs.ru.nl/~milad
+Institution: Radboud University Nijmegen
+Address: http://www.cs.ru.nl
+Author: Tonny Hurkens (paper proof)
+Email: hurkens@sci.kun.nl
+Institution: Radboud University Nijmegen
+Address: http://www.cs.ru.nl
+Date: 2007-04
+Description: Formalisation of Tonny Hurkens' proof of the problem
+             11262 of The American Mathematical Monthly 113(10), Dec. 2006
+             (see the README files)
+Url: http://www.cs.ru.nl/~milad/AMM11262
+License: LGPL
+Keywords: american mathematical monthly problem 11262

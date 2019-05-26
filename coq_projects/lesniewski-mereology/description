@@ -1,0 +1,16 @@
+Name: LesniewskiMereology
+Title: KDTL
+Url: http://www.polytech.univ-savoie.fr/index.php?id=listic-logiciels-coq&L=1
+Description: LesniewskiMereology is a Coq library created by R. Dapoigny and P. Barlatier whose purpose is to implement the alternative to Set Theory of Stanislaw Lesniewski. It is part of an on-going project using the Coq language and called KDTL (Knowledge-based Dependently Typed Language) to build an alternative to Description Logics. The developed theory is close to the analysis of Denis Mieville (1984) in his book "Un developpement des systemes logiques de Stanislaw Lesniewski". It is a theoretical construct which relies on three dependent levels, logic (a.k.a. Protothetic), the Lesniewski Ontologie (LO) and mereology. Each level incorporates a minimal collection of axioms, protothetic and ontologic definitions and a set of theorems together with their intuitionist proofs. 
+Keywords: mereology, protothetic, ontology, nominalist theory, extensionality
+Category: Mathematics/Logic/Foundations
+Author: Richard Dapoigny
+Email: richard.dapoigny@univ-savoie.fr
+Homepage: https://www.researchgate.net/profile/Richard_Dapoigny
+Institution: LISTIC
+Author: Patrick Barlatier
+Email: patrick.barlatier@univ-savoie.fr
+Homepage: https://www.researchgate.net/profile/Patrick_Barlatier
+Institution: LISTIC
+Require: 
+License: LGPL

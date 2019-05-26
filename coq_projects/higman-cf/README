@@ -1,0 +1,72 @@
+			 HIGMAN'S LEMMA
+			a new Coq version
+
+Author: Stefan Berghofer <berghofe@in.tum.de>
+Packaging, some optimizations, this README: Pierre Letouzey <letouzey@lri.fr>
+
+This development formalizes in Coq the Coquand-Friedlender proof of Higman's 
+lemma for a two-letter alphabet. 
+
+Hugo Herbelin made the first formalization of Higman's lemma in Coq (see 
+Rocq/HIGMAN user contribution) via a A-translation of Nash-Williams 
+impredicative and classical proof of Higman's lemma.
+
+This new proof is at the same time much smaller and much more efficient 
+(from the computational point of view) than Herbelin's original work. 
+
+More explanations, as well as the original Isabelle version of this new proof, 
+can be found in Stefan Berghofer PhD thesis, available at: 
+	http://wwwbroy.in.tum.de/~berghofe/papers/phd.pdf
+
+
+Quote from the mail I received from Stefan:  
+
+-----------------------------------------------------------------------------
+Last week I managed to port my Isabelle proof of Higman's lemma to Coq. There 
+are two versions of the proof: 
+
+- In the first version (Higman.v), a program called good_prefix is extracted, 
+  which, given an infinite sequence of words, returns a good prefix as a list. 
+  This version closely corresponds to what I described in my thesis. 
+
+- In the second version (Higman2.v), a program called higman_idx is extracted, 
+  which, given an infinite sequence of words, returns the indices of two words 
+  that can be embedded into each other. 
+
+Note that in contrast to Herbelin's formalization,
+the datatype of lists defined in PolyList is used, and the two
+letters of the alphabet are named A and B (instead of A0 and A1).
+
+Comments are highly appreciated.
+
+
+Stefan Berghofer                   E-Mail: berghofe@in.tum.de
+Institut fuer Informatik           Phone: +49 89 289 17328
+Technische Universitaet Muenchen   Fax:   +49 89 289 17307
+Boltzmannstr. 3                    Room: 01.11.059
+85748 Garching, GERMANY            http://www.in.tum.de/~berghofe
+-----------------------------------------------------------------------------
+
+
+
+Description of the files:
+------------------------
+
+README: this file
+
+Higman.v : cf. above
+Higman2.v : cf. above
+
+higman.mli 
+higman.ml  : extracted files from Higman.v
+
+higman2.mli 
+higman2.ml  : extracted files from Higman2.v
+
+main.ml : an hand-written wrapper around higman2.ml used for building 
+          the standalone program higman
+
+higman : a standalone program for testing the extracted algorithm 
+         run ./higman --help for more detail 
+
+example_higman : a big example generated and solve by ./higman --random

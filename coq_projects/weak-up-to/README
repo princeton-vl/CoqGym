@@ -1,0 +1,50 @@
+UpToWeak: A Coq Formalisation of Up-to Techniques for Weak Bisimulation 
+
+Copyright (C) 2004,2005 Damien Pous
+UpToWeak is protected by the GNU Gneral Public License, 
+see LICENSE and COPYING for details
+
+This contribution is the formalisation of a paper that appeared in
+Proc. of ICALP 2005: "Up-to Techniques for Weak Bisimulation".  
+
+First we define a framework for defining up-to techniques for weak
+bisimulation in a modular way. Then we prove the correctness of some
+new up-to techniques, based on termination guarantees. Notably, a
+generalisation of Newman's Lemma to commutation results is
+established.
+
+
+Structure of the project:
+
+- Relations: 
+	Definition of binary relations, auxiliary results 
+
+- Functions: 
+	Functions over relations
+
+- Reductions:
+	Labelled Transition Systems (LTS), Weak transition relation
+
+- Settings:
+	General setting for behavioural equivalences, evolution,
+	simulation, bisimulation...
+
+- Theory: 
+	Correctness of the up-to techniques corresponding to the
+	notions of (weak) monotonic functions, or controlled
+	simulations
+
+- Monotonic: 
+	Study of the class of monotonic functions (Lemma 1.7 and 1.8)
+
+- WeakMonotonic: 
+	Study of the class of weakly monotonic functions (Lemma 2.3)
+
+- Diagrams: 
+	Results about commutation diagrams
+
+- Controlled: 
+	Study of controlled simulations
+
+- Application: 
+	Application to the bisimulation case

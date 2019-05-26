@@ -1,0 +1,11 @@
+-byte
+-I .
+-I fake_maple
+-R . MapleMode
+COQC = "export MAPLE=./fake_maple/fake_maple ; $(COQBIN)coqc"
+Examples.v
+Maple.v
+maple.ml4
+fake_maple/fake_maple.ml4
+-extra "fake_maple/fake_maple" "fake_maple/fake_maple.cmo" "$(CAMLLINK) -o $@ str.cma $<"
+-extra Maple.vo fake_maple/fake_maple ""

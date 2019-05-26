@@ -1,0 +1,5 @@
+This directory contains the general separate compilation development
+of the VST.
+
+Compositional CompCert (which is one application of the sepcomp
+theory) has been moved to vst/compcomp.

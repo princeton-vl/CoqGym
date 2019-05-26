@@ -1,0 +1,25 @@
+The remaining axioms in our work are :
+
+- Pdec : (P:Elt->Prop)(x:Elt) ({(P x)} + {~(P x)}).(file Dec.v)
+this axiom is FALSE, but we used it only with P such that {(P x)}+{~(P x)} is true.
+
+- induction_word_Set (file Ensf.v) is a bit harder to prove than induction_word, but it is possible to prove it.
+
+- auto_cons (file RatReg.v) has been proved, but the proof is very long, so we put in a comment.
+
+- chemin_restriction_2,  chemin_extension_2 and transition_a_droite_2 : their proofs are similar to those of chemin_restriction_1, chemin_extension_1 and 
+transition_a_gauche
+
+- APD : (P_automata X P wd wa d) ->(u:Word) {(L u)}+{~(L u)}.
+For each push-down automata, we have a program recognizing its language.
+
+- dans_inv_f, inv1 and inv2 (file fonctions.v) are axioms used to "define" inv, given as a parameter
+
+- cut2_cons (file gram_aut), quite easy to prove
+
+- Derivestar_Derivegstar : (X,R:Ensf)(u,v:Word)(Derivestar R u v)->(Derivegstar X R u v).
+        Well, that's a hard one ! We think we hava solution, and we have begun the proof.
+
+- Dans_spec (file need.v) is probably not too difficult, but very long.
+
+- Append_Append, inmonoid_Append_inv2 (file need.v) should be quite easy.

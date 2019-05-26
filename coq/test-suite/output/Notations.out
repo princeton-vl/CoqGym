@@ -1,0 +1,139 @@
+true ? 0; 1
+     : nat
+if true as x return (x ? nat; bool) then 0 else true
+     : nat
+fun e : nat * nat => proj1 e
+     : nat * nat -> nat
+decomp (true, true) as t, u in (t, u)
+     : bool * bool
+! (0 = 0)
+     : Prop
+forall n : nat, n = 0
+     : Prop
+! (0 = 0)
+     : Prop
+forall n : nat, # (n = n)
+     : Prop
+forall n n0 : nat, ## (n = n0)
+     : Prop
+forall n n0 : nat, ### (n = n0)
+     : Prop
+3 + 3
+     : Z
+3 + 3
+     : znat
+[1; 2; 4]
+     : list nat
+(1; 2, 4)
+     : nat * nat * nat
+ifzero 3
+     : bool
+pred 3
+     : nat
+fun n : nat => pred n
+     : nat -> nat
+fun n : nat => pred n
+     : nat -> nat
+fun x : nat => ifn x is succ n then n else 0
+     : nat -> nat
+1 -
+     : bool
+-4
+     : Z
+The command has indeed failed with message:
+Cannot find where the recursive pattern starts.
+The command has indeed failed with message:
+in the right-hand side, y and z should appear in
+term position as part of a recursive pattern.
+The command has indeed failed with message:
+The reference w was not found in the current environment.
+The command has indeed failed with message:
+in the right-hand side, y and z should appear in
+term position as part of a recursive pattern.
+The command has indeed failed with message:
+z is expected to occur in binding position in the right-hand side.
+The command has indeed failed with message:
+as y is a non-closed binder, no such "," is allowed to occur.
+The command has indeed failed with message:
+Cannot find where the recursive pattern starts.
+The command has indeed failed with message:
+Cannot find where the recursive pattern starts.
+The command has indeed failed with message:
+Cannot find where the recursive pattern starts.
+The command has indeed failed with message:
+Cannot find where the recursive pattern starts.
+The command has indeed failed with message:
+Both ends of the recursive pattern are the same.
+SUM (nat * nat) nat
+     : Set
+FST (0; 1)
+     : Z
+Nil
+     : forall A : Type, list A
+NIL : list nat
+     : list nat
+(false && I 3)%bool /\ I 6
+     : Prop
+[|1, 2, 3; 4, 5, 6|]
+     : Z * Z * Z * (Z * Z * Z)
+[|0 * (1, 2, 3); (4, 5, 6) * false|]
+     : Z * Z * (Z * Z) * (Z * Z) * (Z * bool * (Z * bool) * (Z * bool))
+fun f : Z -> Z -> Z -> Z => {|f; 0; 1; 2|} : Z
+     : (Z -> Z -> Z -> Z) -> Z
+Init.Nat.add
+     : nat -> nat -> nat
+S
+     : nat -> nat
+Init.Nat.mul
+     : nat -> nat -> nat
+le
+     : nat -> nat -> Prop
+plus
+     : nat -> nat -> nat
+succ
+     : nat -> nat
+Init.Nat.mul
+     : nat -> nat -> nat
+le
+     : nat -> nat -> Prop
+fun x : option Z => match x with
+                    | SOME x0 => x0
+                    | NONE => 0
+                    end
+     : option Z -> Z
+fun x : option Z => match x with
+                    | SOME2 x0 => x0
+                    | NONE2 => 0
+                    end
+     : option Z -> Z
+fun x : option Z => match x with
+                    | SOME2 x0 => x0
+                    | NONE2 => 0
+                    end
+     : option Z -> Z
+fun x : list ?T => match x with
+                   | NIL => NONE2
+                   | (_ :') t => SOME2 t
+                   end
+     : list ?T -> option (list ?T)
+where
+?T : [x : list ?T  x1 : list ?T  x0 := x1 : list ?T |- Type] (x, x1,
+     x0 cannot be used)
+s
+     : s
+10
+     : nat
+fun _ : nat => 9
+     : nat -> nat
+fun (x : nat) (p : x = x) =>
+match p in (_ = n) return (n = n) with
+| ONE => ONE
+end = p
+     : forall x : nat, x = x -> Prop
+fun (x : nat) (p : x = x) =>
+match p in (_ = n) return (n = n) with
+| 1 => 1
+end = p
+     : forall x : nat, x = x -> Prop
+bar  0
+     : nat

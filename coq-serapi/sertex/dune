@@ -1,0 +1,6 @@
+(library
+ (name sertex)
+ ; (public_name coq-serapi.sertex)
+ (wrapped false)
+ (synopsis "Serialization Library for Coq [TeX support]")
+ (libraries sexplib))

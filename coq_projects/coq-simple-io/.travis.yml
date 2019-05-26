@@ -1,0 +1,22 @@
+language: c
+sudo: required
+install: wget https://raw.githubusercontent.com/ocaml/ocaml-ci-scripts/master/.travis-opam.sh
+script: bash -ex .travis-opam.sh
+env:
+  global:
+  - EXTRA_REMOTES="https://coq.inria.fr/opam/released https://coq.inria.fr/opam/extra-dev https://coq.inria.fr/opam/core-dev"
+  matrix:
+  - OCAML_VERSION=4.05
+  - OCAML_VERSION=4.07
+matrix:
+  fast_finish: true
+  allow_failures:
+    - os: osx
+os:
+  - linux
+  - osx
+cache:
+  apt: true
+  directories:
+  - $HOME/.opam
+  - $HOME/Library/Caches/Homebrew

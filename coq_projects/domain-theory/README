@@ -1,0 +1,71 @@
+This directory contains work by Frederic Prost (ENS-Lyon), revised
+by Gilles Kahn (INRIA Sophia-Antipolis) to axiomatize Domain Theory
+as devised by Scott and Plotkin, with the ambition of checking on
+the computer the paper by Kahn and Plotkin, Concrete Domains (to appear
+in TCS, December 1993). Needless to say, only a few initial pages have been
+handcrafted, but the feeling is that the definitions are probably sound.
+
+Many thanks to Yves Bertot, who knows and understands Coq deeply, and always 
+helped us in distress.
+----------------------------------------------------------------------------
+Third Edition, January 1996        Works under Coq V5.10.15
+
+Much work on the basic set theoretic package in the Newton Institute, in
+Summer 1995 has allowed including two new lemmas, contained in newfil.v and
+triple.v. Critical for this was the proof of a general induction principle for
+sets. The proof is due to  Yves Bertot. Once this lemma was established,
+proving the lemma in triple.v was just a matter of managing the boring
+administrative detail.
+
+----------------------------------------------------------------------------
+Second Edition, November 1993  	     Works under Coq V5.8.2
+
+The global structure is unchanged. The major modification concerns
+the definition of a partial order, which is now a type. A partial order
+is a triple made of a set, a binary relation on this set, and a proof that
+this relation is an order.
+
+The second modification, that results in 42% reduction in the size of the
+long proofs, is a more systematic use of Auto to prove boring facts. Globally
+however, the package is only 30% shorter. Thus, the improvement is mostly
+that the user can stay more focussed on the mathematics, as some trivial 
+things will be proved automatically.
+
+------------------------------------------------------------------------------
+First edition, September 1993        Works under Coq V5.8.2
+
+Ensembles.v gives elementary set theory, built on Type!
+Relations.v gives basic definitions for relations.
+podefs.v    gives basic definitions regarding partial orders.
+algpodefs.v gives definitions surrounding algebraic pos and domains.
+--
+ps.v        develops elementary facts regarding the power set construction
+            as a partial order under inclusion
+lpo.v       develops elementary facts on partial orders
+alpo.v      is getting into the meat of the Concrete Domains paper with
+            more serious proofs (i.e. a few lines of mathematical arguments
+            in a textbook presentation)
+------------------------------------------------------------------------------
+
+If you want to use this stuff:
+Copy the file paths.v in your .coqrc.
+Now you can require any component. If you want the whole shebang, use a 
+powerful computer and invoke:
+
+Require condom.
+------------------------------------------------------------------------------
+Remarks:
+	1. If I find the time, I will contribute more. I have bigger proofs
+in store, but I need time to polish them a bit.
+	2. I am interested in all remarks regarding the style of 
+axiomatization, or shorter proofs, or elementary facts that should logically be
+added to these packages.
+	3. (Short ad) If you find the style bizarre, it is because I use the
+wonderful man-machine interface built by Yves Bertot, that generates most
+of the Vernacular for me from mouse-clicks.
+
+
+					        Antibes, September 4 1993
+                                                Gilles Kahn
+         
+                                        

@@ -1,0 +1,6 @@
+; Broken
+; (alias
+;  (name runtest)
+;  (deps (:input quote.v))
+;  (action (ignore-outputs
+;            (bash "%{bin:sercomp} --async=coqtop --mode=check %{input}"))))

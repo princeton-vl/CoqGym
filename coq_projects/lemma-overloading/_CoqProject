@@ -1,0 +1,38 @@
+-Q theories LemmaOverloading
+
+-arg -w -arg +default
+-arg -w -arg -notation-overridden
+-arg -w -arg -projection-no-head-constant
+-arg -w -arg -redundant-canonical-projection
+-arg -w -arg -undeclared-scope
+-arg -w -arg -auto-template
+-arg -w -arg -duplicate-clear
+
+theories/prelude.v
+theories/rels.v
+theories/ordtype.v
+theories/finmap.v
+theories/heaps.v
+theories/hprop.v
+theories/domains.v
+theories/stmod.v
+theories/stsep.v
+theories/stlog.v
+theories/auto.v
+theories/noalias.v
+theories/noaliasBT.v
+theories/noaliasCTC.v
+theories/prefix.v
+theories/perms.v
+theories/xfind.v
+theories/xfindCTC.v
+theories/terms.v
+theories/cancel.v
+theories/cancel2.v
+theories/cancelD.v
+theories/cancelCTC.v
+theories/stlogR.v
+theories/llistR.v
+theories/stlogCTC.v
+theories/indom.v
+theories/indomCTC.v

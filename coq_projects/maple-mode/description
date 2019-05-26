@@ -1,0 +1,14 @@
+Name: MapleMode
+Title: A Maple Mode for Coq
+Author: David Delahaye
+Institution: Chalmers University of Technology (Gothenburg, Sweden)
+Author: Micaela Mayero
+Institution: Chalmers University of Technology (Gothenburg, Sweden)
+Date: 2002-03
+Description: This contribution is an interface between Coq and Maple. In
+  particular, this exports the functions simplify/factor/expand/normal giving
+  the corresponding tactics Simplify/Factor/Expand/Normal. The manipulations
+  carried out by these tactics are proved thanks to the tactic Field. These
+  tactics can be also used as functions by means of the Eval ... In command.
+Keywords: Maple, simplification, field tactic
+Category: Miscellaneous/Coq Extensions

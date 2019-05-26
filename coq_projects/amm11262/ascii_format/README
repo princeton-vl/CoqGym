@@ -1,0 +1,47 @@
+DESCRIPTION
+
+ This directory contains three Coq files:
+
+  AMM11262.v: Formalisation of Tonny Hurkens' proof of the problem
+              11262 of American Mathematical Monthly 113(10), Dec. 2006.
+
+  example1.v: A sample town with 3 inhabitants (instantiation of the
+              problem for n=1).
+
+  example2.v: A sample town with 5 inhabitants (instantiation of the
+              problem for n=2).
+
+
+ The Coq files can be interpreted or compiled using Coq Proof
+ assistant (version 8.1 of higher), which can be freely downloaded at:
+
+      <http://coq.inria.fr>
+
+ Moreover, the directory also contains three OCaml files that are
+ extracted from the above proofs.
+
+  amm11262.ml: Algorithm extracted from the proof.
+
+  social1.ml: The citizen that knows everybody else in the town of example1.
+
+  social2.ml: The citizen that knows everybody else in the town of example2.
+
+ These OCaml files are put here for only completeness; they will be
+ reproduced each time you make/compile the Coq files.
+
+USAGE
+
+ First download and install the Coq proof assistant from
+ <http://coq.inria.fr>. Then unpack the files and run the make file
+ using
+
+ $ make
+
+AUTHOR
+
+ Milad Niqui
+
+DATE
+
+ 21 February 2007
+

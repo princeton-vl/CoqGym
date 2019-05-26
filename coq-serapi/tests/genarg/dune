@@ -1,0 +1,151 @@
+; Eventually we should use the "put binaries in scope feature of Dune"
+(rule
+ (targets test_roundtrip)
+ (deps
+  (:input test_roundtrip.in)
+  (package coq-serapi))
+ (action
+  (progn
+   (copy test_roundtrip.in test_roundtrip)
+   ; We insert the digest of the binaries to force a rebuild of the
+   ; test cases if the binaries have been modified.
+   (bash "echo \"# $(md5sum ../../sertop/compser.exe)\" >> test_roundtrip")
+   (bash "echo \"# $(md5sum ../../sertop/sercomp.exe)\" >> test_roundtrip"))))
+
+(alias
+ (name runtest)
+ (deps (:input abstract.v))
+ (action (run ./test_roundtrip %{input})))
+
+(alias
+ (name runtest)
+ (deps (:input add_field.v))
+ (action (run ./test_roundtrip %{input})))
+
+(alias
+ (name runtest)
+ (deps (:input auto.v))
+ (action (run ./test_roundtrip %{input})))
+
+; Broken
+; (alias
+;  (name runtest)
+;  (deps (:input case.v))
+;  (action (run ./test_roundtrip %{input})))
+
+(alias
+ (name runtest)
+ (deps (:input clear.v))
+ (action (run ./test_roundtrip %{input})))
+
+(alias
+ (name runtest)
+ (deps (:input eauto.v))
+ (action (run ./test_roundtrip %{input})))
+
+; Broken
+; (alias
+;  (name runtest)
+;  (deps (:input elim.v))
+;  (action (run ./test_roundtrip %{input})))
+
+(alias
+ (name runtest)
+ (deps (:input exact.v))
+ (action (run ./test_roundtrip %{input})))
+
+(alias
+ (name runtest)
+ (deps (:input exists.v))
+ (action (run ./test_roundtrip %{input})))
+
+(alias
+ (name runtest)
+ (deps (:input firstorder.v))
+ (action (run ./test_roundtrip %{input})))
+
+(alias
+ (name runtest)
+ (deps (:input fix.v))
+ (action (run ./test_roundtrip %{input})))
+
+(alias
+ (name runtest)
+ (deps (:input functional_induction.v))
+ (action (run ./test_roundtrip %{input})))
+
+(alias
+ (name runtest)
+ (deps (:input functional_scheme.v))
+ (action (run ./test_roundtrip %{input})))
+
+(alias
+ (name runtest)
+ (deps (:input hint_rewrite.v))
+ (action (run ./test_roundtrip %{input})))
+
+(alias
+ (name runtest)
+ (deps (:input instantiate.v))
+ (action (run ./test_roundtrip %{input})))
+
+(alias
+ (name runtest)
+ (deps (:input intropattern.v))
+ (action (run ./test_roundtrip %{input})))
+
+(alias
+ (name runtest)
+ (deps (:input intros.v))
+ (action (run ./test_roundtrip %{input})))
+
+(alias
+ (name runtest)
+ (deps (:input libTactics.v))
+ (action (run ./test_roundtrip %{input})))
+
+; Broken
+; (alias
+;  (name runtest)
+;  (deps (:input move.v))
+;  (action (run ./test_roundtrip %{input})))
+
+(alias
+ (name runtest)
+ (deps (:input rename.v))
+ (action (run ./test_roundtrip %{input})))
+
+(alias
+ (name runtest)
+ (deps (:input replace.v))
+ (action (run ./test_roundtrip %{input})))
+
+(alias
+ (name runtest)
+ (deps (:input revert.v))
+ (action (run ./test_roundtrip %{input})))
+
+(alias
+ (name runtest)
+ (deps (:input setoid_rewrite.v))
+ (action (run ./test_roundtrip %{input})))
+
+(alias
+ (name runtest)
+ (deps (:input specialize.v))
+ (action (run ./test_roundtrip %{input})))
+
+(alias
+ (name runtest)
+ (deps (:input subst.v))
+ (action (run ./test_roundtrip %{input})))
+
+(alias
+ (name runtest)
+ (deps (:input symmetry.v))
+ (action (run ./test_roundtrip %{input})))
+
+(alias
+ (name runtest)
+ (deps (:input tactic_notation.v))
+ (action (run ./test_roundtrip %{input})))

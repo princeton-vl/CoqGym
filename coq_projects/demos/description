@@ -1,0 +1,10 @@
+Name: Demos
+Title: Demos of some Coq tools appeared in version V6.0
+Author: Coq group
+Institution: INRIA Rocquencourt
+Description: Example of sorting algorithms defined using the Cases
+(pattern-matching) construction. Demo of the decision tactic Tauto for
+intuitionistic propositional calculus. Demo of the AutoRewrite tactic. Demo of
+the Prolog tactic applied to the compilation of miniML programs.
+Keywords: sorting, Cases, Tauto, AutoRewrite, Prolog
+Category: Miscellaneous/Coq Use Examples

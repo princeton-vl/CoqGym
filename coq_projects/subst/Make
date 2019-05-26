@@ -1,0 +1,21 @@
+-R . Subst
+     terminaison_SL.v
+     sur_les_relations.v
+     sigma_lift.v
+     resoudPC_SL.v
+     lambda_sigma_lift.v
+     inversionSL.v
+     egaliteTS.v
+     determinePC_SL.v
+     confluence_LSL.v
+     conf_strong_betapar.v
+     conf_local_SL.v
+     comparith.v
+     commutation.v
+     betapar.v
+     Yokouchi.v
+     TS.v
+     SLstar_bpar_SLstar.v
+     Pol2.v
+     Pol1.v
+     Newman.v

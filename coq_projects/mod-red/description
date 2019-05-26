@@ -1,0 +1,8 @@
+Name: ModRed
+Title: Efficient Reduction of Large Integers by Small Moduli
+Author: Luc Rutten
+Date: 2007-12; Updated in April 2009
+Description: Fast reduction of integers by moduli up to 2^(w-1), where w is a processor's word size.
+License: GNU Lesser General Public License
+Keywords: Algorithms, Performance, Computer Arithmetic, Modular Reduction, Optimization
+Category: Mathematics/Arithmetic and Number Theory/Miscellaneous

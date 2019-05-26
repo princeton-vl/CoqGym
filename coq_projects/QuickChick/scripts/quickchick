@@ -1,0 +1,27 @@
+#!/bin/sh
+set -e
+
+# Test mutated QuickChick test executable ($1)
+# quickchick-expectfailure must be findable in PATH
+
+QC_OUT_DIR=qc-out
+mkdir -p $QC_OUT_DIR/
+
+QC_ALL_MUTANTS_FILE=$QC_OUT_DIR/qc-mutants
+
+# Dynamic mutant discovery
+# TODO: allow mutants to be found via other means
+QC_MUTANT=DISCOVERY ./"$1"
+
+# Test each mutant
+xargs -n 1 -I {} quickchick-expectfailure ./"$1" {} < $QC_ALL_MUTANTS_FILE
+
+if [ "$2" != "" ]
+then
+  N_MUTANTS=$(wc -l $QC_ALL_MUTANTS_FILE|egrep -o "[0-9]+")
+  if [ -z "$N_MUTANTS" ] || [ $2 -ne $N_MUTANTS ]
+  then
+    echo "Unexpected number of mutants: $N_MUTANTS (expected $2)"
+    exit 1
+  fi
+fi

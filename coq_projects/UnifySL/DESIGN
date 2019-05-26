@@ -1,0 +1,163 @@
+Should a typeclass A (about language, about proof theory) dependent on another B?
+
+It depends on whether A's critical feature requires the existence of B. For example, proposition axiomatization should be dependent on axiomatization of implication. But it should not be the case of sequent calculus.
+
+
+===============================
+
+Should connective (pattern) be components of proof-theory-pattern type classes or arguments of proof-theory-pattern?
+
+Arguments! Because we sometimes want to prove properties about two or more proof-theory-patterns.
+
+
+===============================
+
+Should context properties proved by sequent calculus theories or axiomatization theories?
+
+The assumption should be a mixture of both! On one hand, context properties are mainly about context and derivable. On the other hand, the very basic context property that "derivable" is finite-witnessed is based on NormalAxiomatization. Because of that, there is no way to put a limitation there.
+
+However, if in the future we prove some weak completeness instead of strong completeness. At the time, we should rethink about this problem.
+
+===============================
+
+The following Coq script illustrate a time overhead problem.
+
+Fixpoint even1 (n: nat): Prop :=
+  match n with
+  | O => True
+  | S O => False
+  | S (S n) => even1 n
+  end.
+
+Fixpoint even2 (n: nat): Prop :=
+  match n with
+  | O => True
+  | S n => ~ odd2 n
+  end
+with odd2 (n: nat): Prop :=
+  match n with
+  | O => True
+  | S n => ~ even2 n
+  end.
+
+Definition even3 (n: nat): Prop :=
+  exists m, n = m + m.
+
+Axiom even12: forall n, even1 n -> even2 n.
+Axiom even23: forall n, even2 n -> even3 n.
+Axiom even31: forall n, even3 n -> even1 n.
+
+Module TEST1.
+
+Class Even1: Type := {
+  e1: nat -> Prop
+}.
+
+Class Even2: Type := {
+  e2: nat -> Prop
+}.
+
+Class Even3: Type := {
+  e3: nat -> Prop
+}.
+
+Class Even12 {E1: Even1} {E2: Even2}: Prop := {
+  e12: forall n, e1 n -> e2 n
+}.
+
+Class Even23 {E2: Even2} {E3: Even3}: Prop := {
+  e23: forall n, e2 n -> e3 n
+}.
+
+Class Even31 {E3: Even3} {E1: Even1}: Prop := {
+  e31: forall n, e3 n -> e1 n
+}.
+
+Instance IE1: Even1 := {| e1 := even1; |}.
+Instance IE2: Even2 := {| e2 := even2; |}.
+Instance IE3: Even3 := {| e3 := even3; |}.
+Instance IE12: Even12 := {| e12 := even12; |}.
+Instance IE23: Even23 := {| e23 := even23; |}.
+Instance IE31: Even31 := {| e31 := even31; |}.
+
+Goal e1 4.
+  Time do 50000 (apply e31; apply e23; apply e12). (* 22.55 secs (16.015u,0.156s) *)
+                                                   (* 21.442 secs (15.156u,0.062s) *)
+                                                   (* 24.554 secs (18.031u,0.015s) *)
+                                                   (* 23.143 secs (17.046u,0.109s) *)
+  exact I.
+Qed.
+
+End TEST1.
+
+Module TEST2.
+
+Class Even: Type := {
+  e1: nat -> Prop;
+  e2: nat -> Prop;
+  e3: nat -> Prop
+}.
+
+Class Evens {E: Even}: Prop := {
+  e12: forall n, e1 n -> e2 n;
+  e23: forall n, e2 n -> e3 n;
+  e31: forall n, e3 n -> e1 n;
+}.
+
+Instance IE: Even :=
+ {|
+    e1 := even1;
+    e2 := even2;
+    e3 := even3
+ |}.
+
+Instance IEs: Evens :=
+ {|
+    e12 := even12;
+    e23 := even23;
+    e31 := even31;
+ |}.
+
+Goal e1 4.
+  Time do 50000 (apply e31; apply e23; apply e12). (* 24.779 secs (17.218u,1.437s) *)
+                                                   (* 19.408 secs (12.703u,0.375s) *)
+                                                   (* 18.896 secs (12.171u,0.421s) *)
+                                                   (* 22.963 secs (16.828u,0.125s) *)
+                                                   (* 18.952 secs (12.406u,0.25s) *)
+                                                   (* 22.249 secs (13.187u,2.531s) *)
+  exact I.
+Qed.
+
+End TEST2.
+
+Module TEST3.
+
+Class Even: Type := {
+  e1: nat -> Prop;
+  e2: nat -> Prop;
+  e3: nat -> Prop;
+  e12: forall n, e1 n -> e2 n;
+  e23: forall n, e2 n -> e3 n;
+  e31: forall n, e3 n -> e1 n;
+}.
+
+Instance IE: Even :=
+ {|
+    e1 := even1;
+    e2 := even2;
+    e3 := even3;
+    e12 := even12;
+    e23 := even23;
+    e31 := even31;
+ |}.
+
+Goal e1 4.
+  Time do 50000 (apply e31; apply e23; apply e12). (* 12.093 secs (5.828u,0.156s) *)
+                                                   (* 20.005 secs (11.187u,1.515s) *)
+                                                   (* 13.89 secs (7.843u,0.046s) *)
+                                                   (* 12.389 secs (6.375u,0.078s) *)
+  exact I.
+Qed.
+
+End TEST3.
+

@@ -1,0 +1,33 @@
+                     Proof of AILS Algorithm
+                             ------
+                        Olivier Desmettre
+                           January 2002
+ 
+  These files contain an aircraft trajectory modeling and an analysis of this
+modeling using the AILS algorithm (Airborne Information for Lateral Spacing) to warn against possible collisions. We prove that an alarm is raised when the
+distance between two aircrafts is smaller than the alerting distance (a predefined constant) [see ails.v]. Furthermore, we establish the correctness of AILS algorithm [see correctness.v].
+ 
+  The files are organized as follows :
+ 
+  - trajectory_const.v : some useful constants for an aircraft
+  - rrho.v : some inequalities that will be used to study the trajectories
+  - trajectory_def.v : definitions of useful parameters for the flight
+  - constants.v
+  - ycngftys.v : ie You Can Not Go Faster Than Your Speed - That's the aim of
+this file
+  - ycngstys.v : ie You Can Not Go Slower Than Your Speed
+  - ails_def.v : new types definitions
+  - math_prop.v : some complex inequalities for the trajectory's projections (use the plane geometry defined in Reals/Rgeom.v)
+  - tau.v : other properties concerning inclination of the plane
+  - ails.v : the first important result proving AILS validity
+  - trajectory.v : analysis of the trajectory
+  - measure2state.v : technical module
+  - ails_trajectory.v : we establish some useful invariants
+  - alarm.v : conditions that raise an alarm [Theorem ails_alarm_tau_gt_0]
+  - alpha_no_conflict.v
+  - correctness.v : proof of AILS correctness [conflict->alarm]
+ 
+---------------------------------------------------------------------------
+---------------------------------------------------------------------------
+ 
+Note : to compile successfully these files, you will have to set the COQBIN environment variable to the suitable value. Coq V7.2  (or higher) is needed for this archive.

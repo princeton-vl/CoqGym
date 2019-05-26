@@ -1,0 +1,6 @@
+/* IE Specific styles */
+.clearfix
+{
+	display: block;
+	zoom: 1;
+}

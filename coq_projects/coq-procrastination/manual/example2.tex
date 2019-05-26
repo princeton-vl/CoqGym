@@ -1,0 +1,141 @@
+\begin{minipage}{0.5\textwidth}
+\begin{coql}
+Goal exists (f: nat -> nat),
+  forall n,
+    1 + (if zerop n then 0
+         else 1 + max (f (n/2)) (f (n - (n/2) - 1)))
+    <= f n.
+Proof.
+  /&begin defer assuming f&/. /*(1)*/ \exists f.
+  intro n. destruct (zerop n) as [|Hn].
+  { subst n. simpl. /*(2)*/ /&defer&/. }
+  { rewrite max_l; swap 1 2.
+    { /*(3)*/ /&defer M: (monotonic f)&/. /*(4)*/ ... }
+    { ... /*(5)*/ revert n Hn. /*(6)*/ /&defer&/. } }
+  /&end defer&/.
+  /*(7)*/ ...
+Qed.
+\end{coql}
+
+\vspace{1.5em}
+
+\begin{adjustbox}{minipage={0.97\textwidth},fbox}
+\begin{coql}
+f: ?x
+g: Group (?G f)
+@*\grule*@
+ exists (f0: nat -> nat),
+   forall n, 1 + (if zerop n then 0
+           else 1 + max (f0 (n/2)) (f0 (n - (n/2) - 1)))
+       <= f0 n
+\end{coql}%
+\nointerlineskip%
+\makebox[0pt]{%
+  \begin{tikzpicture}[overlay]
+    \node at (7.4, 2.7) { \footnotesize{(1)} };
+  \end{tikzpicture}%
+}%
+\end{adjustbox}
+
+\vspace{0.3em}
+
+\begin{adjustbox}{minipage={0.97\textwidth},fbox}
+\begin{coql}
+f: nat -> nat
+g: Group (?G f)
+@*\grule*@
+ 1 <= f 0
+\end{coql}
+\nointerlineskip%
+\begin{tikzpicture}[overlay]
+  \node at (7.4, 1.55) { \footnotesize{(2)} };
+\end{tikzpicture}
+\end{adjustbox}%
+
+\vspace{0.3em}
+
+\end{minipage}%
+\hfill%
+\begin{minipage}{0.45\textwidth}
+
+\begin{adjustbox}{minipage={0.97\textwidth},fbox}
+\begin{coql}
+f: nat -> nat
+g: Group (1 <= f 0 /\ ?Goal0)
+n: nat
+H: 0 < n
+@*\grule*@
+ f (n - n / 2 - 1) <= f (n / 2)
+\end{coql}
+\nointerlineskip%
+\begin{tikzpicture}[overlay]
+  \node at (6.6, 2.3) { \footnotesize{(3)} };
+\end{tikzpicture}
+\end{adjustbox}%
+
+\vspace{0.3em}
+
+\begin{adjustbox}{minipage={0.97\textwidth},fbox}
+\begin{coql}
+f: nat -> nat
+g: Group (1 <= f 0 /\ monotonic f /\ ?Goal0)
+n: nat
+H: 0 < n
+M: monotonic f
+@*\grule*@
+ f (n - n / 2 - 1) <= f (n / 2)
+\end{coql}
+\nointerlineskip%
+\begin{tikzpicture}[overlay]
+  \node at (6.6, 2.7) { \footnotesize{(4)} };
+\end{tikzpicture}
+\end{adjustbox}%
+
+\vspace{0.3em}
+
+\begin{adjustbox}{minipage={0.97\textwidth},fbox}
+\begin{coql}
+f: nat -> nat
+g: Group (1 <= f 0 /\ monotonic f /\ ?Goal0)
+n: nat
+H: 0 < n
+@*\grule*@
+ 2 + f (n / 2) <= f n
+\end{coql}
+\nointerlineskip%
+\begin{tikzpicture}[overlay]
+  \node at (6.6, 2.3) { \footnotesize{(5)} };
+\end{tikzpicture}
+\end{adjustbox}%
+
+\vspace{0.3em}
+
+\begin{adjustbox}{minipage={0.97\textwidth},fbox}
+\begin{coql}
+f: nat -> nat
+g: Group (1 <= f 0 /\ monotonic f /\ ?Goal0)
+@*\grule*@
+ forall n, 0 < n -> 2 + f (n / 2) <= f n
+\end{coql}
+\nointerlineskip%
+\begin{tikzpicture}[overlay]
+  \node at (6.6, 1.55) { \footnotesize{(6)} };
+\end{tikzpicture}
+\end{adjustbox}%
+
+\vspace{0.3em}
+
+\begin{adjustbox}{minipage={0.97\textwidth},fbox}
+\vspace{-0.7em}
+\begin{coql}
+@*\grule*@
+ exists f: nat -> nat,
+   1 <= f 0 /\ monotonic f /\
+   forall n, 0 < n -> 2 + f (n/2) <= f n
+\end{coql}
+\nointerlineskip%
+\begin{tikzpicture}[overlay]
+  \node at (6.6, 1.30) { \footnotesize{(7)} };
+\end{tikzpicture}
+\end{adjustbox}%
+\end{minipage}

@@ -1,0 +1,17 @@
+
+Implementation of finite sets, application to a certified decision procedure 
+for arithmetic formulas represented as graphs.
+
+The part concerning the implementation of finite sets has been moved to 
+the standard Coq theories : theories/IntMap.
+To use it : Require Allmaps.
+
+J. Goubault-Larrecq Dyade (INRIA-Bull)
+
+To compile everything : "make" or "make opt" 
+
+(* Graphs: *)
+
+Require cgraph.
+Require zcgraph.
+(* cf. examples at the end of zcgraph.v for an idea how to use it. *)

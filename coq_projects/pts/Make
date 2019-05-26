@@ -1,0 +1,22 @@
+-R . PTS
+
+Main.v
+GenericSort.v
+SortECC.v
+SortV6.v
+CoqV6.v
+ECC.v
+CoqV6Beta.v
+ExtractV6.v
+MlExtract.v
+MyList.v
+MyRelations.v
+General.v
+
+-extra test eccd "(cd examples; ./test_def ../eccd)"
+-extra eccd "kernel.cmo checker.cmo" "$(CAMLLINK) -o eccd kernel.cmo checker.cmo"
+-extra kernel.ml "ExtractV6.v MlExtract.vo Main.vo CoqV6.vo" "$(COQBIN)coqtop $(COQLIBS) $(COQFLAGS) -load-vernac-source ExtractV6.v"
+-extra kernel.mli kernel.ml "true"
+-extra kernel.cmo "kernel.ml kernel.cmi" "$(CAMLC) $(PP) $<"
+-extra kernel.cmi kernel.mli "$(CAMLC) $<"
+-extra checker.cmo "checker.ml kernel.cmi" "$(CAMLC) $(PP) $<"

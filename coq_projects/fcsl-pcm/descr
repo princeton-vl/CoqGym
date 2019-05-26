@@ -1,0 +1,11 @@
+Partial Commutative Monoids
+
+The PCM library provides a formalisation of Partial Commutative Monoids (PCMs),
+a common algebraic structure used in separation logic for verification of
+pointer-manipulating sequential and concurrent programs.
+The library provides lemmas for mechanised and automated reasoning about PCMs
+in the abstract, but also supports concrete common PCM instances, such as heaps,
+histories and mutexes.
+
+This library relies on extensionality axioms: propositional and
+functional extentionality.

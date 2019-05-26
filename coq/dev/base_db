@@ -1,0 +1,6 @@
+source core.dbg
+load_printer top_printers.cmo
+install_printer Top_printers.ppid
+install_printer Top_printers.ppsp
+install_printer Top_printers.ppconstr
+

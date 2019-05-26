@@ -1,0 +1,10 @@
+-R . TarskiGeometry
+Ch01_tarski_axioms.v
+Ch02_congruence_properties.v
+Ch03_between_properties.v
+Ch04_congruence_between_properties.v
+Ch05_between_transitivity_le.v
+Ch06_out_lines.v
+Ch07_midpoint.v
+Ch08_orthogonality.v
+general_tactics.v

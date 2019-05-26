@@ -1,0 +1,32 @@
+dist: trusty
+sudo: required
+language: generic
+
+matrix:
+  include:
+    - dist: trusty
+      env: COQ_VERSION="trunk"    COQ_PACKAGE="coq" PPA="ppa:jgross-h/coq-trunk-daily" 
+    - dist: trusty
+      env: COQ_VERSION="master"   COQ_PACKAGE="coq" PPA="ppa:jgross-h/coq-master-daily"       
+    - dist: trusty
+      env: COQ_VERSION="8.6.1"    COQ_PACKAGE="coq-8.6.1" PPA="ppa:jgross-h/many-coq-versions"
+    - dist: trusty
+      env: COQ_VERSION="8.7.2"    COQ_PACKAGE="coq-8.7.2" PPA="ppa:jgross-h/many-coq-versions" 
+    - dist: trusty
+      env: COQ_VERSION="8.8.1"    COQ_PACKAGE="coq-8.7.2" PPA="ppa:jgross-h/many-coq-versions"       
+    - dist: trusty
+      env: COQ_VERSION="8.8.2"    COQ_PACKAGE="coq-8.7.2" PPA="ppa:jgross-h/many-coq-versions"  
+    - dist: trusty
+      env: COQ_VERSION="8.9.0"    COQ_PACKAGE="coq-8.9.0" PPA="ppa:jgross-h/many-coq-versions"
+
+before_install:
+  - if [ ! -z "$PPA" ]; then sudo add-apt-repository "$PPA" -y; fi
+  - sudo apt-get update -q
+  - sudo apt-get install $COQ_PACKAGE -y
+
+script:
+- echo 'Building GeoCoq...' && echo -en 'travis_fold:start:geocoq.build\\r'
+- ./configure-ci.sh
+- make -j 2
+# travis_wait allows more minutes without output, usefull for long automatic proofs
+- echo -en 'travis_fold:end:geocoq.build\\r'

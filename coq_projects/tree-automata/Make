@@ -1,0 +1,20 @@
+-R . TreeAutomata
+auto.v 
+bases.v 
+coacc_test.v 
+defs.v 
+empty_test.v 
+inter_correct.v 
+inter.v 
+lattice_fixpoint.v 
+non_coacc_kill_correct.v 
+non_coacc_kill.v 
+pl_path.v 
+refcorrect.v 
+semantics.v 
+signature.v 
+states_kill_correct.v 
+states_kill_empty.v 
+union_correct.v 
+union.v 
+-full

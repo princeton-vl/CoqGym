@@ -1,0 +1,57 @@
+
+                             Contribution Rocq/ZF
+                             ====================
+
+This directory contains:
+
+        - An encoding of Zermelo-Fraenkel Set Theory in Coq
+
+Author & Date:  Benjamin WERNER
+                INRIA-Rocquencourt
+                October 1996
+
+
+Installation procedure:
+-----------------------
+
+  To get this contribution compiled, type
+
+    make 
+
+  or
+
+    make opt
+
+Which will compile the proof file.
+
+
+Description:
+------------
+
+  The encoding of Zermelo-Fraenkel Set Theory is largely inspired by
+Peter Aczel's work dating back to the eighties. A type Ens is defined,
+which represents sets. Two predicates IN and EQ stand for membership
+and extensional equality between sets. The axioms of ZFC are then
+proved and thus appear as theorems in the development.
+
+  A main motivation for this work is the comparison of the respective
+expressive power of Coq and ZFC.
+
+  A non-computational type-theoretical axiom of choice is necessary to
+prove the replacement schemata and the set-theoretical AC.
+
+  The main difference between this work and Peter Aczel's, is that
+propositions are defined on the impredicative level Prop. Since the
+definition of Ens is, however, still unchanged, I also added most of
+Peter Aczel's definition. The main advantage of Aczel's approach, is a
+more constructive vision of the existential quantifier (which gives
+the set-theoretical axiom of choice for free).
+
+
+Further information on this contribution:
+-----------------------------------------
+
+See "The encoding of Zermelo-Fraenkel Set Theory in Coq", in the Proceedings
+of TACS'97.
+
+

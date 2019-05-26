@@ -1,0 +1,26 @@
+32%Z
+     : Z
+fun f : nat -> Z => (f 0%nat + 0)%Z
+     : (nat -> Z) -> Z
+fun x : positive => Z.pos x~0
+     : positive -> Z
+fun x : positive => (Z.pos x + 1)%Z
+     : positive -> Z
+fun x : positive => Z.pos x
+     : positive -> Z
+fun x : positive => Z.neg x~0
+     : positive -> Z
+fun x : positive => (Z.pos x~0 + 0)%Z
+     : positive -> Z
+fun x : positive => (- Z.pos x~0)%Z
+     : positive -> Z
+fun x : positive => (- Z.pos x~0 + 0)%Z
+     : positive -> Z
+(Z.of_nat 0 + 1)%Z
+     : Z
+(0 + Z.of_nat (0 + 0))%Z
+     : Z
+Z.of_nat 0 = 0%Z
+     : Prop
+(0 + Z.of_nat 11)%Z
+     : Z

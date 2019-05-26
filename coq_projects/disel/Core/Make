@@ -1,0 +1,27 @@
+-Q . DiSeL
+
+-arg -w -arg -notation-overridden
+-arg -w -arg -local-declaration
+-arg -w -arg -redundant-canonical-projection
+-arg -w -arg -projection-no-head-constant
+
+Domain.v
+State.v
+Freshness.v
+Protocols.v
+EqTypeX.v
+DepMaps.v
+StatePredicates.v
+NewStatePredicates.v
+Worlds.v
+NetworkSem.v
+Rely.v
+Actions.v
+Injection.v
+InductiveInv.v
+Process.v
+Always.v
+HoareTriples.v
+InferenceRules.v
+While.v 
+DiSeLExtraction.v

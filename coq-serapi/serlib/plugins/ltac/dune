@@ -1,0 +1,7 @@
+(library
+ (name serlib_ltac)
+ (public_name coq-serapi.serlib.ltac)
+ (wrapped false)
+ (synopsis "Serialization Library for Coq [LTAC plugin]")
+ (preprocess (staged_pps ppx_import ppx_sexp_conv))
+ (libraries coq.plugins.ltac serlib sexplib))

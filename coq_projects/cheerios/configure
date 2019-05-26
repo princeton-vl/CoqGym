@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+
+DEPS=(StructTact)
+DIRS=(core extraction runtime/coq)
+CANARIES=("StructTact.StructTactics" "Build StructTact before building Cheerios")
+NAMESPACE_core="Cheerios"
+NAMESPACE_extraction="Cheerios"
+NAMESPACE_runtime_coq="Cheerios"
+source script/coqproject.sh

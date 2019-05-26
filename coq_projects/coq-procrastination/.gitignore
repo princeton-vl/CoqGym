@@ -1,0 +1,8 @@
+*.vo
+*.d
+*.glob
+*.aux
+.lia.cache
+.nia.cache
+./Makefile.coq
+examples/_CoqProject

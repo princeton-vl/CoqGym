@@ -1,0 +1,110 @@
+# -*- mode: gitignore; -*-
+
+# ===
+# VIM
+# ===
+# Swap
+[._]*.s[a-v][a-z]
+[._]*.sw[a-p]
+[._]s[a-rt-v][a-z]
+[._]ss[a-gi-z]
+[._]sw[a-p]
+
+# Session
+Session.vim
+
+# Temporary
+.netrwhist
+*~
+# Auto-generated tag files
+tags
+# Persistent undo
+[._]*.un~
+
+# =====
+# EMACS
+# =====
+*~
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+*.elc
+auto-save-list
+tramp
+.\#*
+
+# Org-mode
+.org-id-locations
+*_archive
+
+# flymake-mode
+*_flymake.*
+
+# eshell files
+/eshell/history
+/eshell/lastdir
+
+# elpa packages
+/elpa/
+
+# reftex files
+*.rel
+
+# AUCTeX auto folder
+/auto/
+
+# cask packages
+.cask/
+dist/
+
+# Flycheck
+flycheck_*.el
+
+# server auth directory
+/server/
+
+# projectiles files
+.projectile
+
+# directory configuration
+.dir-locals.el
+
+# ===
+# COQ
+# ===
+
+coq2html
+coq2html.css
+coq2html.js
+coq2html.ml
+coq2html.o
+**.vo
+**.v.d
+**.glob
+*.v#
+**.cmo
+**.cmi
+**.cmx
+**.null
+**/_build
+src/main.native
+src/vellvm
+src/ml/.merlin
+*~
+*.v~
+*.log
+*.aux
+*.stackdump
+*.bbl
+*.blg
+*.fdb_latexmk
+*.fls
+*.ml~
+examples.mli
+*.mli
+*.gz
+src/ml/extracted/*.ml
+src/ml/extracted/STAMP
+src/.depend
+output
+Makefile.conf

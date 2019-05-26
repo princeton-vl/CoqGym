@@ -1,0 +1,12 @@
+Name: HigmanCF
+Title: A direct constructive proof of Higman's Lemma
+Author: Stefan Berghofer
+Institution: Institut fuer Informatik, Technische Universitaet Muenchen
+Description: 
+   This development formalizes in Coq the Coquand-Friedlender proof of 
+   Higman's lemma for a two-letter alphabet. 
+   An efficient program can be extracted from the proof.
+Keywords: Higman's Lemma, Extraction
+
+Category: Mathematics/Combinatorics and Graph Theory
+Category: Miscellaneous/Extracted Programs/Combinatorics

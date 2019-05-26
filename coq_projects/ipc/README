@@ -1,0 +1,60 @@
+	
+	IPC: An Intuitionistic Propositional Checker
+
+			Klaus Weich
+
+(adaptation to Coq 8: Pierre Letouzey  <Firstname.Name@pps.jussieu.fr>) 
+
+NOTA BENE: 
+---------
+These files have been developped by Klaus Weich during his PhD thesis
+at LMU Munich, defended in 2001. Unfortunately, Klaus seems to have
+quit academical research and has since been out of reach. In
+particular, this nice work was not available on-line anymore. So I
+(Pierre Letouzey) take the liberty to place it into Coq User's
+Contributions, in order for it not to be definitively lost.
+IF YOU HAPPEN TO CONTACT KLAUS WEICH, PLEASE ASK HIM WHETHER THIS IS OK
+WITH HIM, OTHERWISE TELL HIM TO EMAIL ME. 
+
+
+DESCRIPTION:
+-----------
+(excerpt from K. Weich thesis)
+
+This thesis treats proof search in intuitionistic propositional logic,
+a fragment of any constructive type theory. We present new and more
+efficient decision procedures for intuitionistic propositional
+logic. They themselves are given by (non-formal) constructive proofs.
+We take one of them to demonstrate that constructive type theory can
+be used in practice to develop a real, efficient, but error-free proof
+searcher. This was done by formally proving the decidability of
+intuitionistic propositional logic in Coq; the proof searcher was
+automatically extracted.
+
+
+REFERENCES: 
+----------
+Improving Proof Search in Intuitionistic Propositional Logic, 
+Klaus Weich, PhD thesis, 139 pages, 2001
+ISBN 3-89722-767-3
+Paper copy available at: 
+ http://www.logos-verlag.de/cgi-bin/engbuchmid?isbn=767&lng=deu&id=
+Preis: 40.50 Eur
+
+Decision Procedures for Intuitionistic Propositional Logic by Program Extraction, 
+Klaus Weich, TABLEAUX 1998, LNCS 1397, pages 292-306, 1998. 
+ISBN 3-540-64406-7
+
+
+PRACTICAL DETAILS: 
+-----------------
+
+Invoking 'make' should be enough to compile the Coq files, perform the
+extraction, and compile the benchmark program. This program can then
+be launched via './benchmark'. This will run a sequence of
+increasingly difficult tests as long as these tests finish within 1
+second of time. So the longer the output is, the better the checker is. 
+
+By default, the checker doesn't build the derivations for the
+formulae.  This can be changed by changing in Derivable_Def.v the
+"Require Import" command.

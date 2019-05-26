@@ -1,0 +1,3 @@
+bin: [
+  "extraction/dyade" {"dyade"}
+]

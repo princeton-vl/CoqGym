@@ -1,0 +1,236 @@
+
+\lstdefinelanguage{Coq}{
+%
+% Anything betweeen $ becomes LaTeX math mode
+mathescape=false,
+escapeinside={@*}{*@},
+%
+% Comments may or not include Latex commands
+texcl=false,
+%
+%
+% Vernacular commands
+morekeywords=[1]{
+Section, Module, End, Require, Import, Export,
+Variable, Variables, Parameter, Parameters, Axiom, Hypothesis, Hypotheses,
+Notation, Local, Tactic, Reserved, Scope, Open, Close, Bind, Delimit,
+Definition, Ltac, Fixpoint, CoFixpoint, Add, Morphism, Relation,
+%Let,
+Implicit, Arguments, Set, Unset, Contextual, Strict, Prenex, Implicits,
+Inductive, CoInductive, Record, Structure, Canonical, Coercion,
+Context, Class, Global, Instance, Program, Infix,
+Theorem, Lemma, Corollary, Proposition, Fact, Remark, Example,
+Proof, Goal, Save, Qed, Defined, Hint, Resolve, Rewrite, View,
+Search, Show, Print, Printing, All, Graph, Projections, inside, outside},
+%
+% Gallina
+morekeywords=[2]{forall, exists, exists2, fun, fix, cofix, struct,
+  match, with,
+  %end,
+  as, in, return, let, if, is, then, else,
+  for, of, nosimpl, when},
+%
+% Sorts
+morekeywords=[3]{Type, Prop, Set},
+%
+% Various tactics, some are std Coq subsumed by ssr, for the manual purpose
+morekeywords=[4]{
+%         pose, set, move, case, elim, apply, clear,
+%            hnf, intro, intros, generalize, rename, pattern, after,
+%destruct, induction, using, refine, inversion, injection,
+%         rewrite, congr, unlock, compute, ring, field, fourier,
+%            replace, fold, unfold, change, cutrewrite, simpl,
+%         have, suff, wlog, suffices, without, loss, nat_norm,
+%            assert, cut, trivial, revert, bool_congr, nat_congr,
+%symmetry, transitivity, auto, split, left, right, autorewrite
+},
+%
+% Terminators
+morekeywords=[5]{
+  now
+%         by, done, exact, reflexivity, tauto, romega, omega,
+%         assumption, solve, contradiction, discriminate
+},
+%
+% Control
+morekeywords=[6]{
+%do, last, first, try, idtac, repeat
+},
+%
+% Various symbols
+%literate={~}{\url{~}}1,
+% For the ssr manual we turn off the prettyprint of formulas
+% literate=
+% {->}{{$\rightarrow\,$}}2
+% {->}{{\tt ->}}3
+% {<-}{{$\leftarrow\,$}}2
+% {<-}{{\tt <-}}2
+% {>->}{{$\mapsto$}}3
+% {<=}{{$\leq$}}1
+% {>=}{{$\geq$}}1
+% {<>}{{$\neq$}}1
+% {/\\}{{$\wedge$}}2
+% {\\/}{{$\vee$}}2
+% {<->}{{$\leftrightarrow\;$}}3
+% {<=>}{{$\Leftrightarrow\;$}}3
+% {:nat}{{$~\in\mathbb{N}$}}3
+% {fforall\ }{{$\forall_f\,$}}1
+% {forall\ }{{$\forall$}}1
+% {exists\ }{{$\exists\,$}}1
+% {negb}{{$\neg$}}1
+% {spp}{{:*:\,}}1
+% {~}{{$\sim$}}1
+% {\\in}{{$\in\;$}}1
+% {/\\}{$\land\,$}1
+% {:*:}{{$*$}}2
+% {=>}{{$\,\Rightarrow\ $}}1
+% {=>}{{\tt =>}}2
+% {:=}{{{\tt:=}\,\,}}2
+% {==}{{$\equiv$}\,}2
+% {!=}{{$\neq$}\,}2
+% {^-1}{{$^{-1}$}}1
+% {elt'}{elt'}1
+% {=}{{\tt=}\,\,}2
+% {+}{{\tt+}\,\,}2,
+%
+% Comments delimiters, we do turn this off for the manual
+morecomment=[s]{(*}{*)},
+%
+% Spaces are not displayed as a special character
+showstringspaces=false,
+%
+% String delimiters
+morestring=[b]",
+morestring=[d],
+%
+% Size of tabulations
+tabsize=3,
+%
+% Enables ASCII chars 128 to 255
+extendedchars=false,
+%
+% Case sensitivity
+sensitive=true,
+%
+% Automatic breaking of long lines
+breaklines=true,
+%
+% Default style fors listings
+basicstyle=\small,
+%
+% Position of captions is bottom
+captionpos=b,
+%
+% Full flexible columns
+columns=[l]fullflexible,
+%
+% Style for (listings') identifiers
+identifierstyle={\ttfamily\color{black}},
+% Note : highlighting of Coq identifiers is done through a new
+% delimiter definition through an lstset at the begining of the
+% document. Don't know how to do better.
+%
+% Style for declaration keywords
+keywordstyle=[1]{\ttfamily\color{plum3}},
+% Style for gallina keywords
+keywordstyle=[2]{\ttfamily\color{skyblue2}},
+% Style for sorts keywords
+keywordstyle=[3]{\ttfamily\color{ltblue}},
+% Style for tactics keywords
+keywordstyle=[4]{\ttfamily\color{dkblue}},
+% Style for terminators keywords
+keywordstyle=[5]{\ttfamily\color{dkred}},
+%Style for iterators
+%keywordstyle=[6]{\ttfamily\color{dkpink}},
+% Style for strings
+stringstyle=\ttfamily,
+% Style for comments
+commentstyle={\ttfamily\color{chocolate3}},
+%
+%
+moredelim=**[is][\ttfamily\color{red2}]{/&}{&/},
+moredelim=**[is][\color{chocolate3}]{/*}{*/},
+%litterate
+% \Longrightarrow
+literate=
+    {==>}{{$\,\triangleright\;$}}1
+    {Hexists}{{$\HPexi\,$}}1
+    {=>}{{$\Rightarrow$\,}}1
+    {>>}{{\texttt{>}\texttt{>}\,}}1
+    {<=}{{$\leq$ }}1
+    {>=}{{$\geq$ }}1
+    {>->}{{$\rightarrowtail$}}2
+    {->}{{$\rightarrow$\;}}2
+    {<-}{{$\leftarrow\,$}}2
+    {<->}{{$\,\leftrightarrow\,\,$}}4
+    {<==}{{$\subseteq$}}1
+    {\\\#}{$\,\#\;\;$}1 % set disjointness: print \# as #
+    {\#\#}{{\texttt{\#}}}1
+    %% {\/\\}{{${}\wedge{}$}}3
+    {/\\}{{$\wedge\;\,$}}2
+    {|-}{{$\vdash$\;}}1
+    {\\equiv}{{$\equiv\ $}}1
+    {|AAC}{{\ $\equiv_{AC}$\ }}1
+    {\\\/}{{${}\vee{}$}}1
+    {\\tab}{{$\quad$}}1
+    {\\ttab}{{$\qquad$}}1
+    {\\~}{{$\neg$ }}1
+    {~}{{$\mytilde$}}1
+    {`}{{\;}}1
+    {\\c}{{$\,\subset\,$ }}1
+    {\\cup}{{$\cup$}}1
+    {\\cap}{{$\cap$}}1
+    {\\emptyset}{{$\emptyset$}}1
+    {sigma}{{$\sigma$}}1
+    {Gamma}{{$\Gamma$} }1
+    {forall}{{$\forall$\,}}1
+    {exists}{{$\exists$\,}}1
+    {\\exists}{{\texttt{exists}\ }}1
+    {\\eexists}{{\texttt{eexists}}}1
+    {=o=}{{$\circeq$}}1
+    {\\cdot}{{$\cdot$}}1
+    {\\epsilon}{{$\epsilon$}}1
+    {|redbox}{{\color{blue}$\blacksquare$} }1
+    {|redtriangle}{{\color{red}$\dots$ }}1
+%    {|in}{{$\in$}}1
+    {|times}{{$\times$}}1
+    {^2}{{$^2$}}1
+    {<|}{{$\,\lhd\quad$}}3
+    %% {[|}{{$\llbracket$}}1
+    %% {|]}{{$\rrbracket$}}1
+    {\{|}{{$\llparenthesis$\ }}1
+    {|\}}{{\ $\rrparenthesis$}}1
+    % {[|}{{[|}}1
+    % {|]}{{|]}}1
+    {\\fun}{{$\lambda$}}1
+    {<>}{{$\neq$}}1
+    {~>}{{$\Hdatasep$\,}}1
+    {\\\{}{{$\{$}}1
+%    {\\in}{{$\in$\,}}1
+    {\\alpha}{{$\Ga$}}1
+    {\\lambda}{{$\Gl$}}1
+    {\\n}{{$\OSinter$\,}}1
+    {\\notin}{{$\not\in$\,}}1
+    {\\*}{{$\Qstar$\,}}1
+    {\\$}{{\$}}1
+    {\\[}{{[}\,}1 % CFML pure property: print \[ as [
+    {\\\{\}}{{$\OSempty$\,}}1
+    {\\u}{{$\OSuni$\,}}1
+    {\\\{x\}}{{$\OSsng{\texttt{x}}$\,}}1
+    {\\pi}{{$\pi$\,}}1
+%
+    {Hexists}{{$\HPexi$}}1
+%
+}[keywords,comments,strings]
+
+%\lstnewenvironment{coq}{\lstset{language=Coq,basicstyle=\basiccodesize}}{}
+\lstnewenvironment{coq}{\lstset{language=Coq,basicstyle=\small}}{} % \normalsize
+\lstnewenvironment{coqs}{\lstset{language=Coq,basicstyle=\scriptsize}}{}
+\lstnewenvironment{coql}{\lstset{language=Coq,basicstyle=\footnotesize}}{}
+\lstnewenvironment{coqlnums}{\lstset{language=Coq,basicstyle=\footnotesize,numbers=left}}{}
+\lstnewenvironment{coqlframed}{\lstset{language=Coq,basicstyle=\footnotesize}}{}
+% pour inliner dans le texte
+\def\coqinline{\lstinline[language=Coq, basicstyle=\normalsize]}
+\newcommand\co[1]{\text{\coqinline{#1}}}
+% pour inliner dans les tableaux / displaymath...
+\def\coqinlines{\lstinline[language=Coq, basicstyle=\normalsize]}

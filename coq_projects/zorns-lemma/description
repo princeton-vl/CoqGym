@@ -1,0 +1,10 @@
+Name: ZornsLemma
+Title: Zorn's Lemma
+Description: This library develops some basic set theory.  The main purpose I had in writing it was as support for the Topology library.
+
+Keywords: set theory, cardinals, ordinals, finite, countable, quotients, well orders, Zorn's lemma
+Category: Mathematics/Logic/Set theory
+Author: Daniel Schepler
+Email: dschepler@gmail.com
+Require: 
+License: LGPL

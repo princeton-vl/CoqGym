@@ -1,0 +1,82 @@
+(****************************************************************************)
+(*                                                                          *)
+(*                                                                          *)
+(*                   Solange Coupet-Grimal & Line Jakubiec                  *)
+(*                                                                          *)
+(*                                                                          *)
+(*                 Laboratoire d'Informatique de Marseille                  *)
+(*                   Technopole de Chateau-Gombert                          *)
+(*                   39, Rue F. Joliot Curie                                *)
+(*                   13453 MARSEILLE Cedex 13                               *)
+(*           e-mail:{Solange.Coupet,Line.Jakubiec}@lim.univ-mrs.fr          *)
+(*                                                                          *)
+(*                                                                          *)
+(*                                Coq V5.10                                 *)
+(*                              May 30th 1996                               *)
+(*                                                                          *)
+(****************************************************************************)
+ 
+
+
+Verification and synthesis of hardware linear arithmetic structures.
+Example of a left-to-right comparator.
+
+
+Three approaches are tackled :
+----------------------------
+  * the usual verification of a circuit, consisting in proving that the
+    description satisfies the specification,
+  * the synthesis of a circuit from its specification using the Coq
+    extractor,
+  * the same approach as above but using the Program tactic.
+
+Directories :
+-----------
+  * Libraries : additional lemmas about arithmetic, booleans, 
+                dependent lists ...
+  * Factorization :
+      - Lib_Numerals : Libraries about the representation of natural numbers
+        as lists of digits in a given base,
+      - Linear_Structures.v : Definition of linear connections of identical 
+        cells,
+      - Factorization.v : Definition of two properties ("proper" and
+        "factorizable") that the arithmetic relations we consider are
+        supposed to satisfy,
+      - Factorization_Verif.v, Factorization_Synth.v, Factorization_Prog.v :
+        three versions (corresponding to our three approaches) of a general
+        theorem stating the correctness of circuits implementing proper and
+        factorizable arithmetic relations,
+      - Comparator : application to the example of a comparator.
+
+Compilation order :
+-----------------
+  1. Libraries
+  2. Libraries/ Lib_Arithmetic, Lib_Boolean, Lib_Lists
+  3. Factorization/ Lib_Numerals
+  4. Factorization
+  5. Factorization/ Comparator
+
+
+
+This work is described in the following reference :
+
+  Title     : "Coq and Hardware Verification : A Case Study"
+  Author    : Coupet-Grimal Solange and Jakubiec Line
+  Booktitle : TPHOLs'96 (International Conference on Theorem Proving 
+              in Higher Order Logics) - Turku (Finlande)
+  Publisher : Springer-Verlag
+  Series    : LCNS
+  Date      : 27-30th August 1996
+  Abstract  : We present several approaches to verifying a class of circuits
+              with the Coq proof-assistant, using the example of a 
+              left-to-right comparator. The large capacity of expression of 
+              the Calculus of Inductive Constructions allows us to give 
+              precise and general specifications. Using Coq's higher order
+              logic, we state general results useful in establishing the
+              correctness of the circuits. Finally, exploiting the constructive
+              aspect of the logic, we can show how a certified circuit can 
+              be automatically synthesized from its specification.
+
+
+
+ 

@@ -1,0 +1,97 @@
+/* Clearfix */
+.clearfix:after
+{
+	content: ".";
+	display: block;
+	height: 0.1px;
+	clear: both;
+	font-size: 0;
+	visibility: hidden;
+}
+.clearfix
+{
+	display: inline-table;
+}
+html>body .clearfix {
+	display:block;
+}
+/* \*/
+* html .clearfix
+{
+	height: 1%;
+}
+/* */
+
+/* Turn off borders on linked images. */
+a img
+{
+	border: 0;
+}
+
+/* kill default form margin/padding */
+form {
+	margin:0;
+	padding:0;
+}
+
+/* Make sure our inline elements vertical-align properly. */
+img,
+input,
+select,
+label
+{
+	vertical-align: middle;
+}
+
+/* Make sure all elements inherent font properties properly. */
+table,
+thead,
+tbody,
+tfoot,
+tr,
+th,
+td,
+input,
+select,
+textarea
+{
+	font-size: 1em;
+	font-family: inherit;
+}
+
+/* Make table cells default to top vertical alignment since more often than not we want it this way. */
+td
+{
+	vertical-align: top;
+}
+
+table .action,
+table .numeric,
+table .money
+{
+	text-align: right;
+}
+tfoot th
+{
+	text-align: right;
+}
+
+/*****************************************************************
+** Descriptive classes mainly for use in our rich-text-editors. **
+*****************************************************************/
+.floatLeft
+{
+	float: left;
+}
+.floatRight
+{
+	float: right;
+}
+.none
+{
+	display: none;
+}
+.hidden
+{
+	visibility: hidden;
+}

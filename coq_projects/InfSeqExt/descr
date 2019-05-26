@@ -1,0 +1,1 @@
+InfSeqExt is a collection of Coq libraries for reasoning inductively and coinductively on infinite sequences, using modal operators similar to those in linear temporal logic (LTL).

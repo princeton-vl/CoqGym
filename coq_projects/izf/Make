@@ -1,0 +1,11 @@
+-R . IZF
+
+IZF_base.v
+IZF_coll.v
+IZF_logic.v
+IZF_nat.v
+IZF_omega.v
+IZF_pair.v
+IZF_power.v
+IZF_select.v
+IZF_union.v

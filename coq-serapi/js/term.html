@@ -1,0 +1,55 @@
+<!-- -*- mode:javascript -*--->
+<!DOCTYPE HTML>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>SerAPI Terminal</title>
+    <meta name="Description" content=""/>
+    <script src="term-js/jquery-1.7.1.min.js"></script>
+    <script src="term-js/jquery.mousewheel-min.js"></script>
+    <script src="term-js/jquery.terminal-0.10.12.min.js"></script>
+    <link  href="term-js/jquery.terminal-0.10.12.min.css" rel="stylesheet"/>
+    <style>
+     body {
+         background: #000000;
+         color: #aaa;
+     }
+    </style>
+  </head>
+
+  <body>
+    <div id="tilda"></div>
+    <h1>SerAPI Demo</h1>
+    <div id="term_demo" class="terminal">
+    </div>
+  </body>
+
+  <script type="text/javascript">
+
+    var coq = new Worker("sertop_js.js");
+
+    var coqterm;
+
+    jQuery(function($, undefined) {
+
+    coqterm = $('#term_demo').terminal(function(command, term) {
+        if (command !== '') {
+            coq.postMessage(command);
+        }
+    }, {
+        greetings: 'Welcome to SerTOP, have fun! Type "Help" for help.',
+        name: 'serapi',
+        height:  560,
+        width : 1024,
+        prompt: 'sertop> '
+    });
+    });
+
+   /* EG: Is there a race condition here? */
+   coq.onmessage = e => {
+       coqterm.echo(e.data);
+   }
+
+  </script>
+
+</html>

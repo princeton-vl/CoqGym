@@ -1,0 +1,46 @@
+\documentclass{article}
+
+\usepackage{fullpage}
+
+\usepackage[utf8]{inputenc}
+
+\usepackage{url}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{supertabular}
+
+\usepackage{mathpartir}
+\usepackage{ottalt}
+
+\inputott{stlc-rules}
+
+
+\title{Specification of the CBN Simply-Typed Lambda Calculus}
+\author{Stephanie Weirich}
+% \address{University of Pennsylvania}
+\date{2017}
+
+\begin{document}
+
+\maketitle
+
+This document demonstrates the use of the Ott tool to generate \LaTeX input
+definitions. It uses the \texttt{ottalt} \LaTeX package available from
+\url{http://users.eecs.northwestern.edu/~jesse/code/latex/}.
+
+\section{Syntax of STLC}
+
+\nonterms{T,e,G}
+
+\ottgrammar{}
+
+\section{Typing rules for STLC}
+
+\ottdefntyping{}
+
+\section{Small-step rules for STLC}
+
+\ottdefnstep{}
+
+
+\end{document}

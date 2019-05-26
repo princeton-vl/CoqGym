@@ -1,0 +1,98 @@
+
+(*****************************************************************************)
+(*          Projet Coq  - Calculus of Inductive Constructions V5.10          *)
+(*****************************************************************************)
+(*                                                                           *)
+(*      Meta-theory of the explicit substitution calculus lambda-env         *)
+(*      Amokrane Saibi                                                       *)
+(*                                                                           *)
+(*      September 1993                                                       *)
+(*                                                                           *)
+(*      Revised version : December 1994                                      *)
+(*                                                                           *)
+(*****************************************************************************)
+
+
+  Le principal re'sultat de ce de'veloppement est la confluence du 
+lambda-sigma-lift-calcul (appele' aussi lambda-env-calcul). Ce syste`me 
+de re'e'criture a e'te' de'fini par T. Hardin et J.-J. Le'vy. 
+
+Fichier a` charger: confluence_LSL.v
+
+
+ Description des fichiers:
+ =========================
+
+  * Re'sultats ge'ne'raux:
+    ----------------------
+     
+       - sur_les_relations.v  :  de'finitions ge'ne'rales concernant les 
+                                 relations, confluence, noethe'rianite'...
+       - Newman.v             :  lemme de Newman.
+       - Yokouchi.v           :  lemme de Yokouchi.
+
+ * La the'orie:
+   ------------
+
+       - TS.v                 : de'finition de l'alge`bre: termes et 
+                                substitutions explicites.
+       - sigma_lift.v         : de'finition d'un sous-syste`me du 
+                                lambda-sigma-lift-calcul, appelle'
+                                sigma-lift (ou SL).
+       - lambda_sigma_lift.v  : de'finition du lambda-sigma-lift-calcul 
+                                (ou LSL).
+       - egaliteTS.v          : l'e'galite' dans l'alge`bre.
+
+ * Etapes de la preuve:
+   --------------------
+
+     ** noethe'rianite' de sigma-lift:
+        ------------------------------
+           
+           - comparith.v            : comple'ments d'arithme'tique, utilse 
+                                      les re'sultats de ARITH.
+           - Pol1.v                 : polynome P1.
+           - Pol2.v                 : polynome P2.
+           - terminaison_SL.v       : sigma-lift est noetherien en utilisant 
+                                      un ordre lexicographique combine avec une 
+                                      interpretation polynomiale par P1 et P2.
+
+    ** confluence locale de sigma-lift:
+       --------------------------------
+
+           - inversionSL.v          : inversion de la relation sigma-lift.
+           - determinePC_SL.v       : determination des paires critiques de sigma-lift.
+           - resoudPC_SL.v          : resolution des paires critiques de sigma-lift.
+           - conf_local_SL.v        : confluence locale de sigma-lift.
+   
+    ** confluence forte de Beta||:
+       ---------------------------
+
+           - betapar.v              : de'finition de la parallelisation de la 
+                                      regle Beta: beta_par (ou B||).  
+           - conf_strong_betapar.v  : confluence forte de beta_par.
+    
+
+    ** re'sultat technique:
+       -------------------- 
+        
+           - SLstar_bpar_SLstar.v   : de'finition de "SL* o B|| o SL*".
+           - commutation.v          : le diagramme si-dessous commute:
+
+                                           B||
+                                       x ---------> z
+                                       |            |
+                                    SL |            |SL*
+                                       |            | 
+                                       V            V
+                                       y ----------> u
+                                         SL*B||SL*    
+    
+    ** confluence du lambda-sigma-lift-calcul:
+       ---------------------------------------
+          
+           - confluence_LSL.v       : confluence du lambda-sigma-lift-calcul 
+                                      en utilisant tous les re'sultats ci-dessus.
+
+
+  

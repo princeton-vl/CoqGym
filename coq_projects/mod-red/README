@@ -1,0 +1,23 @@
+ModRed
+
+On w-bit processors which are much faster at multiplying
+two w-bit integers than at dividing 2w-bit integers by w-bit
+integers, reductions of large integers by moduli M smaller than
+2^(w-1) are often implemented sub-optimally, leading applications
+to take excessive processing time.
+
+We present a modular reduction algorithm - ModRed - implementing division by a
+modulus through multiplication by a reciprocal of that modulus, a
+well-known method for moduli larger than 2^(w-1). We show that application of this
+method to smaller moduli makes it possible to express certain modular sums and
+differences without having to compensate for word
+overflows.
+
+By embedding the algorithm in a loop and applying a few
+transformations to the loop, we obtain an algorithm - MultiRed - for reduction of
+large integers by moduli up to 2^(w-1). Implementations of
+this algorithm can run considerably faster than implementations of
+similar algorithms that allow for moduli up to 2^w.
+
+For further information, you can mail
+luc at casema dot nl

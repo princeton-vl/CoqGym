@@ -1,0 +1,15 @@
+# Script simulating a dialog between coqide and coqtop -ideslave
+# Run it via fake_ide
+#
+# Undoing arbitrary commands, as non-first step
+#
+ADD { Theorem b : O=O. }
+ADD here { assert True by trivial. }
+ADD { Ltac g x := x. }
+# <replay>
+EDIT_AT here
+# <\replay>
+ADD { Ltac g x := x. }
+ADD { assert True by trivial. }
+ADD { trivial. }
+ADD { Qed. }

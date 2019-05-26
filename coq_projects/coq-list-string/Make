@@ -1,0 +1,12 @@
+-R src ListString
+
+src/All.v
+src/Bool.v
+src/Case.v
+src/Char.v
+src/Comparison.v
+src/Conversion.v
+src/Etc.v
+src/LString.v
+src/Trim.v
+src/UnitTests.v

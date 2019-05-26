@@ -1,0 +1,147 @@
+
+          Coq Extraction
+          ==============
+
+
+What is it ?
+------------
+
+The extraction is a mechanism that produces functional code
+(Ocaml/Haskell/Scheme) out of any Coq terms (either programs or
+proofs).
+
+Who did it ?
+------------
+
+The current implementation (from version 7.0 up to now) has been done
+by P. Letouzey during his PhD, helped by J.C. Filliâtre and supervised
+by C. Paulin. 
+
+An earlier implementation (versions 6.x) was due to B. Werner and
+C. Paulin.
+
+
+Where can we find more information ?
+------------------------------------
+
+- Coq Reference Manual includes a full chapter about extraction
+- P. Letouzey's PhD thesis [3] forms a complete document about
+  both theory and implementation and test-cases of Coq-extraction
+- A more recent article [4] proposes a short overview of extraction
+- earlier documents [1] [2] may also be useful.
+
+
+Why a complete re-implementation ?
+----------------------------------
+
+Extraction code has been completely rewritten since version V6.3. 
+
+1) Principles 
+
+The main goal of the new extraction is to handle any Coq term, even 
+those upon sort Type, and to produce code that always compiles. 
+Thus it will never answer something like "Not an ML type", but rather
+a dummy term like the ML unit. 
+
+Translation between Coq and ML is based upon the following principles: 
+
+- Terms of sort Prop don't have any computational meaning, so they are
+merged into one ML term "__". This part is done according to P. Letouzey's 
+works [1] and [2].
+
+This dummy constant "__" used to be implemented by the unit (), but 
+we recently found that this constant might be applied in some cases. 
+So "__" is now in Ocaml a fixpoint that forgets its arguments: 
+
+           let __ = let rec f _ = Obj.repr f in Obj.repr f
+
+
+- Terms that are type schemes (i.e. something of type ( : )( : )...s with 
+s a sort ) don't have any ML counterpart at the term level, since they 
+are types transformers. In fact they do not have any computational
+meaning either. So we also merge them into that dummy term "__".
+
+- A Coq term gives a ML term or a ML type depending of its type: 
+type schemes will (try to) give ML types, and all other terms give ML terms.
+
+And the rest of the translation is (almost) straightforward: an inductive
+gives an inductive, etc...
+
+This gives ML code that have no special reason to typecheck, due 
+to the incompatibilities between Coq and ML typing systems. In fact
+most of the time everything goes right. 
+
+We now verify during extraction that the produced code is typecheckable, 
+and if it is not we insert unsafe type casting at critical points in the 
+code, with either "Obj.magic" in Ocaml or "unsafeCoerce" in Haskell.
+
+
+2) Differences with previous extraction (V6.3 and before)
+
+2.a) The pros 
+
+The ability to extract every Coq term, as explain in the previous 
+paragraph. 
+
+The ability to extract from a file an ML module (cf Extraction Library in the 
+documentation)
+
+You can have a taste of extraction directly at the toplevel by 
+using the "Extraction <ident>" or the "Recursive Extraction <ident>".
+This toplevel extraction was already there in V6.3, but was printing 
+Fw terms. It now prints in the language of your choice: 
+Ocaml, Haskell or Scheme. 
+
+The optimization done on extracted code has been ported between 
+V6.3 and V7 and enhanced, and in particular the mechanism of automatic
+expansion.
+
+2.b) The cons 
+
+The presence of some parasite "__" as dummy arguments
+in functions. This denotes the rests of a proof part. The previous 
+extraction was able to remove them totally. The current implementation
+removes a good deal of them, but not all. 
+
+This problem is due to extraction upon Type.
+For example, let's take this pathological term: 
+	(if b then Set else Prop)  : Type
+The only way to know if this is an Set (to keep) or a Prop (to remove) 
+is to compute the boolean b, and we do not want to do that during 
+extraction. 
+
+There is no more "ML import" feature. You can compensate by using 
+Axioms, and then "Extract Constant ..." 
+
+
+
+
+
+[1]:
+Exécution de termes de preuves: une nouvelle méthode d'extraction 
+pour le Calcul des Constructions Inductives, Pierre Letouzey,
+DEA thesis, 2000, 
+http://www.pps.jussieu.fr/~letouzey/download/rapport_dea.ps.gz
+
+[2]: 
+A New Extraction for Coq, Pierre Letouzey, 
+Types 2002 Post-Workshop Proceedings. 
+http://www.pps.jussieu.fr/~letouzey/download/extraction2002.ps.gz
+
+[3]: 
+Programmation fonctionnelle certifiée: l'extraction de programmes
+dans l'assistant Coq. Pierre Letouzey, PhD thesis, 2004.
+http://www.pps.jussieu.fr/~letouzey/download/these_letouzey.ps.gz
+http://www.pps.jussieu.fr/~letouzey/download/these_letouzey_English.ps.gz
+
+[4]:
+Coq Extraction, An overview. Pierre Letouzey. CiE2008.
+http://www.pps.jussieu.fr/~letouzey/download/letouzey_extr_cie08.pdf
+
+
+
+
+
+
+
+

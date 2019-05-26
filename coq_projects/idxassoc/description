@@ -1,0 +1,24 @@
+Name : IdxAssoc
+Title : Associative Arrays
+Author : Dominique Quatravaux
+Author : François-René Ridaux
+Author : Gérald Macinenti
+Institution : IdealX
+Date : April 2001
+Description : We define the associative array (key -> value associations)
+              datatype as list of couples, providing definitions of standards
+              operations such as adding, deleting.
+
+              We introduce predicates for membership of a key and of couples.
+
+              Finally we define a search operator ("find") which returns the 
+              value associated with a key or the "none" option (see file 
+              Option.v which should be part of this contribution) on failure.
+
+              Lemmas we prove about these concepts were motivated by our needs
+              at the moment we created this file. We hope they'll suit your
+              needs too but anyway, feel free to communicate any wish or 
+              remark.
+Keywords : associative arrays, search operator, data structures
+Category: Computer Science/Data Types and Data Structures
+License: BSD with advertising clause

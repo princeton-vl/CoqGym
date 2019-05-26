@@ -1,0 +1,28 @@
+opam-version: "1.2"
+version: "dev"
+maintainer: "palmskog@gmail.com"
+
+homepage: "https://github.com/uwplse/cheerios"
+dev-repo: "https://github.com/uwplse/cheerios.git"
+bug-reports: "https://github.com/uwplse/cheerios/issues"
+license: "BSD-2-Clause"
+
+build: [
+  [ "./configure" ]
+  [ make "-j%{jobs}%" ]
+]
+install: [ make "install" ]
+remove: [ "sh" "-c" "rm -rf '%{lib}%/coq/user-contrib/Cheerios'" ]
+depends: [
+  "coq" {>= "8.6.1" & < "8.10~"}
+  "StructTact" {= "dev"}
+]
+
+tags: [ "keyword:serialization" ]
+authors: [
+  "Keith Simmons <>"
+  "Doug Woos <>"
+  "James Wilcox <>"
+  "Justin Adsuara <>"
+  "Karl Palmskog <>"
+]

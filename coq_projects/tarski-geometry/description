@@ -1,0 +1,19 @@
+Name: TarskiGeometry
+Title: Tarski's geometry
+Author: Julien Narboux
+Email: Julien.Narboux@dpt-info.u-strasbg.fr
+Homepage:http://dpt-info.u-strasbg.fr/~narboux/
+Institution: INRIA FUTURS / Lix
+Date: 2006-03
+Description: This is a formalization of geometry using a simplified version of Tarski's axiom system. The development contains a formalization of the chapters 1-8 of the book "Metamathematische Methoden in der Geometrie" by W. Schwabhäuser, W. Szmielew and A. Tarski.
+This includes between properties, congruence properties, 
+  midpoint, perpendicular lines, point reflection, orthogonality ...
+This development aims to be a low level complement for Frédérique Guilhot's development about high-school geometry.
+
+For more information see:
+Mechanical Theorem Proving in Tarski's geometry in the post-proceeding of ADG 2006, F. Botana and T. Recio (Eds.), LNAI 4869, pages 139-156, 2007.
+
+Url:http://dpt-info.u-strasbg.fr/~narboux/tarski.html
+License:GPL
+Keywords: geometry, Tarski's geometry, congruence, between property, orthogonality
+Category: Mathematics/Geometry/General

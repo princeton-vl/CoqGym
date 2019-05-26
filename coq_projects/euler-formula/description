@@ -1,0 +1,13 @@
+Name: EulerFormula
+Title: Hypermaps, Genus Theorem and Euler Formula
+Author: Jean-François Dufourd
+Email: dufourd@dpt-info.u-strasbg.fr
+Homepage: http://dpt-info.u-strasbg.fr/~jfd/
+Institution: University of Strasbourg, LSIIT (UMR CNRS 7005)
+Address: Boulevard S. Brant, BP10413, 67400 Illkirch
+Date: 2006-09
+Description: This library formalizes the combinatorial hypermaps and their properties in a constructive way. It gives the proofs of the Genus Theorem and of the Euler Formula for the polyhedra. 
+License: LGPL
+Keywords: polyhedron, hypermap, genus, Euler formula, assisted proofs
+Require:
+Category: Mathematics/Geometry/See also

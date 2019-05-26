@@ -1,0 +1,61 @@
+(********************************************************)
+(* Une  axiomatisation en coq de la norme IEEE 754 	*)
+(* Plan d'ensemble 				   	*)
+(*                                                     	*)
+(* Patrick Loiseleur, avril 1997			*)
+(********************************************************)
+
+Voici le graphe des dependances:
+
+        Omega     ZArith
+          |          |
+          |     Zcomplements
+          |          |
+          +------ Zpower
+                     |
+                Zlogarithm
+  	 Bool        |
+          |        Diadic
+          |          |
+          +----- IEEE754_def
+                     |
+            +--------+---------+			 
+            |                  |
+   IEEE754_properties  IEEE754_algorithms.
+
+Le fichier IEEE.v charge l'ensemble des modules.
+
+Omega, ZArith Zcomplements, Zpower et Zlogarithm font maintenant partie de
+la bibliothèque standard de Coq.
+
+Le fichier Diadic
+=================
+Definition et propritetes elementaires de nombres diadiques (ce sont les
+nombres rationels de la forme n/2^p, autrement dit les nombres dont le
+developpement en base 2 est fini)
+WARNING : c'est dans ce module que sont definis les quatre modes
+d'arrondi utilises plus tard dans IEE754_*
+
+Le fichier IEE754_def
+=====================
+Specification de la norme IEEE 754 (formats de nombres, modes
+d'arrondi, specification des 5 fonctions + - * / et racine carree et
+des conversions entre les formats)
+
+Le fichier IEEE754_properties
+=============================
+Proprietes des operations certifiees IEEE. Par exemple :
+
+  Pour tous x,y tels que le calcul ne produise pas de debordements :
+
+                     x
+	-1 <= --------------- <= +1
+		 ___________
+                /  2    2
+	      \/  x  + y 
+		
+  (en mode d'arrondi au plus proche uniquement)
+
+Le fichier IEEE754_algorithms
+=============================
+Certification d'algorithmes conformes a la specification IEEE.

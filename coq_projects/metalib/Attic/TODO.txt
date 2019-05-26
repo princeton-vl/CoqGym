@@ -1,0 +1,11 @@
+BEA's list of things to do:
+
+  - Review Arthur's library, see what can be incorporated.
+
+  - Incorporate permutations somehow?
+
+  - Is it possible to use AssumeList-style lists for everything w/o it being
+    too painful?  I don't think so, based on adapting Fsub to use them.
+
+  - The naming convention in MyAssumeList needs to be thought about: map
+    versus map_var, binds versus bindsAlt, etc.  This lacks consistency.

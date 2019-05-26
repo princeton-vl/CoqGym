@@ -1,0 +1,83 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN">
+<html>
+<head>
+  <title>
+    Coqrel: a binary logical relations library for the Coq proof assistant
+  </title>
+  <style>
+    body {
+      max-width: 100ex;
+      margin: 1ex auto;
+    }
+  </style>
+</head>
+<body>
+  <h1>
+    Coqrel: binary logical relations for Coq
+  </h1>
+
+  <h2>Introduction</h2>
+  <p>
+    Coqrel is a library for the Coq proof assistant
+    which mechanizes techniques associated with binary logical relations.
+    It provides a unified syntax and methodology for
+    building relations between complex objects,
+    and an extensible tactic library for solving relational goals.
+  </p>
+
+  <h2>Download</h2>
+  <p>
+    The code is available
+    <a href="https://github.com/CertiKOS/coqrel/">on github</a>.
+    Beware: Coqrel is a work in progress,
+    and its exact interface has not been finalized yet.
+    With your help and feedback,
+    I will do my best to make it as usable as possible,
+    but I make no promise to preserve backward compatibility
+    until I release the first stable version.
+  </p>
+
+  <h2>Documentation</h2>
+  <p>
+    I presented Coqrel at the CoqPL'16 workshop; an
+    <a href="http://arthur.chargueraud.org/events/coqpl2016/CoqPL_2016_paper_7.pdf">extended abstract</a>
+    is available which provides a good high-level overview.
+    The following paper may be philosophically useful as well:
+    <a href="http://www.cs.bham.ac.uk/~udr/papers/logical-relations-and-parametricity.pdf">
+    Logical Relations and Parametricity -
+    A Reynolds Programme for Category Theory and Programming languages</a>
+    by C. Hermida, U. S. Reddy and E. P. Robinson. WACT 2013. 
+  </p>
+  <p>
+    While documentation is scarce,
+    the code is well-commented and should be readable.
+    You can browse the Coqdoc
+    <a href="html/toc.html">table of contents</a> and
+    <a href="html/index.html">index</a> here.
+    The top-level file
+    <a href="html/coqrel.LogicalRelations.html">LogicalRelations</a>
+    is a good place to start.
+    Coqrel uses typeclasses extensively,
+    both to make the system extensible by the user,
+    and to enable full backtracking between the different components.
+    As a result,
+    some familiarity with the typeclass system of Coq
+    will be valuable to understand the code.
+  </p>
+
+  <h2>Contact</h2>
+  <p>
+    I encourage you to use github's
+    <a href="https://github.com/CertiKOS/coqrel/issues">issue tracker</a>
+    to report any problems you encounter with Coqrel
+    or suggest improvements.
+    For general questions you can also email me directly at
+    <a href="mailto:jeremie.koenig@yale.edu">jeremie.koenig@yale.edu</a>;
+    I'm always happy to hear from potential users of Coqrel!
+  </p>
+
+  <p>
+    -- <a href="http://www.cs.yale.edu/homes/jkoenig/">J&eacute;r&eacute;mie Koenig</a>
+  </p>
+</body>
+</html>

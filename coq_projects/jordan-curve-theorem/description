@@ -1,0 +1,13 @@
+Name: JordanCurveTheorem
+Title: Hypermaps, planarity and discrete Jordan curve theorem
+Author: Jean-François Dufourd
+Email: dufourd@lsiit.u-strasbg.fr
+Homepage: http://dpt-info.u-strasbg.fr/~jfd/
+Institution: University of Strasbourg, LSIIT (UMR CNRS 7005)
+Address: LSIIT, Pole Technologique, Bd. S. Brant, 67412 Illkirch
+Date: 2008
+Description: Constructive formalization of the combinatorial hypermaps, characterization of the planarity, genus theorem, Euler formula, ring of faces, discrete Jordan curve theorem
+Url: http://dpt-info.u-strasbg.fr/~jfd/Downloads/JORDAN_Contrib_Coq.tar.gz
+License: 
+Keywords: combinatorial hypermaps, genus, planarity, Euler formula, Discrete Jordan Curve Theorem
+Category: Mathematics/Geometry/General

@@ -1,0 +1,15 @@
+language: coq
+sudo: enabled
+before_install:
+  - sudo apt update -qq
+  - sudo apt install opam
+  - opam init -n --comp=4.02.3 
+  - opam repo add coq-released http://coq.inria.fr/opam/released
+  - opam install coq.8.8.1 && opam pin add coq 8.8.1
+  - export OPAMROOT=~/opam-coq.8.8.1
+  - eval `opam config env`
+install:
+  - make 
+script:
+  - coqchk -norec pigeonhole_principle.v
+  - make test

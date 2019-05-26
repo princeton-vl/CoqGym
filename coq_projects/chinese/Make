@@ -1,0 +1,25 @@
+-R . Chinese
+
+rings.v
+misc.v
+groups.v
+Zrec.v
+Zmult.v
+Zle.v
+Zgcd.v
+Zdiv.v
+Zbase.v
+Zadd.v
+Z_succ_pred.v
+Z.v
+Nat_complements.v
+Lci.v
+
+-extra chinese.ml Zgcd.vo
+	"$(COQBIN)coqtop $(COQLIBS) $(COQFLAGS) -silent -batch -load-vernac-source extract.v"
+-extra chinese "chinese.ml main.ml"
+	"$(CAMLBIN)ocamlopt -o chinese chinese.mli chinese.ml main.ml"
+-extra test chinese
+	"@echo '***** test: computing the chinese remaindering of an example  *****'
+	./chinese 9 16 3 7
+	@echo '*********************** End of test *******************************'"

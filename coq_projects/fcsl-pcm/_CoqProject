@@ -1,0 +1,17 @@
+-R . fcsl
+-arg -w -arg -notation-overridden
+-arg -w -arg -redundant-canonical-projection
+
+finmap/finmap.v
+finmap/ordtype.v
+pcm/automap.v
+pcm/axioms.v
+pcm/heap.v
+pcm/mutex.v
+pcm/lift.v
+pcm/natmap.v
+pcm/pcm.v
+pcm/pred.v
+pcm/prelude.v
+pcm/unionmap.v
+

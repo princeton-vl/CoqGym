@@ -1,0 +1,108 @@
+<html><head><title>Tutorial on Hoare Logic</title>
+</head>
+
+<body bgcolor="#ffffff">
+
+<h1 align=center>A Tutorial on Reflecting in Coq<br> the generation of Hoare proof obligations</h1>
+
+<h2 align=left>Copyright 2007 <a href=mailto:Sylvain.Boulme@imag.fr>Sylvain Boulm&eacute;</a></h2>
+
+<p align=justify>
+This file is part of the "Tutorial on Hoare Logic". The "Tutorial on
+Hoare Logic" is a Coq library distributed under the terms of the "GNU
+LESSER GENERAL PUBLIC LICENSE" version 3. For further details, 
+see <a href=http://www.gnu.org/licenses/gpl-3.0.txt>http://www.gnu.org/licenses/gpl-3.0.txt</a>
+and <a href=http://www.gnu.org/licenses/lgpl-3.0.txt>http://www.gnu.org/licenses/lgpl-3.0.txt</a>.
+</p>
+
+<p align=justify>This library requires Coq version 8.1 (Feb. 2007).</p>
+
+<h2 align=left>Short description</h2>
+
+<p align=justify>
+Hoare logics are "program logics" suitable for reasoning about
+imperative programs.  This library formalizes the generation of PO
+(proof obligations) in a Hoare logic for a very basic imperative
+programming language. It proves the soundness and the completeness of
+the PO generation both in partial and total correctness. At last, it
+examplifies on a very simple example (a GCD computation) how the PO
+generation can simplify concrete proofs. Coq is indeed able to
+compute PO on concrete programs: we say here that the generation of
+proof obligations is reflected in Coq. Technically, the PO generation
+is here performed through Dijkstra's weakest-precondition calculus.
+</p>
+ 
+<h2 align=left>Aims of this library</h2>
+
+<p align=justify>
+This work is both an introduction to Hoare logic and a demo
+illustrating Coq nice features. Indeed, the power of Coq higher order
+logic allows to give a very simple description of Hoare
+logic. Actually, I find this presentation simpler than those found in
+some hand-written books. In particular, because we are in a rich
+language, some notions which are not in the "kernel" of the logic
+(e.g. the return types of expressions or the assertion language) can
+be simply "shallow embedded": we do need to introduce an abstract
+syntax for these notions, and we can handle directly their semantics
+instead. Furthermore, because Coq is a programming language with
+propositions as first class citizens, it is able to compute the PO of
+Hoare logic on concrete imperative programs. At last, most of proofs
+in this development are discharged by Coq, using only a few hints
+given by the user. Most of these hints are simply some key ideas of
+the proofs.
+</p>
+
+<p align=justify>
+In summary, this work aims to illustrate the following ideas:<ul>
+<li> Coq is suitable both for reasoning about program logics and for
+    emulating these logics.  
+<li> Reflecting Dijkstra's weakest-precondition calculus is an elegant and powerful 
+    way to reason about non-functional programs in Coq.</a>
+</ul>
+</p>
+
+<p align=justify>
+I use this library in some talks presenting Coq. It takes me usually
+between 45 minutes and 1 hour to present its different part.
+</p>
+
+<h2 align=left>How to read the sources</h2>
+
+<p align=justify>
+The best way to read the sources is to read them through <a href=http://coq.inria.fr/coqide/index.html>coqide</a> (or your
+favorite coq interface): you will be able to replay the (short) proofs
+of this development.  In particular, replaying proof of <a href=exgcd.html#gcd_partial_proof>gcd_partial_proof</a> 
+and <a href=exgcd.html#gcd_total_proof>gcd_total_proof</a> in file <a href=exgcd.html>exgcd.v</a> allows to see 
+how Coq generates PO on a concrete example. To do so, you
+may first need to <a href=http://www-verimag.imag.fr/~boulme/HOARE_LOGIC_TUTORIAL/hoare_logic_tutorial.tgz>download the sources</a> and then to compile them using <tt>make</tt>.
+Alternatively, you can browse the html documentation through your favorite web browser. 
+In case of trouble, please <a href=mailto:Sylvain.Boulme@imag.fr>contact me</a>.
+</p>
+
+</p>
+<p align=justify>
+To read the sources, you may follow this order:<ul>
+<li> Start by reading <a href=hoarelogicsemantics.html>hoarelogicsemantics.v</a> (the semantics of my Hoare logic) 
+    and <a href=exgcd.html>exgcd.v</a> (which examplifies how to use this Hoare logic). 
+    It seems a good idea to read these files more or less in parallel.
+<li> Then, read <a href=partialhoarelogic.html>partialhoarelogic.v</a> the PO generation in partial correctness.
+<li> At last, read <a href=totalhoarelogic.html>totalhoarelogic.v</a> the PO generation in total correctness.  
+    Indeed, the PO generation in total correctness may be considered as a
+    refinement of the PO generation in partial correctness.
+<li> It seems almost useless to read <a href=hoarelogic.html>hoarelogic.v</a>. 
+    Its purpose is only to glue all this stuff together.
+</ul>
+</p>
+
+<h2 align=left><a name=contact></a>Contact</h2>
+
+<p align=justify>
+If you have any comment, suggestion, question or trouble about this work,
+please send a mail to <a href=mailto:Sylvain.Boulme@imag.fr>Sylvain.Boulme@imag.fr</a>
+</p>
+
+<p align=justify>
+For more information, see my web page at 
+<a href=http://www-verimag.imag.fr/~boulme>http://www-verimag.imag.fr/~boulme</a>
+</p>
+</body>

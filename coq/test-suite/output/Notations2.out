@@ -1,0 +1,102 @@
+2 3
+     : PAIR
+2 [+] 3
+     : nat
+forall (A : Set) (le : A -> A -> Prop) (x y : A), le x y \/ le y x
+     : Prop
+match (0, 0, 0) with
+| (x, y, z) => x + y + z
+end
+     : nat
+let '(a, _, _) := (2, 3, 4) in a
+     : nat
+exists myx y : bool, myx = y
+     : Prop
+fun (P : nat -> nat -> Prop) (x : nat) => exists y, P x y
+     : (nat -> nat -> Prop) -> nat -> Prop
+∃ n p : nat, n + p = 0
+     : Prop
+let a := 0 in
+∃ (x y : nat) (b := 1) (c := b) (d := 2) (z : nat), 
+let e := 3 in
+let f := 4 in x + y = z + d
+     : Prop
+∀ n p : nat, n + p = 0
+     : Prop
+λ n p : nat, n + p = 0
+     : nat -> nat -> Prop
+λ (A : Type) (n p : A), n = p
+     : ∀ A : Type, A -> A -> Prop
+λ A : Type, ∃ n p : A, n = p
+     : Type -> Prop
+λ A : Type, ∀ n p : A, n = p
+     : Type -> Prop
+let' f (x y : nat) (a := 0) (z : nat) (_ : bool) := x + y + z + 1 in f 0 1 2
+     : bool -> nat
+λ (f : nat -> nat) (x : nat), f(x) + S(x)
+     : (nat -> nat) -> nat -> nat
+Notation plus2 n := (S(S(n)))
+λ n : list(nat), match n with
+                 | list1 => 0
+                 | _ => 2
+                 end
+     : list(nat) -> nat
+λ n : list(nat),
+match n with
+| list1 => 0
+| nil | 0 :: _ | 1 :: _ :: _ | plus2 _ :: _ => 2
+end
+     : list(nat) -> nat
+λ n : list(nat),
+match n with
+| nil => 2
+| 0 :: _ => 2
+| list1 => 0
+| 1 :: _ :: _ => 2
+| plus2 _ :: _ => 2
+end
+     : list(nat) -> nat
+# x : nat => x
+     : nat -> nat
+# _ : nat => 2
+     : nat -> nat
+# x : nat => # H : x <= 0 => exist (le x) 0 H
+     : ∀ x : nat, x <= 0 -> {x0 : nat | x <= x0}
+exist (Q x) y conj
+     : {x0 : A | Q x x0}
+% i
+     : nat -> nat
+% j
+     : nat -> nat
+{1, 2}
+     : nat -> Prop
+a#
+     : Set
+a#
+     : Set
+a≡
+     : Set
+a≡
+     : Set
+.≡
+     : Set
+.≡
+     : Set
+.a#
+     : Set
+.a#
+     : Set
+.a≡
+     : Set
+.a≡
+     : Set
+.α
+     : Set
+.α
+     : Set
+# a : .α =>
+# b : .α =>
+let res := 0 in
+for i from 0 to a updating (res)
+{{for j from 0 to b updating (res) {{S res}};; res}};; res
+     : .α -> .α -> .α

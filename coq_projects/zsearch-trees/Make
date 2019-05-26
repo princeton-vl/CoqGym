@@ -1,0 +1,7 @@
+-R . ZSearchTrees
+search_tree.v
+extraction.v
+-extra test "extraction.vo test.ml"
+	"@echo '********* Test on one example **********'
+	$(CAMLBIN)ocaml test.ml
+	@echo '************ End of test ***************'"

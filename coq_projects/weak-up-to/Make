@@ -1,0 +1,11 @@
+-R . WeakUpTo
+./Functions.v
+./Settings.v
+./Diagrams.v
+./Controlled.v
+./Theory.v
+./WeakMonotonic.v
+./Monotonic.v
+./Applications.v
+./Relations.v
+./Reductions.v

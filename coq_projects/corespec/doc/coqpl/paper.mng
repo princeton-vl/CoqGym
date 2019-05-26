@@ -1,0 +1,424 @@
+%\documentclass[format=sigplan,10pt,review=false,screen=true]{acmart}\settopmatter{}
+\documentclass[sigplan,screen,10pt,nocopyright,printccs=false]{acmart}
+\renewcommand\footnotetextcopyrightpermission[1]{} % removes footnote with conference information in first column
+\settopmatter{printfolios=true,printacmref=false}
+
+% Suppress conference info in the headers
+\usepackage{fancyhdr}
+\fancyhead[LE]{}%
+\fancyhead[RO]{}%
+\fancyhead[LO]{\shorttitle}%
+\fancyhead[RE]{\shortauthors}%
+
+\usepackage[para]{footmisc}   %% gather footnotes on a single line
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{supertabular}
+\usepackage{stmaryrd}
+\usepackage{color}
+\usepackage{multirow}
+\usepackage{calc}
+\usepackage[T1]{fontenc}
+\usepackage{graphicx}
+\usepackage{xspace}
+\usepackage{dashrule}  % for \hdashrule
+\usepackage{stackrel}
+\usepackage{enumerate}
+\usepackage{framed}
+\usepackage{bussproofs}
+\usepackage{mdframed}  % highlight
+\usepackage{hyperref}
+\usepackage{comment}
+%\usepackage{natbib}
+\usepackage{ifthen}
+\usepackage{pdftexcmds}
+
+\usepackage{mathpartir}
+\usepackage{ottalt}
+
+\usepackage{fancyvrb}
+
+\usepackage{listings}
+\lstset{language=Haskell}
+
+%\special{papersize=8.5in,11in}
+%\setlength{\pdfpageheight}{\paperheight}
+%\setlength{\pdfpagewidth}{\paperwidth}
+
+%\usepackage{palatino}
+\renewcommand{\familydefault}{\rmdefault}
+%\renewcommand{\ttdefault}{cmtt}
+
+%% Show admissible premises in rules
+%% This should be false in main body of text and true in the appendix.
+\newif\ifadmissible
+\admissiblefalse
+\newcommand\suppress[1]{\ifadmissible{[#1]}\else{}\fi}
+\inputott{ett-rules}
+
+
+\newcommand{\alt}{\ |\ }
+\newcommand{\rul}[1]{\rref{#1}}
+
+
+\newcommand{\fc}{DC\xspace}
+\newcommand{\fimp}{D\xspace}
+\newcommand{\pico}{\textsc{PiCo}\xspace}
+
+
+\newif\ifcomments
+\commentstrue
+\ifcomments
+\newcommand{\scw}[1]{\textcolor{blue}{{SCW: #1}}}
+\newcommand{\rae}[1]{\textcolor{magenta}{{RAE: #1}}}
+\newcommand\av[1]{\textcolor{orange}{{AV: #1}}}
+\else
+\newcommand{\scw}[1]{}
+\newcommand{\rae}[1]{}
+\newcommand\av[1]{}
+\fi
+
+
+
+
+%% allow more interline spacing (and fewer overfull hboxes).
+\tolerance=5000
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%% Copyright information
+%% Supplied to authors (based on authors' rights management selection;
+%% see authors.acm.org) by publisher for camera-ready submission
+\setcopyright{none}             %% For review submission
+%\setcopyright{acmcopyright}
+%\setcopyright{acmlicensed}
+%\setcopyright{rightsretained}
+
+
+%% Bibliography style
+\bibliographystyle{ACM-Reference-Format}
+%% Citation style
+%% Note: author/year citations are required for papers published as an
+%% issue of PACMPL.
+\citestyle{acmauthoryear}   %% For author/year citations
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{document}
+\settopmatter{printfolios=true}
+
+%\title{A specification of eta-equivalence in LNrep}
+\title{Locally Nameless at Scale}
+
+\author{Stephanie Weirich}
+\orcid{0000-0002-6756-9168}
+\affiliation{
+  \institution{University of Pennsylvania}            %% \institution is required
+  \streetaddress{3330 Walnut St}
+  \country{USA}
+}
+\email{sweirich@cis.upenn.edu}
+
+\author{Antoine Voizard}
+\affiliation{
+  \position{}
+  \department{}              %% \department is recommended
+  \institution{University of Pennsylvania}            %% \institution is required
+  \streetaddress{}
+  \city{}
+  \state{}
+  \postcode{}
+  \country{USA}
+}
+\email{voizard@seas.upenn.edu}
+
+\author{Anastasiya Kravchuk-Kirilyuk}
+\affiliation{
+  \position{}
+  \department{}              %% \department is recommended
+  \institution{University of Pennsylvania}            %% \institution is required
+  \streetaddress{}
+  \city{}
+  \state{}
+  \postcode{}
+  \country{USA}
+}
+\email{akravc@sas.upenn.edu}
+
+\begin{abstract}
+
+The Corespec project is an extensive mechanization in Coq of the metatheory of
+System D and System DC, two related, dependently-typed languages aimed at
+replacing the GHC's internal language, Core~\cite{ghc-core-spec}. In this talk, we take
+a retrospective look at our development through the lens of a recent addition,
+$\eta$-equivalence. In particular, we describe our experience with the
+practical application of locally nameless variable-binding representation for
+mechanized metatheory, supported by the Ott and LNgen tools.
+\end{abstract}
+
+\maketitle
+
+%% Our running head is too long for acmsmall
+\renewcommand{\shortauthors}{Weirich, Voizard, Kravchuk-Kirilyuk}
+
+\section{Corespec}
+The idea behind the Corespec project is to provide a replacement for GHC's
+Core language FC~\cite{systemfc} that supports full spectrum dependent
+types~\cite{Weirich:systemd} .  Specifically, this project required untangling
+the notions of type on the one hand and of erasable component
+(computationally irrelevant)
+on the other - which current GHC essentially conflates.
+
+As part of this process, the Corespec project developed two related
+dependently-typed languages: System D and System DC. The former is Curry-style
+and includes only computationally relevant information in its syntax; the
+latter includes much more: typing annotations, irrelevant arguments, and
+coercions in support of decidable type checking. Thus, the implicit language provides an uncluttered specification of the
+semantics of the language as well as a simplified context for certain parts
+of the metatheory.
+
+We have shown that these two languages are related via annotation and erasure
+theorems. Our progress result about System D can be translated
+to System DC through the first theorem, and the preservation result of System
+DC can be similarly translated to System D via the second.
+
+Our Coq formalization has been invaluable both in the confidence that it gives
+us in our results, but also in the design of the system in the first
+place. Although Systems D and DC draw on prior
+work~\cite{eisenberg:phd,gundry:phd,weirich:dwk}, we designed this language in
+conjunction with its mechanization.
+
+After completing the initial design, which we reported in ICFP 2017, we have
+been extending the equational theory with rules for $\eta$-equivalence. For
+this part of the project, we have been joined by Kravchuk-Kirilyuk who did not
+participate in the original design.
+
+% \scw{We need to explain much more precisely about what definitions are
+%   provided by Ott, what lemmas are provided by
+%   lngen, and what we actually proved.  maybe pick some representative
+%   lemmas such as confluence to state?}
+
+\subsection{Tool support for Locally Nameless representation}
+Our formalization of Systems D and DC uses a locally nameless representation
+for variable binding, and employs co-finite
+quantification~\cite{aydemir:popl-binders} in the rules that manipulate
+binders.
+
+%ANA: our choice for what?
+Our choice was strongly influenced by the availability of two tools:
+
+The first, Ott~\cite{Ott}, is a specification tool for programming languages
+semantics. One can think of it as a compiler for its specification language.
+It takes as input rules
+similar to the one in figure \ref{fig:ott-eta}
+%of the shape as shown below
+- that is, a
+user-definable ASCII representation of the syntax, judgment, and rules of the
+language. Ott compiles this to a representation in another format - for instance,
+\LaTeX, or Coq with a locally-nameless representation (Coq/LN in
+the following).
+
+For example, here is the inductive type Ott generates to represent the syntax
+of the lambda-calculus:
+\begin{verbatim}
+Induction exp :=
+   | var_f : atom -> exp
+   | var_b : nat -> exp
+   | abs   : exp -> exp
+   | app   : exp -> exp -> exp
+\end{verbatim}
+(\verb!atom! is the set of names used for free variables)
+% As expected, we get a locally nameless representation: variables have 2
+% constructors, one for bound variables that uses a de Bruijn representation,
+% and another for free variables that relies on a set of names (\verb!atom!).
+
+Ott also translates rule specifications of inductive definitions to Coq
+inductive datatypes, as in the example below.
+% For instance, rule \av{refs} XXXX as show in figure XXXX
+% gets compiled to the case XXXX shown in figure XXXXX (this is a constructor of
+% the inductive type that ott defines to represent the reduction judgment).
+In addition, it
+automatically defines operations for free variable calculation (called
+\verb|fv|, free variable substitution (called \verb|subst|) and bound variable
+substitution (called \verb|open|).
+
+The second tool, LNgen~\cite{aydemir:lngen}, is a complement to Ott when used
+to output Coq/LN.  This tool uses the same specification to derive additional
+definitions and helper lemmas about the Coq/LN code generated by Ott.
+For example, one lemma generated by LNgen asserts that
+\begin{verbatim}
+Lemma subst_fresh :
+   forall x, x `notin` fv e -> subst x e = e.
+\end{verbatim}
+
+% Looks like there needs to be more written about this lemma or otherwise why have it at all?
+
+\section{Case study: Eta reduction}
+One part of extending Systems D and DC with eta-equivalence rules requires
+proving the confluence of a parallel reduction system extended with rules for
+\emph{eta-reduction}. This confluence proof justifies the consistency of the
+type equivalence rules of our language and is the main component of our
+canonical forms theorem.
+
+Our Ott specification of this rule, in ASCII syntax, appears in Figure
+\ref{fig:ott-eta}.
+
+% As the only figure, it looks weird with a lot of space around it
+\vspace*{-8pt}
+\begin{figure}[h]
+\begin{verbatim}
+ |- b => b'
+ a = b x
+----------------------------- :: Eta
+ |- \ x. a => b'
+\end{verbatim}
+\caption{Ott input for rule Eta}
+\label{fig:ott-eta}
+\end{figure}
+\vspace*{-9pt}
+
+At first glance, this rule seems a bit strange. What has become of the
+free variable condition (\verb|x `notin` fv b|)  required by Eta-reduction?
+
+When we look at the generated Coq definition, it is also not immediately
+obvious that \verb|x| is not allowed to appear in \verb|b|. Here is the case
+generated for the $\eta$ rule above:
+\begin{verbatim}
+Par_Eta : forall (L:vars) (a b b' : Exp),
+  Par b b' ->
+  (forall x, x notin L -> open a x = app b x) ->
+  Par (abs a) b'
+\end{verbatim}
+% this next paragraph could be shortened but I don't understand it so idk how to condense it
+This rule is the constructor of eta-equivalence within the parallel reduction relation (\verb!Par!).
+It relies on
+co-finite quantification: the second premise generalizes over the complement
+of \verb!L!, a universally quantified finite set. This means
+that the induction hypothesis generated by this rule is available for an
+infinite number of variables chosen for the binder --- all except those in
+\verb|L|. Furthermore, this quantification enforces the free variable
+condition: since \verb|b| is quantified at the outermost level of the type, it
+cannot depend on the variable~\verb|x|.
+
+With this reasoning, we see why the original Ott definition makes sense.
+The free variable condition \emph{is} enforced, albeit
+indirectly. Notice that, in the conclusion, $[[a]]$ appears under the
+binder $\lambda [[x]]$. This prompts Ott to output a definition in which $[[x]]$ can appear in
+$[[a]]$, as it is aware that $\lambda$ is a binder.
+Now,
+%notice the second
+in the second premise of the rule,
+% - in particular the fact that
+no side of the equation is
+under a binder. Thus, in the generated definition, $[[x]]$
+can \emph{not} appear in $[[b]]$. This results in the proper semantics for
+the rule.
+
+
+Although the cofinite  version of the rule generates a strong induction hypothesis, sometimes one
+might want an \emph{existential} version for constructing derivations that
+mention a particular name for the bound variable:
+\begin{verbatim}
+Lemma Par_Eta_exists : forall a b b' x,
+  x `notin` fv b -> x `notin` fv b' ->
+  Par b b' ->
+  open a x = app b x ->
+  Par (abs a) b'
+\end{verbatim}
+This version of the rule is proven admissible in our development.
+It is both handy for forward reasoning, and
+a good way to check that we defined the type system
+we intended. Note that this rule makes the free variable
+conditions explicit.
+
+Finally, we have also proven one more version of
+%the eta-reduction
+this
+rule. This
+version relies on the \verb|close| operation that replaces a free variable
+\verb|x| with a bound one, suitable for \verb|abs|.
+\begin{verbatim}
+Lemma Par_Eta_close : forall a b x,
+  x `notin` fv a ->
+  Par a b ->
+  Par (abs (close x (app a (var_f x)))) b
+\end{verbatim}
+While being perhaps the ``most obviously correct'' version of
+$\eta$-reduction with this representation, this rule is the least useful in
+proof development.
+
+% It is not really handy for backward reasoning, since rewriting the
+% term in the conclusion to have this specific shape might take quite a bit of reasoning.
+% However, it is convenient for forward reasoning
+% (especially since $[[a]]$ may in some cases be a term of the shape \verb!open (...)!, and
+% Lngen provides several lemmas to easily rewrite interactions of \verb!open! and \verb!close!)
+
+
+\section{Lessons learned}
+Overall, we have been very happy with the use of Coq and the related tools
+for our development. In particular, the mechanization of
+Systems D and DC has made it easier to include new collaborators when
+considering extensions of the system. In this case, KK could make progress on
+this task without having to understand the entire development.
+
+Furthermore, we appreciated the confidence that Coq provides in our
+reasoning. For example, our initial design of our $\eta$-equivalence rule
+depended on the following inversion lemma, which sadly, does not hold in
+System D, for subtle reasons.
+\begin{lemma}[Inversion]
+if $[[G |= \x.b x : all rho x : A -> B ]]$ and $[[x notin fv b]]\,$ then
+$[[ G |= b : all rho x:A -> B ]]$.
+\end{lemma}
+% The lemma fails because the erased language only mentions variables in
+% computationally relevant positions. However, we could have used x implicitly,
+% such as in instantiating a polymorphic function.
+%
+% Because this lemma doesn't hold, our untyped parallel reduction relation does
+% not have the preservation property. The rule above allows the term to reduce,
+% in some cases to an ill-typed term.
+Thankfully, none of the rest of the
+metatheory relies on preservation for parallel reduction.
+
+This development also relies strongly on the tool support provided by Ott and
+LNgen. Because we have formalized the rules of the complete system using the
+Ott tool, the semantics that appears typeset in our paper \emph{exactly} corresponds
+to the rules that we proved in Coq. Furthermore, the extensive
+library of lemmas and definitions provided by LNgen were essential to our
+development. % \scw{say more ... how big is the library. how much did we use it?}
+
+Tool support has been critical to this project's very existence. Other
+sets of tools exist to deal with variable binding in Coq, such as
+Autosubst ~\cite{SchaeferEtAl:2015:Autosubst:-Reasoning} or
+Needle and Knot \cite{keuchel2016needle}.
+
+%\scw{Say that we wouldn't do something like this without tool support. Maybe
+%  cite autosubst \url{https://www.ps.uni-saarland.de/autosubst/} and needle
+%  and knot (steven Kuechel) as other examples of tools for Coq-based variable
+%  binding.}
+
+\bibliography{../icfp17/weirich.bib,../icfp17/proposal.bib,../icfp17/rae.bib,coqpl.bib}
+
+\end{document}
+
+
+
+
+%% Local Variables:
+%% mode: LaTeX
+%% End:
+
+%%  LocalWords:  interline overfull hboxes papersize FL Ahmed eir sweirich HM
+%%  LocalWords:  Hamidhasan taun SCW lncs urgh app rccll damas milner HMV SB
+%%  LocalWords:  Damas's outsidein SB's ghc Expr normalizePoly normalizeProxy
+%%  LocalWords:  normalizeExpr TypeApplications AllowAmbiguousTypes APIs API
+%%  LocalWords:  ICFP Refl SCond MonadReader MonadWriter RAE polytype const
+%%  LocalWords:  NB SwapPair swapPair sP HM's monotypes Barendregt Gen InstG
+%%  LocalWords:  monotype vars InstS hmv Abs TApp Var V's Annot algv foo DAbs
+%%  LocalWords:  RankNTypes metatheorems skolemization inst'd DeepSkol Skol
+%%  LocalWords:  Twelf Dreyer Blume's ML's DK Neel Krishnaswami Didier hlio
+%%  LocalWords:  TypeOperators DataKinds PolyKinds ConstraintKinds Typeable
+%%  LocalWords:  ScopedTypeVariables woozle boolCast eqT unsafeThe Val Cond
+%%  LocalWords:  eval SExpr sEval SBool SVal sIf Inst IFPOP ListInst infixr
+%%  LocalWords:  STrue SFalse supertype checkIf myId myAbs abs Num GHCi ghci
+%%  LocalWords:  fromInteger myPair MkG pr Ty forall ol pid cc hm sp inst gen
+%%  LocalWords:  sb dn pf sf ys xs se

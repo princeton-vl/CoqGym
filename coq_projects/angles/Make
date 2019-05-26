@@ -1,0 +1,8 @@
+-R . Angles
+
+point_angle.v
+point_cocyclicite.v
+point_tangente.v
+point_orthocentre.v
+point_napoleon.v
+point_Simson.v

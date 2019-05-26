@@ -1,0 +1,14 @@
+Name: Markov
+Title: Markov's inequality
+Author: Robert Kam
+Email: rkam2001@hotmail.com
+Homepage: none
+Institution: San Jose State University
+Address: One Washington Square, San Jose, CA 95112, USA
+Date: 2008-01-5
+Description: A proof of Markov's inequality, restricted to probability spaces, based on the Wikipedia proof. Defines Lebesgue integral and associated concepts such as measurability, measure functions, and sigma algebras. Extended real numbers did not need to be defined because we are working in a probability space with measure 1. Nonconstructive; uses classic, Extensionality_Ensembles, axiomatized real numbers from Coq standard library.  
+License: GNU Lesser Public License
+Keywords: probability theory, markov, lebesgue integral, measures, sigma algebras, measurability, borel
+Version: 8.1pl3 (Dec. 2007)
+Require: 
+Category: Mathematics/Real Calculus and Topology

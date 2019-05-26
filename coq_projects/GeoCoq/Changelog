@@ -1,0 +1,114 @@
+Release 2.4.0
+==========================
+
+	- Introduction of several packages: "coinc" includes some useful tactics we developed, "axioms" all our axiom systems, 
+	  "elements" the formalization of Euclid's proofs, "pof" the plane over a real closed field modeling Tarski's axioms,
+	  and "main" the rest of the development.
+	- This release is compatible with Coq 8.6.1, 8.7.2, 8.8. Some files depends on mathcomp field library (version >=1.6.4). Mathcomp is used only to build a model of the axioms, it is not essential for using the library.
+	- Reorganization of the type classes to allow more different contexts.
+	- Definition of Hilbert's line completeness axiom and two versions of Hilbert's completeness axiom.
+	- Proof that Hilbert's line completeness axiom implies Hilbert's completeness axiom.
+	- Proof that Dedekind cut axiom implies Hilbert's line completeness axiom.
+	- Add two versions of the circle-circle continuity and the equivalence proofs.
+	- Most of the development in neutral geometry is now dimensionless, including the equivalence of the different versions of the parallel postulate.
+	- Add some definitions and properties about planes.
+	- Definition of five equivalent versions of the upper 3-dimensional axiom and related proofs.
+	- The fixed axioms of Euclid's Elements is modified to be closer to Euclid's. Proofs for Book I are updated accordingly.
+	- Add constructions for parallelogram and rhombus (by R. Coghetto)
+	- Model of Tarski's axioms: a cartesian plane over a real closed field: this part of the development depends on mathcomp library.
+
+Release 2.3.0
+==========================
+
+	- This release is compatible with Coq 8.5, 8.6 and trunk.
+	- Definition of the sum of segments and related proofs.
+	- Files grouping Euclid's Elements Propositions for which we have a proof based on Tarski's axioms: Book I Prop. 1-34 and 46-47, Book III Prop. 2-14 17-18.
+	- Definitions of an axiom system to prove Propositions of Euclid's Elements and some links with Tarski's axiom system.
+	- Coq translation of Michael Beeson's formalization of the 48 propositions of Book 1 of Euclid's Elements, those proofs try to mimic Euclid's proofs as much as possible but are based on a richer axiom system than Tarski's.
+	- Definition of elementary continuity properties: segment-circle, line-circle, circle-circle continuity properties.
+	- Definition of first-order Dedekind cut axiom, and Dedekind cut axiom.
+	- Proof that Archimedes' axiom can be derived from Dedekind cut axiom.
+	- Proof of the equivalence between different variants of circle-circle continuity.
+	- Proof of the equivalence between different variants of line-circle, and segment-circle continuity.
+	- Proof that line-circle continuity can be derived from circle-circle continuity.
+	- Proof that circle-circle continuity can be derived from first-order Dedekind cut axiom.
+	- Add a new version of the parallel postulate and the equivalence proofs.
+	- Add definitions of predicates to express that a point is inside, on and outside a circle, and associated lemmas.
+	- Add some properties about tangency.
+	- Add some results about half of angles.
+
+Release 2.2.1
+==========================
+
+	- Add compatibility with Coq 8.6.
+	- Add SSA theorem (Side Side Angle) for right triangles.
+	- Add the fact that in a isosceles triangle ABC with AB = AC,
+	  the altitude from vertex A is also the angle bisector from vertex A and the median from vertex A.
+
+Release 2.2.0
+==========================
+
+	- Add compatibility with Coq 8.5.
+	- Definition of Archimedes' axiom (its geometric version).
+	- Definition of Archimedes' axiom for angles.
+	- Archimedes' axiom implies Aristotle's axiom.
+	- Proof of Legendre's theorems.
+	- The TS Predicate (Two Sides) was cleared of a redundant condition.
+	- Definition of the interior bisector and related properties.
+	- Proof of the existence of the incenter of a triangle.
+	- Proof of the existence of an equilateral triangle build on a given base without any continuity axiom (in any Pythagorean field).
+	- Justification of the axioms of the area method.
+
+Release 2.1.1 (2016-05-25)
+==========================
+
+	- A few statements equivalent to the parallel postulate are renamed.
+
+Release 2.1.0 (2016-05-09)
+==========================
+
+	- Proof that Tarski's axioms follow from Hilbert's.
+	- Definition of new statements equivalent to the parallel postulate and related proofs.
+
+Release 2.0.0 (2016-03-03)
+==========================
+
+	This version does not bring many new results but we cleaned up the names of the definitions.
+
+	- Definition of new statements equivalent to the parallel postulate and related proofs.
+	- Many predicates were renamed.
+
+Release 1.1.1 (2015-12-03)
+==========================
+
+	- Definition of new statements equivalent to the parallel postulate and related proofs.
+	- Algebraic characterization of right triangle, parallelism and perpendicularity using coordinates.
+	- The Gröbner basis method can now be used to prove statements within Tarski's system of geometry.
+
+Release 1.1.0 (2015-10-27)
+==========================
+
+	- Reorganization of files into directories.
+	- Creation of a ./configure.
+	- Formalization of Chapter 16 of SST:
+	  definition of coordinates and characterization of Cong and Bet using coordinates.
+	- Algebraic characterization of Midpoint and Col using coordinates.
+	- Proof of the equivalence between upper-dimension axiom and the fact that all points are coplanar.
+	- Proof of the pseudo-transitivity and permutation properties of the generalized con-cyclic predicate.
+	- Definition of the sum of angles and related proofs.
+	- Definition of a weak geometric version of Archimedes' axiom: Aristotle's axiom.
+	- Proofs about the parallel postulate:
+	  assuming Aristotle's axiom,
+	  the fact that the angles of a triangle sum to exactly two right angles implies Playfair's postulate.
+	- Proofs of the decidability of the predicates from Chapter 11, assuming point equality decidability.
+
+Release 1.0.1 (2015-07-16)
+==========================
+
+	- Add -R . GeoCoq to fix compilation for the release as an opam package.
+
+Release 1.0.0 (2015-07-15)
+==========================
+
+	- First release under LGPL 3.0 available on Github.
+	- Website available here: http://geocoq.github.io/GeoCoq/.

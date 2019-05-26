@@ -1,0 +1,45 @@
+/* LAYOUT */
+#navigation ul,
+#navigation h2,
+#navigation h3,
+#navigation p,
+#header .top-navigation ul,
+.bottom-navigation,
+.subNav-container {
+	display:none;
+}
+#wrapper,
+#content,
+#mainContent,
+#footer {
+	display:block;
+	margin:1em 0;
+	padding:0;
+	width:550px;
+	float:none;
+}
+.three-column #mainContent {
+	display:block;
+	margin:1em 0;
+	padding:0 10px 0 0;
+	width:365px;
+	float:left;
+}
+#header,
+#header .navigation-logo,
+#header .top-navigation .department-logo {
+	display:block;
+	margin:0 0 0.5em 0;
+	padding:0;
+	width:550px;
+	float:none;
+	clear:both;
+	text-align:left;
+	border:none;
+}
+#footer {
+	margin:1em 0 0 0;
+	float:none;
+	clear:both;
+	border-top:1px solid;
+}

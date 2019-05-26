@@ -1,0 +1,10 @@
+Name: HigmanS
+Title: Higman's lemma on an unrestricted alphabet
+Author: William Delobel
+Email: william.delobel@lif.univ-mrs.fr
+Institution: LIF Marseille
+Date: 2007-09-14
+Description: This proof is more or less the proof given by Monika Seisenberger in "An Inductive Version of Nash-Williams' Minimal-Bad-Sequence Argument for Higman's Lemma".
+License: LGPL
+Keywords: Higman's lemma, well quasi-ordering
+Category: Mathematics/Combinatorics and Graph Theory

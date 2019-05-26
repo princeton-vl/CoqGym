@@ -1,0 +1,19 @@
+language: c
+sudo: required
+install: wget https://raw.githubusercontent.com/ocaml/ocaml-ci-scripts/master/.travis-opam.sh
+script: bash -ex .travis-opam.sh
+env:
+  global:
+  - OCAML_VERSION=4.05
+matrix:
+  fast_finish: true
+  allow_failures:
+    - os: osx
+os:
+  - linux
+  - osx
+cache:
+  apt: true
+  directories:
+  - $HOME/.opam
+  - $HOME/Library/Caches/Homebrew

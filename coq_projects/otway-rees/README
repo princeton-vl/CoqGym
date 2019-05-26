@@ -1,0 +1,36 @@
+
+                  Otway-Rees cryptographic protocol
+           Dominique Bolignano and Valérie Ménissier-Morain
+                        GIE Dyade, VIP action
+----------------------------------------------------------------------
+
+This directory contains a description and a proof of correctness for
+the Otway-Rees cryptographic protocol, usually used as an example for
+                   formalisation of such protocols.
+
+The file securite.v contains the description of:
+  - the objects the protocol will manipulate
+  - the knowledge of the reliable principals and of intruders
+  - the guarantees on the keys provided by the certification authority
+  - the protocol itself with the rel function cut in eight
+    subfunctions rel[1-8]
+  - three invariant properties (inv0, inv1 and invP): invP ensures
+    that after any session with this protocol, the key that the
+    certification authority provides to the reliable principals to
+    encrypt their messages along this session is still unknown for
+    intruders. 
+
+The files inv0.v, inv1.v, invp.v contain the proof of each invariant
+property. The two last proofs are rather long so they are cut in eight
+files inv[1p]rel[1-8].v according to each subfunction rel[1-8].
+
+-----------------------------------------------------------------------
+
+Further information: a detailed description of this formalisation will
+be available soon on http://www.dyade.fr/actions/VIP/Otway-Rees.dvi.
+
+V. Ménissier-Morain
+D. Bolignano
+GIE Dyade, VIP action
+Url: http://www.dyade.fr/actions/VIP/
+December 1996

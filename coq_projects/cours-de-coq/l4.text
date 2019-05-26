@@ -1,0 +1,123 @@
+Lesson 4 (Relations_2.v, Relations_2_facts.v)
+
+The Section Relations_2 introduces new definitions, that will
+give us the opportunity of experimenting with proofs by Induction.
+
+Rstar is the definition of the reflexive transitive closure of
+R. It contains two introduction clauses, called Rstar_0 and Rstar_n.
+Be careful with the names you choose, as you might inadvertently
+clobber a preexisting name, for example the name of a theorem.
+
+One simple way of understanding this definition is to see it as a
+Prolog program that computes the transitive closure of R, where each clause 
+would be given a name. Here is how I read clause Rstar_n:  if you give me
+x, y and, z, and tell me that R(x,y) and  you have already proved that
+that Rstar(y,z), then you have proved that Rstar(x,z). Rstar_0 and Rstar_n
+are just two theorems that allow you to prove facts about Rstar.
+
+Do  Info Rstar. 
+You see three parts. The first one is the definition of Rstar itself, 
+slightly  different from what you have typed: it uses Ind, a fixpoint operator.
+The second part, called constructors, lists the two introduction theorems.
+The third part is a theorem that has been automatically created by Coq,
+Rstar_ind.  Rstar_ind is a higher order theorem
+that expresses minimality of Rstar. You don't have to understand Rstar_ind
+in detail right now, but look at it: can you imagine how it has been
+synthesized?
+Notice the hint at the end of the section, Hint Rstar_0. 
+Why not Hint Rstar_n? (Try it).
+
+Rstar is defined in a Prolog manner, familiar to computer scientists.
+In contrast to Prolog, the order in which you give the introduction
+theorems is immaterial. Rstar1 is an alternate definition, which is
+possibly more natural mathematically.  Could the three clauses be defined
+even more naturally, using the definitions of the previous lesson? 
+We prefer the current definition for it is easier
+to use with Auto (unfortunately). The definition of Rplus is a piece of
+cake for you now.  Check Rplus_ind.
+
+I am sure that you would like to prove
+some elementary facts already. Let us look at the elementary
+facts in  Relations_2_facts.v.
+
+Rstar_reflexive is proved easily. If you use Auto, you will see
+that Auto unfolds Reflexive automatically, when Reflexive is the head
+operator of the conclusion. This is what Hint Unfold is for. Notice
+also the clause  Rstar_0 is automatically used, as would any theorem in the 
+Hint list. Rplus_contains_R works the same way.
+
+The fact Rstar_contains_R uses both clauses of the definition of Rstar.
+
+To prove that Rstar contains Rplus requires more experience. We will do this
+by induction on the definition of Rplus. At first, what is going on  may seem
+a bit magic to you. First arrange for (Rplus x y) to
+become an hypothesis H'. Call P the conclusion. 
+We want to prove by induction that H' => P. 
+As we have done before, we exploit the content of Hypothesis H' with
+Elim H'. Surprise, two  subgoals appear, corresponding to the base case and 
+the  inductive case in the definition of Rplus. 
+For the base case, theorem Rstar_contains_R should prove it. We have to  do a
+little gymnastics though, because  Rstar_contains_R is stated using
+contains. Try Unfold contains in Rstar_contains_R. Luckily, that
+doesn't work, because it would change the theorem for everyone. But you can
+do almost as well. Given a theorem foo, you can steal your own
+private copy and call it T. This is done with:
+Generalize foo; Intro T.
+Decompose this: try Generalize Rstar_contains_R alone first. You have
+been told that theorems and assumptions can be handled alike. Can you do
+Generalize H'; Intro H" ? (we call this "bang", because of linear logic).
+You should be careful: the system does not prevent you
+from doing this:
+Generalize foo; Intro foo.
+But it does not specify whether the assumption is more visible 
+than the theorem now. Stay away from this, and use a convention like:
+Generalize foo; Intro Tn. where n is an integer. At a glance, you see
+the Tn's in your context. Of course, now that you have your private copy
+of the theorem, you can massage it arbitrarily, and it is also a local hint
+for this goal. By the way, this is a method for using Auto, while having 
+less global hints. At the beginning of a proof, you say in fact that you will
+use heavily Theorems foo and bar, so that they should, for the duration
+of this proof, be in the hint list. 
+
+The second subgoal, it turns out, is easier to handle: just use one of
+the caluses for the definition of Rstar. This is it, you have completed your
+first truly inductive proof.
+
+(R x u)
+In fact, you have done other proofs like this before. Check  or_ind. This is
+the theorem that you used when doing or elim, i.e. to break up an hypothesis
+containing or. You generated two cases. This was not truly an inductive proof,
+but exactly the same mechanism is used.
+
+Try your new expertise on Rstar_transitive, without looking at the
+solution. You(Rstar U R x y) should get it.
+(Rstar U R u y
+Look at Theorem Rstar_cases. Its statement is more important than
+its proof. What it says is that if (Rstar U R x y) holds,
+then the proof of this fact finishes either with the first clause of
+Rstar (in which case x == y) or with the second clause, in which case 
+there exists a u with  (R x u) and (Rstar U R u y). In Coq parlance,
+this is an "inversion" theorem. Clearly there exists a theorem of
+this kind for every inductive definition. 
+Prove the theorem by induction.
+
+To prove that Rstar and Rstar1 are equivalent, you will need two 
+induction proofs. The next few theorems are  just drill, they
+are easy to understand and prove. Note, in Rstar_monotone,
+that you can generalize an instance of a theorem, if you wish.
+
+Lemma 1 is preparation for the next lesson. You must draw a 
+little picture on the side, if you want to understand what it says and 
+how you should do the proof.
+
+At the end of this lesson, you see that Coq is adapted to
+making proofs by induction. Of course, as we will see in the next lesson,
+sometimes you must be careful because  the property that you should prove
+by induction must  be prepared, before you jump right into the Elim.
+We are in a situation that the users of symbolic computation now well: don't
+unleash the computer without understanding what is  going to happen.
+
+
+
+
+

@@ -1,0 +1,16 @@
+post-all:: predict htimeout
+
+predict: src/predict/main.cpp src/predict/predictor.cpp src/predict/format.cpp src/predict/knn.cpp src/predict/nbayes.cpp src/predict/rforest.cpp src/predict/tfidf.cpp src/predict/dtree.cpp
+	g++ -std=c++11 -DCOQ_MODE -O2 -Wall src/predict/main.cpp -o predict
+
+htimeout: src/htimeout/htimeout.c
+	gcc -O2 -Wall src/htimeout/htimeout.c -o htimeout
+
+install-extra::
+	install -m 0755 predict $(if $(COQBIN),$(COQBIN),`coqc -where | xargs dirname | xargs dirname`/bin/)predict
+	install -m 0755 htimeout $(if $(COQBIN),$(COQBIN),`coqc -where | xargs dirname | xargs dirname`/bin/)htimeout
+
+clean::
+	rm -f predict htimeout
+	cd eval && $(MAKE) clean
+	cd tests && $(MAKE) clean

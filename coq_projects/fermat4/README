@@ -1,0 +1,52 @@
+(* README *)
+
+1 - Files:
+    =====
+
+    This contribution consists of the following files:
+
+    - Make             Used by coq_makefile to generate the Makefile
+    - Makefile         To compile
+    - .depend          Dependence file
+    - ArithCompl.v     Mainly complements of arithmetic
+    - Pythagorean.v    Pythagorean triples
+    - Descent.v        Infinite descent scheme
+    - Diophantus20.v   Diophantus' 20th problem
+    - Fermat4.v        Fermat's last theorem for n = 4
+    - description      Description file for retrieval
+    - README           This file
+
+2 - Requirements:
+    ============
+
+    This contribution is self-contained and does not require any other Coq
+contribution. To be compiled, this contribution requires Coq 8.0 or higher.
+
+3 - Compilation and use:
+    ===================
+
+    Just type "make" and require the modules you wish.
+
+4 - Description:
+    ===========
+
+    This contribution presents the proof of Diophantus' 20th problem (book VI
+of Diophantus'"Arithmetica", which consists in wondering if there exist right
+triangles whose sides and surface may be measured as integers. This problem was
+negatively solved by Fermat in the 17th century, who used the "wonderful"
+method ("ipse dixit" Fermat) of infinite descent. This method, which is,
+historically, the first use of induction, consists in producing smaller and
+smaller non-negative integer solutions assuming that one exists; this naturally
+leads to a "reductio ad absurdum" reasoning because we are bounded by zero. As
+a direct and no less historical application of the previous formalization, this
+contribution also provides the proof (by Fermat) of Fermat's last theorem for
+n = 4.
+
+5 - Contacts:
+    ========
+
+    If you need further information or if you have some remarks, please let us
+know sending us a mail at:
+
+    David.Delahaye@cnam.fr
+    mayero@lipn.univ-paris13.fr

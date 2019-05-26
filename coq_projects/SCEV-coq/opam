@@ -1,0 +1,21 @@
+opam-version: "1.0"
+name: "coq-scev"
+version: "dev"
+maintainer: "Siddharth Bhat<siddu.druid@gmail.com>"
+
+homepage: "http://github.com/bollu/coq-scev"
+dev-repo: "http://github.com/bollu/coq-scev"
+bug-reports: "http://github.com/bollu/coq-scev/issues"
+license: "MIT"
+
+build: [ make "-j%{jobs}%" ]
+install: [ make "install" ]
+remove: [ "rm" "-rf" "%{lib}%/coq/user-contrib/coq-scev" ]
+
+depends: [
+  "coq-ext-lib"
+]
+
+authors: [
+  "Siddharth Bhat <siddu.druid@gmail.com"
+]

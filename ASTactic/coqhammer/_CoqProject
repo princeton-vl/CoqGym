@@ -1,0 +1,33 @@
+-Q theories Hammer
+-Q src Hammer
+-I src
+src/hammer_errors.ml
+src/hhlib.ml
+src/hh_term.ml
+src/msg.ml
+src/timeout.ml
+src/coq_transl_opts.ml
+src/coqterms.ml
+src/defhash.mli
+src/defhash.ml
+src/coq_typing.mli
+src/coq_typing.ml
+src/hashing.mli
+src/hashing.ml
+src/coq_convert.mli
+src/coq_convert.ml
+src/tptp_out.mli
+src/tptp_out.ml
+src/coq_transl.mli
+src/coq_transl.ml
+src/opt.ml
+src/parallel.ml
+src/features.mli
+src/features.ml
+src/provers.mli
+src/provers.ml
+src/partac.ml
+src/hammer.ml4
+src/hammer_plugin.mllib
+theories/Reconstr.v
+theories/Hammer.v

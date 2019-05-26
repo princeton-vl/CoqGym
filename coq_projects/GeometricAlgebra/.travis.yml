@@ -1,0 +1,36 @@
+dist: trusty
+sudo: required
+language: c
+cache:
+  apt: true
+  directories:
+  - $HOME/.opam
+
+addons:
+  apt:
+    sources:
+    - avsm
+    packages:
+    - opam
+    - aspcud
+    - gcc-multilib
+
+env:
+  global:
+  - NJOBS=3
+  - COMPILER="4.05.0"
+  matrix:
+  - COQ_VER="8.8.1" REPO_NAME="coq-released"  REPO_URL="http://coq.inria.fr/opam/released"
+#  - COQ_VER="dev"   REPO_NAME="coq-extra-dev" REPO_URL="https://coq.inria.fr/opam/extra-dev"
+
+install:
+- export OPAMROOT=$HOME/.opam
+- opam init -j ${NJOBS} --compiler=${COMPILER} -n -y
+- eval $(opam config env)
+#- opam repo add coq-core-dev https://coq.inria.fr/opam/core-dev || echo "coq-core-dev registered"
+- opam repo add "${REPO_NAME}" "${REPO_URL}" || echo "${REPO_NAME} registered"
+- opam install coq.${COQ_VER} -y
+
+script:
+ - make -j ${NJOBS}
+ - make install

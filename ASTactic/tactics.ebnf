@@ -1,0 +1,135 @@
+!tactic_expr : intro
+             | "apply" term_commalist1 reduced_in_clause
+             | "auto" using_clause with_hint_dbs
+             | "rewrite" rewrite_term_list1 in_clause
+             | "simpl" in_clause
+             | "unfold" qualid_list1 in_clause
+             | destruct
+             | induction
+             | "elim" QUALID
+             | "split"
+             | "assumption"
+             | trivial
+             | "reflexivity"
+             | "case" QUALID
+             | clear
+             | "subst" local_ident_list
+             | "generalize" term_list1
+             | "exists" LOCAL_IDENT
+             | "red" in_clause
+             | "omega"
+             | discriminate
+             | inversion
+             | simple_induction
+             | constructor
+             | "congruence"
+             | "left"
+             | "right"
+             | "ring"
+             | "symmetry"
+             | "f_equal"
+             | "tauto"
+             | "revert" local_ident_list1
+             | "specialize" "(" LOCAL_IDENT QUALID ")"
+             | "idtac"
+             | "hnf" in_clause
+             | inversion_clear
+             | contradiction
+             | "injection" LOCAL_IDENT
+             | "exfalso"
+             | "cbv"
+             | "contradict" LOCAL_IDENT
+             | "lia"
+             | "field"
+             | "easy"
+             | "cbn"
+             | "exact" QUALID
+             | "intuition"
+             | "eauto" using_clause with_hint_dbs
+
+LOCAL_IDENT : /[A-Za-z_][A-Za-z0-9_']*/
+
+QUANTIFIED_IDENT : /[A-Za-z_][A-Za-z0-9_']*/
+
+INT : /1|2|3|4/
+
+QUALID : /([A-Za-z_][A-Za-z0-9_']*\.)*[A-Za-z_][A-Za-z0-9_']*/
+
+HINT_DB : /arith|zarith|algebra|real|sets|core|bool|datatypes|coc|set|zfc/
+
+!local_ident_list :
+                  | LOCAL_IDENT local_ident_list
+
+!local_ident_list1 : LOCAL_IDENT
+                   | LOCAL_IDENT local_ident_list1
+
+!qualid_list1 : QUALID
+              | QUALID "," qualid_list1
+
+!term_list1 : QUALID
+            | QUALID term_list1
+
+!term_commalist1 : QUALID
+                 | QUALID "," term_commalist1
+
+!hint_db_list1 : HINT_DB
+               | HINT_DB hint_db_list1
+
+!reduced_in_clause :
+                   | "in" LOCAL_IDENT
+
+!in_clause :
+           | "in" LOCAL_IDENT
+           | "in" "|- *"
+           | "in" "*"
+
+!at_clause : 
+           | "at" INT
+
+!using_clause :
+              | "using" qualid_list1
+
+!with_hint_dbs :
+               | "with" hint_db_list1
+               | "with" "*"
+
+!intro : "intro"
+       | "intros"
+
+!rewrite_term : QUALID
+              | "->" QUALID
+              | "<-" QUALID
+
+!rewrite_term_list1 : rewrite_term
+                    | rewrite_term "," rewrite_term_list1
+
+!destruct : "destruct" term_commalist1
+
+!induction : "induction" LOCAL_IDENT
+           | "induction" INT
+
+!trivial : "trivial" 
+
+!clear : "clear"
+       | "clear" local_ident_list1
+
+!discriminate : "discriminate"
+              | "discriminate" LOCAL_IDENT
+
+!inversion : "inversion" LOCAL_IDENT
+           | "inversion" INT
+
+!simple_induction : "simple induction" QUANTIFIED_IDENT
+                  |  "simple induction" INT
+
+!constructor : "constructor"
+             | "constructor" INT
+
+!inversion_clear : "inversion_clear" LOCAL_IDENT
+                 | "inversion_clear" INT
+
+!contradiction : "contradiction" 
+               | "contradiction" LOCAL_IDENT
+
+%import common.WS
+%ignore WS

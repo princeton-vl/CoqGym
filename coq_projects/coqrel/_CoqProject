@@ -1,0 +1,19 @@
+-R . coqrel
+
+Delay.v
+RelDefinitions.v
+RelClasses.v
+RelOperators.v
+Relators.v
+Monotonicity.v
+RDestruct.v
+MorphismsInterop.v
+Transport.v
+PreOrderTactic.v
+LogicalRelations.v
+
+BoolRel.v
+OptionRel.v
+KLR.v
+
+LogicalRelationsTests.v

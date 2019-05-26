@@ -1,0 +1,13 @@
+This directory contains the proof of correctness of RSA algorithm 
+that relies on Fermat's little theorem
+
+To build the directory, do
+
+  coq_makefile *.v > Makefile
+
+Then
+
+  make depend;make all
+  
+
+ Laurent Thery & Jose C. Almeida

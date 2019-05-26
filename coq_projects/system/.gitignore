@@ -1,0 +1,12 @@
+Extraction.v
+Run.v
+opam*/
+Makefile
+extraction/*.ml
+extraction/*.mli
+.coq-native/
+*.bak
+*.vo
+*.glob
+*.v.d
+*.aux

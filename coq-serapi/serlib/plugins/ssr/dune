@@ -1,0 +1,7 @@
+(library
+ (name serlib_ssr)
+ ; (public_name coq-serapi.serlib.ssr)
+ (wrapped false)
+ (synopsis "Serialization Library for Coq [SSR plugin]")
+ (preprocess (staged_pps ppx_import ppx_sexp_conv))
+ (libraries coq.plugins.ssreflect serlib serlib_ltac serlib_ssrmatching sexplib))

@@ -1,0 +1,8 @@
+-R . Demos
+
+compile_ml.v
+Sorting.v
+Demo_tauto.v
+Demo_AutoRewrite.v
+Demo.v
+Ack.v

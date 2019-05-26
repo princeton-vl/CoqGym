@@ -1,0 +1,5 @@
+(alias
+ (name runtest)
+ (deps (:input assoc.v))
+ (action (ignore-outputs
+           (bash "! %{bin:sercomp} --mode=vo %{input}"))))

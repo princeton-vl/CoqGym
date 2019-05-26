@@ -1,0 +1,44 @@
+This library, developed by J.-F. Dufourd from University of
+Strasbourg, formalizes the combinatorial hypermaps and their
+properties in a constructive way. It gives the proofs of the Genus
+Theorem and of the Euler Formula for the polyhedra which are modeled
+by hypermaps.
+
+Mathematically speaking, a hypermap is a set (of darts) equipped with
+two permutations. This notion helps to model the combinatorial
+topology of oriented closed surface subdivisions - or polyhedra - in
+vertices, edges and faces. Let s, e, f, c be the numbers of vertices,
+edges, faces, components of a surface subdivision. The Genus Theorem
+says that the genus g = c - (s - e + f)/2 of the surface is a non
+negative integer. When g = 0, the polyhedra is said to be planar and
+satisfies the Euler Formula: s - e + f = 2.
+
+The formalization in Coq is based on a hierarchy of map types defined
+by invariants. The free maps, inductively defined with three
+constructors, constitute the basis of the hierarchy. The
+quasi-hypermap form a subtype of the free maps which model hypermaps
+with incomplete orbits. Finally, the hypermaps are viewed as closed
+quasi-hypermaps.
+
+Operations are mostly defined by pattern matching and proofs are
+mostly driven by induction on the type fmap of the free maps.
+
+- Euler1.v contains the basic specifications of the free maps,
+  quasi-hypermaps and hypermaps, the definition of their operations
+  and the proofs of their properties.
+
+- Euler2.v contains the definitions and the results on the closure of
+  quasi-hypermaps into hypermaps, on the faces and on the paths in
+  faces.
+
+- Euler3.v contains the definitions of the equivalence in hypermaps,
+  on the numbering and characteristics in hypermaps. It gives the
+  proofs of the Genus Theorem and of the Euler Formula under the form
+  of a sufficient condition of planarity. The file ends with the proof
+  of a necessary constructive condition of planarity using a unique
+  axiom.
+
+For further informations, the reader can refer to the paper "Genus
+theorem and Euler formula: A hypermap-formalized intuitionistic
+proof", to appear in Theoretical Computer Science, Elsevier, 2008., or
+send a mail at: dufourd@lsiit.u-strasbg.fr.

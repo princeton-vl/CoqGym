@@ -1,0 +1,65 @@
+
+This is an implementation of BDDs (binary decision diagrams)
+in Coq, by reflection, together with proofs.  The main file
+is bdds.v.  To use them, type `Require bdds.' at the Coq
+toplevel: `BDDof_bool_expr' converts a Boolean expression
+to a BDD, and Lemma `BDDof_bool_expr_correct' states that this
+is a correct algorithm.
+	People wanting to use BDDs as a decision procedure
+for classical propositional logic may want to use Lemma
+`is_tauto_is_correct : (be:bool_expr) (is_tauto be)=true -> (is_valid be)',
+where `is_tauto' builds the BDD, while `is_valid' is the condition
+that the boolean expression `be' is true under all valuations.
+	More details are given in the full report, which should
+be available as a Coq research report in November or December 1999.
+
+	The BDD library requires the `allmaps' file, which
+is available under the Rocq/GRAPHS subdirectory of the Coq
+contrib directory: please add
+	`AddPath "/usr/local/lib/coq/contrib-6.3/Rocq/GRAPHS/".
+	 AddPath "/usr/local/lib/coq/contrib-6.3/Rocq/BDDS/'
+or a similar AddPath command to your .coqrc file to be able
+to use the BDD package.  The second line is the BDD package
+proper, while the first is the map library, which is used
+by the BDD package.
+
+	If you wish to see how you can use it in practice,
+I have included a few standard examples (please type `Require
+bdds.' first):
+
+	- Type `Load u.':
+this adds a few definitions, notably it defines (U n), where
+n is any natural number, as Urquhart's formula U_n.  This
+is the formula x1 <=> (x2 <=> ... <=> (xn <=> (x1 <=> (x2 <=> ... <=> xn)))),
+and it is valid.  Check this by typing:
+	`Time Eval Compute in (is_tauto (U (3)))).'
+or	`Time Eval Compute in (is_tauto (U (80))).'
+	This should return `true' in each case.  An invalid
+formula would return `false'.
+	You may also want to see how many BDD nodes were
+allocated.  Use `test' instead of `is_tauto', then.
+For example, `(test (U (80)))' should return the pair (`32560`,`1`),
+meaning that 32560 BDD nodes were allocated and that the final
+BDD is `1`, i.e., `BDDone', denoting true.
+
+	- Type `Load pigtest.': this defines (pb72 m n) as
+a formula stating that you cannot put m pigeons into n holes
+without putting at least two pigeons in the same hole.
+This is valid if and only if m>n.  Standard tests are when
+m=n+1.  For instance:
+	`Time Eval Compute in (is_tauto (pb72 (6) (5))).'
+should return `true', while:
+	`Time Eval Compute in (is_tauto (pb72 (5) (5))).'
+should return `false'.
+	These are rather large formulae, and take exponential
+time to solve.
+
+	- A few other examples from the IMEC 1990 benchmarks
+were included: `rip06.v', `rip08.v' (6 and 8-bit adders),
+the hard examples `mul06.v', `mul07.v', `mul08.v' (6, 7 and
+8-bit multipliers), the non-tautological formulae `d3.v'
+and `werner.v'.
+	In each example, try:
+	`Time Eval Compute in (is_tauto bench).'
+
+	Have fun!

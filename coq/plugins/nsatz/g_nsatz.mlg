@@ -1,0 +1,22 @@
+(************************************************************************)
+(*         *   The Coq Proof Assistant / The Coq Development Team       *)
+(*  v      *   INRIA, CNRS and contributors - Copyright 1999-2018       *)
+(* <O___,, *       (see CREDITS file for the list of authors)           *)
+(*   \VV/  **************************************************************)
+(*    //   *    This file is distributed under the terms of the         *)
+(*         *     GNU Lesser General Public License Version 2.1          *)
+(*         *     (see LICENSE file for the text of the license)         *)
+(************************************************************************)
+
+{
+
+open Ltac_plugin
+open Stdarg
+
+}
+
+DECLARE PLUGIN "nsatz_plugin"
+
+TACTIC EXTEND nsatz_compute
+| [ "nsatz_compute"  constr(lt) ] -> { Nsatz.nsatz_compute (EConstr.Unsafe.to_constr lt) }
+END

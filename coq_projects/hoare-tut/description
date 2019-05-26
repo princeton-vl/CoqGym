@@ -1,0 +1,25 @@
+Name: HoareTut
+Title: A Tutorial on Reflecting in Coq the generation of Hoare proof obligations
+Author: Sylvain Boulmé
+Email: Sylvain.Boulme@imag.fr
+Homepage:http://www-verimag.imag.fr/~boulme
+Institution: Verimag
+Address:Lab. VERIMAG, Centre Equation, 2 av. de Vignate, 38610 GIERES
+Date: 2007
+Description: 
+This work is both an introduction to Hoare logic and a demo
+illustrating Coq nice features. It formalizes the generation of PO
+(proof obligations) in a Hoare logic for a very basic imperative
+programming language. It proves the soundness and the completeness of
+the PO generation both in partial and total correctness. At last, it
+examplifies on a very simple example (a GCD computation) how the PO
+generation can simplify concrete proofs. Coq is indeed able to compute
+PO on concrete programs: we say here that the generation of proof
+obligations is reflected in Coq. Technically, the PO generation is
+here performed through Dijkstra's weakest-precondition calculus.
+Url: http://www-verimag.imag.fr/~boulme/HOARE_LOGIC_TUTORIAL/
+License: GNU LGPL
+Keywords: Hoare logic, imperative program, weakest precondition, reflection 
+Require:
+Category: Mathematics/Logic/See also
+Category: Computer Science/Semantics and Compilation/Semantics

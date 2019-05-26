@@ -1,0 +1,22 @@
+Name: WeakUpTo
+Title: New Up-to Techniques for Weak Bisimulation
+Author: Damien Pous
+Email: damien.pous at ens-lyon.fr
+Homepage: http://perso.ens-lyon.fr/damien.pous/
+Institution: ENS Lyon, France
+Date: 2005-02-22
+Description: 
+  This contribution is the formalisation of a paper that appeared in
+  Proc. of ICALP 2005: "Up-to Techniques for Weak Bisimulation".
+  First we define a framework for defining up-to techniques for weak
+  bisimulation in a modular way. Then we prove the correctness of some
+  new up-to techniques, based on termination guarantees. Notably, a
+  generalisation of Newman's Lemma to commutation results is
+  established.
+Url: http://perso.ens-lyon.fr/damien.pous/upto/
+License: GPL
+Keywords: 
+  weak bisimilarity, weak bisimulation, up-to techniques, 
+  termination, commutation, Newman's Lemma.
+Require:
+Category: Computer Science/Concurrent Systems and Protocols/Theory of concurrent systems

@@ -1,0 +1,28 @@
+Contribution
+------------
+This directory contains: Pro[gramm,v]ing with continuations:A development 
+                         in Coq.            
+Author & Date          : Pierre Casteran.                                 
+                         Departement d'Informatique, Universite Bordeaux I
+                         LABRI, URA CNRS 1304
+                         33405 Talence CEDEX
+                         May 1993
+
+Type make to install
+--------------------
+
+Comments
+--------
+This contribution was originally developped for CoqV5.8, and has been
+updated for CoqV5.10 by the Coq Workgroup (ENS-CNRS INRIA-Rocquencourt) in
+January 1995.
+
+The additional file leavemult.dvi, which is a detailed description of the
+developpment leavemult.v, deals with the previous version of the system
+Coq (V5.8). So, you will find some differences between this document
+and the developpment itself, which are not fundamental. 
+
+The main differences between the V5.8 and V5.10 are detailed in the file 
+DOC/Incompatibilities.* and DOC/Mutual-Inductive.*.
+
+

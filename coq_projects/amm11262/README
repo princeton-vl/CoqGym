@@ -1,0 +1,8 @@
+DESCRIPTION
+
+ This package contains a formalisation of Tonny Hurkens' proof of the
+ problem 11262 of The American Mathematical Monthly 113(10), Dec. 2006.
+
+ There are two version of the formalisation, one in the ASCII format,
+ and the other in the unicode format. For further information see
+ ascii_format/README and unicode_format/README.

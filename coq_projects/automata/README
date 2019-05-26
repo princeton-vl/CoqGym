@@ -1,0 +1,28 @@
+This library, developed by J. Courant and J.C. Filliatre from ENS Paris,
+formalises the beginning of formal language theory: finite automata
+and rational languages, context-free grammars and push-down automata.
+
+The main results are :
+
+- every rational language is regular, i.e. for all rationnal language L there 
+  exists a finite automata wich recognizes L (Lemma rat_is_reg in RatReg.v)
+
+- for all context-free language L, there exists a push-down automata wich 
+  recognizes L (Lemma equiv_APD_Gram in gram_aut.v)
+
+- an example of classical result : if two languages are context-free, then 
+  so is their union (Theorem union_is_LCF in gram5.v)
+
+- the extraction of a parser generator. Errr...well... from the axiom we can 
+  associate to every push-down automata a program recognizing the same 
+  language (Theorem Parser1 in extract.v).
+
+You can find a description of the modules in Modules.doc
+
+Axioms.doc explains what are the remaining axioms in this work.
+
+For further informations, send us a mail:
+
+	jcfillia@lip.ens-lyon.fr
+	jcourant@lip.ens-lyon.fr
+

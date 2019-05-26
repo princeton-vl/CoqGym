@@ -1,0 +1,7 @@
+post-all:: run_huffman.ml
+
+clean::
+	$(HIDE)rm -f huffman.ml huffman.mli run_hoffman.ml
+
+run_huffman.ml: src/ex1.ml src/ex2.ml theories/Extraction.vo
+	cat src/ex1.ml huffman.ml src/ex2.ml > run_huffman.ml

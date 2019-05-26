@@ -1,0 +1,40 @@
+-R . Additions
+
+while.v
+two_power.v
+trivial.v
+strategies.v
+standard.v
+spec.v
+shift.v
+monoid.v
+monofun.v
+matrix.v
+main.v
+machine.v
+log2_spec.v
+log2_implementation.v
+imperative.v
+generation.v
+fmpc.v
+euclid.v
+dicho_strat.v
+develop.v
+binary_strat.v
+Wf_compl.v
+Mult_compl.v
+Le_lt_compl.v
+Constants.v
+extract.v
+extract_hs.v
+extract_scm.v
+
+# the test :
+-extra fib extract.vo "$(CAMLBIN)ocamlopt -o fib nums.cmxa fibo.mli fibo.ml main.ml"
+-extra-phony test fib 
+	"@echo '***** test: checking Fibonacci(2000) *****'
+	rm -f .fib_2000
+	./fib 2000 > .fib_2000	
+	cat .fib_2000
+	cmp .fib_2000 fib_2000
+	@echo '************** End of test ****************'"

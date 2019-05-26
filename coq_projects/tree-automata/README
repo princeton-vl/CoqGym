@@ -1,0 +1,289 @@
+Author : Xavier RIVAL
+Institution : Dyade/INRIA
+Date : september 2000
+Keywords : top down non deterministic tree automatas reflection
+Warning : This contribution is based upon the contribution :
+graphs - Jean Goubault . (http://pauillac.inria.fr/coq/contribs/graphs.html)
+
+
+
+Description :
+
+	Tree automatas are a powerful tool to describe languages of terms.
+	This library provides proved algorithms on non deterministic and top down
+tree automatas (merge, intersection, acceptation of a term, calculus and deletion
+of empty states and non-coaccessible states).
+
+Installation procedure :
+
+	To compile all the files you can use the command :
+
+	make
+or
+	make opt
+
+and then to move all the .vo files in the dir directory :
+
+	make TARGETDIR=dir install
+
+	To remove all the generated files which won't be useful :
+
+	make clean
+
+
+        This library requires the `allmaps' file, which
+is available under the Rocq/GRAPHS subdirectory of the Coq
+contrib directory: please add
+        AddPath "/usr/lib/coq/contribs/GRAPHS/".
+        AddPath "/usr/lib/coq/contribs/TA/"
+or a similar AddPath command to your .coqrc file.
+
+
+Loading the library :
+
+	To load all the necessary files in Coq : Require auto.
+
+
+Description :
+
+	This library has been writen during a two months intership
+at Dyade under the direction of Jean Goubault Larrecq.
+	For more details about this stage (and about the performances of
+the library) you can have a look on my report (in french) at URL :
+	Here's a short description of the structures and lemmas :
+
+Maps and addresses :
+
+	A Map is a representation of a finite set. The Map structure
+is a sort of hash tree. Each element stored in a map is indexed by an
+address which describe the path leading to the element from the root
+of the map. Here are the main Coq definitions :
+Inductive positive : Set :=
+         xH : positive
+       | xI : positive->positive
+       | xO : positive->positive
+Inductive ad : Set :=  ad_z : ad | ad_x : positive->ad
+Inductive Map [A:Set] : Set :=
+      M0 : (Map A)
+    | M1 : ad->A->(Map A)
+    | M2 : (Map A)->(Map A)->(Map A)
+	The main fonctions on maps are "MapGet" and "MapPut".
+	Have a look on the implementation of the Graphs contrib for
+more details.
+
+Definition of constructors and terms :
+
+A constructor of terms is represented by an address.
+A signature defines the arity of each constructor.
+Definition signature : Set := (Map nat).
+
+Inductive term : Set :=
+       app : ad -> term_list -> term
+with term_list : Set :=
+       tnil : term_list
+     | tcons : term -> term_list -> term_list.
+
+Definition of states, set of states and automatas :
+Definition state := (Map prec_list).
+Definition preDTA := (Map state).
+Inductive DTA : Set :=
+       dta : preDTA -> ad -> DTA.
+
+Semantics of automatas :
+	The semantics of an automaton is its language (i.e. the set of accepted
+terms). Here are two equivalent definition of this semantics :
+   * function (accpetance of a term by calculation) :
+        dta_rec_term : DTA -> term -> bool
+   * set of rules (inductive definition :
+        reconnaissance : preDTA -> ad -> term -> Prop
+        state_reconnait : preDTA -> state -> term -> Prop
+        liste_reconnait : preDTA -> prec_list -> term_list -> Prop
+        reconnait : DTA -> term -> Prop
+   * equivalence of these definitions :
+    Lemma semantic_equiv_0 : (d : preDTA ; a : ad ; t : term ; n : nat)
+        (rec_term d a t n)=true -> (reconnaissance d a t).
+    Lemma semantic_equiv_1 : (d : preDTA ; a : ad ; t : term)(reconnaissance d a t) ->
+        (rec_term d a t (essence t d))=true.
+
+Corrrection properties :
+        We have three correction properties for tree automatas (which
+are needed to be sure the semantics of certain algorithms is correct) :
+   * all the addresses in transitions tables actually refer to states of
+an automaton :
+    Definition DTA_ref_ok : DTA -> Prop
+   * the final state of an automaton A belongs to the set of A's states :
+    Definition DTA_main_state_correct : DTA -> Prop
+   * the transition tables are correct with respect to a signature (i.e.
+the length of the list of initial states of a transition labeled by a
+constructor f is the arity of f) :
+    Definition dta_correct_wrt_sign : DTA -> signature -> Prop
+	
+	The next fonctions enable you to check an object d of type DTA
+verifies theses conditions by calculation :
+   * dta_ref_ok_check : DTA -> bool
+   * DTA_main_state_correct_check : DTA -> bool
+   * dta_compat_check : DTA -> signature -> bool
+
+	These fonctions are correct and complete :
+   * Lemma dta_ref_ok_check_correct : (d : DTA)
+        (DTA_ref_ok d) -> (dta_ref_ok_check d)=true.
+     Lemma dta_ref_ok_check_complete : (d : DTA)
+        (dta_ref_ok_check d)=true -> (DTA_ref_ok d).
+   * Lemma DTA_main_state_correct_check_correct :
+        (d : DTA)(DTA_main_state_correct d) ->
+        (DTA_main_state_correct_check d)=true.
+     Lemma DTA_main_state_correct_check_complete :
+        (d : DTA)(DTA_main_state_correct_check d)=true
+        -> (DTA_main_state_correct d).
+   * Lemma dta_compat_check_correct : (d : DTA ; sigma : signature)
+        (dta_correct_wrt_sign d sigma) ->
+        (dta_compat_check d sigma)=true.
+     Lemma dta_compat_check_complete : (d : DTA ; sigma : signature)
+        (dta_compat_check d sigma)=true ->
+        (dta_correct_wrt_sign d sigma).
+
+Merge of two automatas :
+   * algorithm :
+        union : DTA -> DTA -> DTA
+   * semantics :
+        Lemma union_semantics : (d0, d1 : DTA ; sigma : signature ; t : term)
+           (DTA_main_state_correct d0) -> (DTA_main_state_correct d1) ->
+           (DTA_ref_ok d0) -> (DTA_ref_ok d1) ->
+           (dta_correct_wrt_sign d0 sigma) -> (dta_correct_wrt_sign d1 sigma) ->
+           ( ( (reconnait d0 t) \/ (reconnait d1 t) )
+           <-> (reconnait (union d0 d1) t) ).
+   * conservation of the correction properties :
+        Lemma union_correct_wrt_sign_invar : (d0, d1 : DTA ; sigma : signature)
+           (dta_correct_wrt_sign d0 sigma) -> (dta_correct_wrt_sign d1 sigma) ->
+           (dta_correct_wrt_sign (union d0 d1) sigma).
+        Lemma union_ref_ok : (d0, d1 : DTA)
+           (DTA_ref_ok d0) -> (DTA_ref_ok d1) -> (DTA_ref_ok (union d0 d1)).
+        Lemma union_DTA_main_state_correct_invar :
+           (d0, d1 : DTA)(DTA_main_state_correct d0) ->
+           (DTA_main_state_correct d1) ->
+           (DTA_main_state_correct (union d0 d1)).
+
+Intersection of two automatas :
+   * algorithm :
+        inter : DTA -> DTA -> DTA
+   * semantics :
+        Lemma inter_semantics : (d0, d1 : DTA ; sigma : signature ; t : term)
+           (dta_correct_wrt_sign d0 sigma) -> (dta_correct_wrt_sign d1 sigma) ->
+           ( ( (reconnait d0 t) /\ (reconnait d1 t) ) <-> (reconnait (inter d0 d1) t) ).
+   * conservation of the correction properties :
+        Lemma DTA_inter_ref_ok_invar : (d0, d1 : DTA)
+           (DTA_ref_ok d0) -> (DTA_ref_ok d1) ->
+           (DTA_ref_ok (inter d0 d1)).
+        Lemma inter_DTA_main_state_correct_invar :
+           (d0, d1 : DTA)(DTA_main_state_correct d0) ->
+           (DTA_main_state_correct d1) ->
+           (DTA_main_state_correct (inter d0 d1)).
+        Lemma inter_correct_wrt_sign_invar :
+           (d0, d1 : DTA ; sigma : signature)
+           (dta_correct_wrt_sign d0 sigma) ->
+           (dta_correct_wrt_sign d1 sigma) ->
+           (dta_correct_wrt_sign (inter d0 d1) sigma).
+
+Vacuity test for all the states of an automaton : 
+   * The library provides two test fonctions.
+        dta_states_non_empty : DTA -> (Map bool)
+        dta_states_non_empty_lazy : DTA -> (Map bool)
+     Theses two fonctions have the same correctness properties. The only difference is
+that the second one might ben quite faster than the first one in certain cases.
+   * semantics :
+        Lemma dt_non_empty_fix : (d : preDTA ; a : ad)
+           (MapGet bool (dta_non_empty_states d) a)=(SOME bool true)
+           <-> (EX t : term | (reconnaissance d a t)).
+        Lemma dt_non_empty_lazy_fix : (d : preDTA ; a : ad)
+           (MapGet bool (dta_non_empty_states_lazy d) a)=(SOME bool true)
+           <-> 	(EX t : term | (reconnaissance d a t)).
+
+Deletion of empty states :
+   * algorithms :
+        DTA_kill_empty_states : DTA -> DTA
+        DTA_kill_empty_states_lazy : DTA -> DTA
+   * semantics :
+        Lemma dta_kill_empty_states_semantics : (d : DTA ; t : term)
+           (reconnait d t) <->
+           (reconnait (DTA_kill_empty_states d) t).
+        Lemma dta_kill_empty_states_lazy_semantics : (d : DTA ; t : term)
+           (reconnait d t) <->
+           (reconnait (DTA_kill_empty_states_lazy d) t).
+   * the previous fonctions actually kill all the empty states :
+        Lemma dt_kill_empty_kill_empty : (d : preDTA ; a : ad ;
+           sigma : signature)(predta_correct_wrt_sign d sigma) ->
+           (EX s : state |  (MapGet state (preDTA_kill (dta_non_empty_states 
+           d) d) a)=(SOME state s)) <-> (EX t : term | (reconnaissance d a t)).
+   * conservation of the correction properties :
+        Lemma kill_empty_correct_wrt_sign_invar : (d : DTA ; sigma : signature)
+           (dta_correct_wrt_sign d sigma) ->
+           (dta_correct_wrt_sign (DTA_kill_empty_states d) sigma).
+        Lemma kill_empty_lazy_correct_wrt_sign_invar : (d : DTA ; sigma : signature)
+           (dta_correct_wrt_sign d sigma) ->
+           (dta_correct_wrt_sign (DTA_kill_empty_states_lazy d) sigma).
+        Lemma DTA_kill_ref_ok_invar :
+           (d : DTA ; sigma : signature)
+           (DTA_ref_ok d) -> (dta_correct_wrt_sign d sigma) ->
+           (DTA_ref_ok (DTA_kill (dta_states_non_empty d) d)).
+        Lemma DTA_kill_ref_ok_invar_lazy :
+           (d : DTA ; sigma : signature)
+           (DTA_ref_ok d) -> (dta_correct_wrt_sign d sigma) ->
+           (DTA_ref_ok (DTA_kill_empty_states_lazy d)).
+        Lemma inter_DTA_main_state_correct_invar :
+           (d : DTA)(DTA_main_state_correct d) ->
+           (DTA_main_state_correct (DTA_kill (dta_states_non_empty d) d)).
+        Lemma inter_DTA_main_state_correct_invar_lazy :
+           (d : DTA)(DTA_main_state_correct d) ->
+           (DTA_main_state_correct (DTA_kill_empty_states_lazy d)).
+
+Co-accessibility test :
+   * algorithms :
+        predta_coacc_states : preDTA -> ad -> (Map bool)
+        predta_coacc_states_0 : preDTA -> ad -> (Map bool)
+     Theses two fonctions have the same correctness properties. The only difference is
+that the second one might ben quite faster than the first one in certain cases.
+   * semantics :
+        Lemma predta_coacc_fix : (d : preDTA ; a, a0 : ad)
+           (preDTA_ref_ok d) -> (
+           (MapGet bool (predta_coacc_states d a) a0)=(SOME bool true)
+           <-> (coacc d a a0) ).
+	Lemma predta_coacc_0_fix : (d : preDTA ; a, a0 : ad)
+           (preDTA_ref_ok d) -> (
+           (MapGet bool (predta_coacc_states_0 d a) a0)=(SOME bool true)
+           <-> (coacc d a a0) ).
+
+Deletion of non co accessible states :
+   * fonctions :
+        dta_kill_non_coacc : DTA -> DTA
+        dta_kill_non_coacc_lazy : DTA -> DTA
+   * semantics :
+        Lemma predta_kill_non_coacc_semantics :
+           (d : DTA ; t : term) (DTA_ref_ok d) ->
+           ( (reconnait d t) <-> (reconnait (dta_kill_non_coacc d) t) ).
+        Lemma predta_kill_non_coacc_lazy_semantics :
+           (d : DTA ; t : term) (DTA_ref_ok d) ->
+           ( (reconnait d t) <-> (reconnait (dta_kill_non_coacc_lazy d) t) ).
+   * conservation of the correction properties :
+        Lemma dta_kill_non_coacc_correct_wrt_sign :
+           (d : DTA ; sigma : signature)
+           (DTA_ref_ok d) -> (dta_correct_wrt_sign d sigma) ->
+           (dta_correct_wrt_sign (dta_kill_non_coacc d) sigma).
+        Lemma dta_kill_non_coacc_lazy_correct_wrt_sign :
+           (d : DTA ; sigma : signature)
+           (DTA_ref_ok d) -> (dta_correct_wrt_sign d sigma) ->
+           (dta_correct_wrt_sign (dta_kill_non_coacc_lazy d) sigma).
+        Lemma dta_kill_non_coacc_correct_ref_ok :
+           (d : DTA)(DTA_ref_ok d) -> (DTA_ref_ok (dta_kill_non_coacc d)).
+        Lemma dta_kill_non_coacc_lazy_correct_ref_ok :
+           ( : DTA)(DTA_ref_ok d) -> (DTA_ref_ok (dta_kill_non_coacc_lazy d)).
+        Lemma dta_kill_non_coacc_correct_main_state :
+           (d : DTA)(DTA_ref_ok d) ->
+           (DTA_main_state_correct d) ->
+           (DTA_main_state_correct (dta_kill_non_coacc d)).
+        Lemma dta_kill_non_coacc_lazy_correct_main_state :
+           (d : DTA)(DTA_ref_ok d) ->
+           (DTA_main_state_correct d) ->
+           (DTA_main_state_correct (dta_kill_non_coacc_lazy d)).
+
+
+Have fun !

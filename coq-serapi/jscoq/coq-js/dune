@@ -1,0 +1,7 @@
+(library
+ (name jscoq_lib)
+ (preprocess (pps ppx_deriving_yojson))
+ (wrapped false)
+ (optional)
+ (flags :standard -w -39)
+ (libraries yojson ppx_deriving_yojson.runtime js_of_ocaml-lwt))

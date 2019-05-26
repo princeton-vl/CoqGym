@@ -1,0 +1,21 @@
+opam-version: "1.2"
+maintainer: "armael.gueneau@inria.fr"
+authors: [
+  "Armaël Guéneau <armael.gueneau@inria.fr>"
+]
+homepage: "https://github.com/Armael/coq-procrastination"
+dev-repo: "https://github.com/Armael/coq-procrastination.git"
+bug-reports: "https://github.com/Armael/coq-procrastination/issues"
+license: "LGPL"
+build: [
+  [make "-j%{jobs}%"]
+]
+install: [
+  [make "install"]
+]
+remove: [
+  [make "uninstall"]
+]
+depends: [
+  "coq" {>= "8.5"}
+]

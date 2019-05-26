@@ -1,0 +1,12 @@
+Name: Dblib
+Title: dblib
+Url: http://gallium.inria.fr/~fpottier/dblib/README
+Description: The dblib library offers facilities for working with de Bruijn indices.
+Keywords: abstract syntax, binders, de Bruijn indices, shift, lift, substitution
+Category: Computer Science/Lambda Calculi
+Author: Francois Pottier
+Email: francois.pottier@inria.fr
+Homepage: http://gallium.inria.fr/~fpottier/
+Institution: INRIA
+Require: 
+License: GPL

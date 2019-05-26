@@ -1,0 +1,16 @@
+Name: FunctionsInZFC
+Title:Functions in classical ZFC
+Author:Carlos Simpson
+Email: carlos@math.unice.fr
+Institution: CNRS, Laboratoire J. A. Dieudonné, 
+Université de Nice-Sophia Antipolis
+Date:April 2001
+Description: This mostly repeats Guillaume Alexandre's contribution `zf',
+but in classical logic and with a different proof style. We start with a 
+simple axiomatization of some flavor of ZFC (for example Werner's 
+implementation of ZFC should provide a model).
+We develop some very basic things like pairs, functions, and a little
+bit about natural numbers, following the standard classical path.
+Keywords: Set Theory, Zermelo-Fraenkel, functions
+Require:
+Category: Mathematics/Logic/Set theory

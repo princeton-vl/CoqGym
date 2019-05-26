@@ -1,0 +1,158 @@
+Nous détaillons le contenu de chaque répertoire et de chaque module :
+
+* ALGEBRA/RELATIONS
+
+- Relations.v : relation d'équivalence, relation d'ordre. 
+
+* ALGEBRA/SETOID
+
+- BasicTypes.v : type unité et type à deux éléments.
+- Setoid.v : type des Setoïdes.
+- Single.v : Setoïd à un élément.
+- Map.v : application entre Setoïdes.
+- MapProperty.v : application injective, surjective.
+- Map2.v : application binaire.
+- SetoidPROD.v : produit de Setoïdes.
+- Setoid_prop.v : Setoïdes définis par compréhension.
+
+* ALGEBRA/SETOID/STRUCTURE
+
+- Monoid.v : type des monoïdes.
+- FreeMonoid.v : monoïde libre.
+- Group.v : type des groupes.
+- Inverses_Group.v : groupe des paires inverses dans un monoïde.
+
+* ALGEBRA/CATEGORY_THEORY/CATEGORY
+
+- Category.v : types des catégories.
+- Hom_Equality.v : égalité entre morphismes d'une catégories.
+- ONE.v : catégorie à un objet.
+- SET.v : catégorie des Setoïdes.
+- MON.v : catégorie des monoïdes.
+- PermCat.v : groupe des permutations sur un objet d'une catégorie.
+- Dual.v : catégorie duale.
+- FullSubCat.v : sous-catégorie pleine.
+- PROD.v : produit de deux catégories. 
+
+* ALGEBRA/CATEGORY_THEORY/CATEGORY/CONSTRUCTIONS
+
+- CatProperty.v : epic, monic, iso, initial, terminal.
+- SETProperty.v : relation entre epic (resp. monic) et surjection
+  (resp. injection) dans SET.
+- SET_Terminal.v : objet terminal dans SET.
+- Binary_Products.v : produits binaires dans une catégories.
+- Products.v : produits de familles d'objets.
+- SET_BinProds.v : produits binaires dans SET.
+- Equalizers.v : égalisateurs de familles de morphismes.
+- SET_Equalizer.v : égalisateurs dans SET.
+- Pullbacks.v : produits fibrés.
+- SET_Pullback.v : produits fibrés dans SET.
+- Exponents.v : exponentiels.
+- SET_Exponents.v : exponentiels dans SET.
+- CCC.v : catégories cartésiennes fermées.
+- SET_CCC.v : CCC dans SET.
+
+* ALGEBRA/CATEGORY_THEORY/FUNCTOR
+
+- Setoid_dup1.v : duplications - Setoid', Map', Map.setoid', Build.Map2'.
+- Functor.v : notion de foncteur.
+- FunctorProperty.v : foncteurs pleins, foncteurs fidèles.
+- Dual_Functor.v : foncteur dual.
+- FunForget.v : foncteur d'oubli entre MON et SET.
+- FunFreeMon.v : foncteur de SET vers MON, associant à tout Setoïde A
+  son monoïde libre A\Lambda.
+- PROD_proj.v : projections des catégories produits Fst et Snd.
+- HomFunctor.v : Hom-Foncteur HomC(a; \Gamma ) : C \Gamma ! SET.
+- Comma.v : catégories comma.
+- Comma_proj.v : foncteur projection dans les catégories comma.
+- FSC_inc.v : foncteur projection dans les sous-catégories pleines.
+- IdCAT.v : foncteur identité.
+- Category_dup1.v : duplications - Build.Comp', Category'.
+- CAT.v : catégorie des catégories CAT.
+
+
+* ALGEBRA/CATEGORY_THEORY/NT
+
+- Setoid_dup2.v : duplications - Setoid'', Map'', Map.setoid'', Build.Map2''.
+- Ntransformation.v : transformations naturelles.
+- Category_dup2.v : duplications - Build.Comp'', Category''.
+- CatFunct.v : catégorie des foncteurs FUNCT.
+- HomFunctor.NT.v : transformation naturelle entre Hom-foncteurs.
+- NatIso.v : isomorphisme naturel.
+- InterChangeLaw.v : loi d'échange.
+
+* ALGEBRA/CATEGORY_THEORY/NT/YONEDA_LEMMA
+
+- Map0_dup1.v : duplications - applications Map0'' de Setoid vers
+  Setoid'', applications Map''0 de Setoid'' vers Setoid et bijections
+  entre elles.
+- Functor_dup1.v : duplications - foncteurs Functor0'' de Category
+  vers Category'', et propriétés (pleins et fidèles).
+- YonedaEmbedding.v : plongement de Yoneda.
+- YonedaLemma.v : lemme de Yoneda.
+
+* ALGEBRA/CATEGORY_THEORY/LIMITS
+
+- UniversalArrow.v : morphisme universel.
+- CoUniversalArrow.v : morphisme co-universel.
+- FunForget_UA.v : morphisme universel de A vers FunForget.
+- Const.v : foncteur constante.
+- Limit.v : limites.
+- CoLimit.v : colimites.
+- Discr.v : catégorie discrète.
+- Products1.v : produits par les limites.
+- PA.v : catégories hh morphismes parallèles ii.
+- Equalizers1.v : égalisateurs par les limites.
+- PULB.v : catégorie hh: ! :  : ii.
+- Pullbacks1.v : produits fibrés par les limites.
+- Iso_Limit.v : isomorphisme dans SET entre Cones(c; F ) et Hom(c; lim l).
+- Comma.UA.v : relation entre morphisme universel et objet initial
+  dans une catégorie comma.
+
+* ALGEBRA/CATEGORY_THEORY/LIMIT_CONSTRUCTIONS
+
+- Pres_Limits.v : préservation de limites, foncteurs continus.
+- Comma_Complete.v : complétude des catégories commas.
+- Th_Initial.v : conditions pour léxistence d'un objet initial.
+- HomFunctor_Continuous.v : les hom-foncteurs sont continus.
+- SET_Complete.v : SET est complet.
+- Th_Limits.v : construction de limites à partir des produits et des
+  égalisateurs.
+
+* ALGEBRA/CATEGORY_THEORY/ADJUNCTION
+
+- HomFunctor2.v : hom-foncteurs hhbinaires ii contravariants.
+- Adjunction.v : adjonctions.
+- Adjunction1.v : une autre définition de l'adjonction ; équivalence
+  des deux définitions.
+- Adj_UA.v : construction de morphismes univesels (et co-universels) à
+  partir d'une adjonction.
+- Th_Adjoint.v : constrution d'une adjonction à partir de morphismes
+  universels.
+- Th_CoAdjoint.v : construction d'une adjonction à partir de
+  morphismes co-universels.
+- Adj_FunFreeMon.v : FunFreeMon est l'adjoint gauche de FunForget.
+- Limit_Adj.v : si un foncteur possède un adjoint gauche, alors il est continu.
+- LeftAdj_Iso.v : unicité de l'adjoint gauche.
+
+* ALGEBRA/CATEGORY_THEORY/ADJUNCTION/CCC
+
+- FunOne.v : (unique) foncteur vers One.
+- Terminal1.v : objet terminal défini en termes d'adjonctions.
+- Diagonal.v : foncteur de recopie.
+- FunProd.v : foncteur (\Gamma \Theta a) défini par (\Gamma \Theta
+  a)(c) = c \Theta a et (\Gamma \Theta a)(f ) = f \Theta Ida.
+- Cartesian1.v : catégories cartésiennes par les adjonctions.
+- CCC1.v : CCC par les adjonctions.
+
+* ALGEBRA/CATEGORY_THEORY/ADJUNCTION/FREYD_THEOREM
+
+- FAFT_SSC2.v : hh Set Solution Condition ii.
+- FAFT_Part1.v : condition nécessaire - construction d'une SSC2.
+- FAFT_Part2_Proof1.v : condition suffisante - construction d'un
+  adjoint gauche. Cette première preuve est directe (longue).
+- FAFT_Part2_Proof2.v : condition suffisante - construction d'un
+  adjoint gauche. Cette preuve est très courte car elle utilise les
+  résultats précédemment prouvés (Th Adjoint, Comma Complete, Th
+  Initial et Comma UA).
+

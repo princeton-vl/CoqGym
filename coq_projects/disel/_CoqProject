@@ -1,0 +1,51 @@
+-Q Core DiSeL
+-Q Examples DiSeL
+
+-arg -w -arg -notation-overridden
+-arg -w -arg -local-declaration
+-arg -w -arg -redundant-canonical-projection
+-arg -w -arg -projection-no-head-constant
+
+Core/Domain.v
+Core/State.v
+Core/Freshness.v
+Core/Protocols.v
+Core/EqTypeX.v
+Core/DepMaps.v
+Core/StatePredicates.v
+Core/NewStatePredicates.v
+Core/Worlds.v
+Core/NetworkSem.v
+Core/Rely.v
+Core/Actions.v
+Core/Injection.v
+Core/InductiveInv.v
+Core/Process.v
+Core/Always.v
+Core/HoareTriples.v
+Core/InferenceRules.v
+Core/While.v
+Core/DiSeLExtraction.v
+Examples/SeqLib.v
+Examples/Greeter/Greeter.v
+Examples/Querying/QueryProtocol.v
+Examples/Querying/QueryHooked.v
+Examples/Calculator/CalculatorProtocol.v
+Examples/Calculator/CalculatorInvariant.v
+Examples/Calculator/CalculatorClientLib.v
+Examples/Calculator/CalculatorServerLib.v
+Examples/Calculator/SimpleCalculatorServers.v
+Examples/Calculator/DelegatingCalculatorServer.v
+Examples/Calculator/SimpleCalculatorApp.v
+Examples/Calculator/CalculatorExtraction.v
+Examples/TwoPhaseCommit/TwoPhaseProtocol.v
+Examples/TwoPhaseCommit/TwoPhaseCoordinator.v
+Examples/TwoPhaseCommit/TwoPhaseParticipant.v
+Examples/TwoPhaseCommit/SimpleTPCApp.v
+Examples/TwoPhaseCommit/TwoPhaseExtraction.v
+Examples/TwoPhaseCommit/TwoPhaseInductiveInv.v
+Examples/TwoPhaseCommit/TwoPhaseInductiveProof.v
+Examples/TwoPhaseCommit/TwoPhaseClient.v
+Examples/Querying/QueryPlusTPC.v
+Examples/LockResource/LockProtocol.v
+Examples/LockResource/ResourceProtocol.v

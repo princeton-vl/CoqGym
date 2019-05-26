@@ -1,0 +1,14 @@
+Name: CTLTCTL
+Title: Computation Tree Logic for Reactive Systems and Timed Computation
+Tree Logic for Real Time Systems.
+Author: Carlos Daniel Luna
+Description: http://www.fing.edu.uy/~cluna
+Institution: Computing Science Department (InCo) at the Engineering
+School of the Universidad de la Republica, Montevideo, Uruguay.
+Date: February-March 2000
+Description: This library formalises two logics for reasoning about
+reactive systems (CTL) and real time systems (TCTL) represents using
+timed automatas (timed graphs) with discrete time.
+Keywords: CTL, TCTL, real time systems, reactive systems, temporal logic,
+	  timed automatas, timed graphs, discrete time, modal logic
+Category: Mathematics/Logic/Modal logic

@@ -1,0 +1,8 @@
+-R . Shuffle
+
+Words.v
+Shuffle.v
+Paired.v
+Opposite.v
+Gilbreath.v
+Alternate.v

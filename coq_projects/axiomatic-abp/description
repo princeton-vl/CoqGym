@@ -1,0 +1,9 @@
+Name: AxiomaticABP
+Title: Verification of an axiomatisation of the Alternating Bit Protocol
+Author: Jan Friso Groote
+Institution: Utrecht University
+Description: 
+The Alternating Bit Protocol is expressed in an axiomatized calculi of process.
+Correctness is proven.
+Keywords: Alternating Bit Protocol, Process Calculi, reactive systems
+Category: Computer Science/Concurrent Systems and Protocols/Correctness of specific protocols

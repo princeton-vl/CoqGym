@@ -1,0 +1,32 @@
+(library
+ (name sertoplib)
+ (modules :standard \ sertop sercomp compser sertop_js sertop_async)
+ (wrapped false)
+ (preprocess (staged_pps ppx_import ppx_sexp_conv))
+ (libraries findlib.dynload cmdliner serapi serlib serlib_ltac))
+
+(executables
+ (public_names sertop sercomp compser)
+ (modules sertop sercomp compser)
+ (link_flags -linkall)
+ (libraries sertoplib))
+
+(executable
+ (name sertop_js)
+ (modules sertop_async sertop_js)
+ (modes byte)
+ (preprocess (staged_pps ppx_import ppx_sexp_conv))
+ (js_of_ocaml
+  (javascript_files
+    ../jscoq/coq-libjs/mutex.js
+    ../jscoq/coq-libjs/unix.js
+    ../jscoq/coq-libjs/str.js
+    ../jscoq/coq-libjs/coq_vm.js)
+  (flags :standard --dynlink +nat.js +dynlink.js +toplevel.js))
+; (flags :standard --dynlink +nat.js +dynlink.js +toplevel.js --pretty --noinline --disable shortvar --debug-info)
+ (link_flags -linkall)
+ (libraries sertoplib js_of_ocaml ppx_deriving_yojson.runtime jscoq_lib))
+
+(rule
+ (targets ser_version.ml)
+ (action (write-file %{targets} "let ser_git_version = \"%{version:coq-serapi}\";;")))

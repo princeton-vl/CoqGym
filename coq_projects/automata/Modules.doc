@@ -1,0 +1,20 @@
+Dec.v   : Given P:Elt_Prop and E:Ensf, definition of the set of x such that (P x) and x in E
+Ensf.v  : Finite sets, definitions, easy lemmas
+Max.v   : Definition of the maximum of two integers, properties
+PushdownAutomata.v : Definition of push-down automatas and languages recognized byy push-down automata
+Rat.v   : Definition of rational languages
+RatReg.v : Every rational language is regular
+Reg.v   : Definition of finite automatas and regular languages
+Relations : Some results about relations on a Set
+Words.v : Words and languages
+all.v   : loads everything
+diff.v  : ~(<A>(Ci x1 x2 ... xn)=(Cj y1 y2 ... ym))-like lemmas
+extract.v : Extraction of a parser from the specification of a push-down automata
+fonctions.v : Some results about functions of type Elt -> Elt and Word -> Word
+gram.v  : Defintion of algebraic grammars and the languages they recognize
+gram2.v gram3.v gram4.v : Results about grammars
+gram5.v : If two languages are context-free, then so is their union
+gram_aut.v :  Every context-free language may be recognized by a push-down automata
+gram_g.v : Definition of leftmost-derivation, equivalence of derivation and leftmost-derivation
+more_words.v : Other definitions and results about words and languages
+need.v  : Some axioms we used

@@ -1,0 +1,178 @@
+##########################################################################
+##         #   The Coq Proof Assistant / The Coq Development Team       ##
+##  v      #   INRIA, CNRS and contributors - Copyright 1999-2018       ##
+## <O___,, #       (see CREDITS file for the list of authors)           ##
+##   \VV/  ###############################################################
+##    //   #    This file is distributed under the terms of the         ##
+##         #     GNU Lesser General Public License Version 2.1          ##
+##         #     (see LICENSE file for the text of the license)         ##
+##########################################################################
+
+-include config/Makefile
+
+###########################################################################
+# Executables
+###########################################################################
+
+TOPBINOPT:=$(addsuffix .opt$(EXE), $(addprefix bin/, coqtop coqproofworker coqtacticworker coqqueryworker))
+TOPBYTE:=$(TOPBINOPT:.opt$(EXE)=.byte$(EXE))
+
+COQTOPEXE:=bin/coqtop$(EXE)
+COQTOPBYTE:=bin/coqtop.byte$(EXE)
+
+COQDEP:=bin/coqdep$(EXE)
+COQPP:=bin/coqpp$(EXE)
+COQDEPBYTE:=bin/coqdep.byte$(EXE)
+COQMAKEFILE:=bin/coq_makefile$(EXE)
+COQMAKEFILEBYTE:=bin/coq_makefile.byte$(EXE)
+COQTEX:=bin/coq-tex$(EXE)
+COQTEXBYTE:=bin/coq-tex.byte$(EXE)
+COQWC:=bin/coqwc$(EXE)
+COQWCBYTE:=bin/coqwc.byte$(EXE)
+COQDOC:=bin/coqdoc$(EXE)
+COQDOCBYTE:=bin/coqdoc.byte$(EXE)
+COQC:=bin/coqc$(EXE)
+COQCBYTE:=bin/coqc.byte$(EXE)
+COQWORKMGR:=bin/coqworkmgr$(EXE)
+COQWORKMGRBYTE:=bin/coqworkmgr.byte$(EXE)
+COQMAKE_ONE_TIME_FILE:=tools/make-one-time-file.py
+COQTIME_FILE_MAKER:=tools/TimeFileMaker.py
+COQMAKE_BOTH_TIME_FILES:=tools/make-both-time-files.py
+COQMAKE_BOTH_SINGLE_TIMING_FILES:=tools/make-both-single-timing-files.py
+
+TOOLS:=$(COQDEP) $(COQMAKEFILE) $(COQTEX) $(COQWC) $(COQDOC) $(COQC)\
+	$(COQWORKMGR) $(COQPP)
+TOOLS_HELPERS:=tools/CoqMakefile.in $(COQMAKE_ONE_TIME_FILE) $(COQTIME_FILE_MAKER)\
+	$(COQMAKE_BOTH_TIME_FILES) $(COQMAKE_BOTH_SINGLE_TIMING_FILES)
+
+COQDEPBOOT:=bin/coqdep_boot$(EXE)
+COQDEPBOOTBYTE:=bin/coqdep_boot.byte$(EXE)
+OCAMLLIBDEP:=bin/ocamllibdep$(EXE)
+OCAMLLIBDEPBYTE:=bin/ocamllibdep.byte$(EXE)
+FAKEIDE:=bin/fake_ide$(EXE)
+FAKEIDEBYTE:=bin/fake_ide.byte$(EXE)
+
+PRIVATEBINARIES:=$(FAKEIDE) $(OCAMLLIBDEP) $(COQDEPBOOT)
+
+CSDPCERT:=plugins/micromega/csdpcert$(EXE)
+CSDPCERTBYTE:=plugins/micromega/csdpcert.byte$(EXE)
+
+###########################################################################
+# Object and Source files
+###########################################################################
+
+ifeq ($(HASNATDYNLINK)-$(BEST),false-opt)
+ # static link of plugins, do not mention them in .v.d
+ DYNDEP:=-dyndep no
+else
+ DYNDEP:=-dyndep var
+endif
+
+# Which coqtop do we use to build .vo file ? The best ;-)
+# Note: $(BEST) could be overridden by the user if a byte build is desired
+# Note: coqdep -dyndep var will use $(DYNOBJ) and $(DYNLIB) extensions
+# for Declare ML Module files.
+
+ifeq ($(BEST),opt)
+COQTOPBEST:=$(COQTOPEXE)
+DYNOBJ:=.cmxs
+DYNLIB:=.cmxs
+else
+COQTOPBEST:=$(COQTOPBYTE)
+DYNOBJ:=.cmo
+DYNLIB:=.cma
+endif
+
+INSTALLBIN:=install
+INSTALLLIB:=install -m 644
+INSTALLSH:=./install.sh
+MKDIR:=install -d
+
+CORESRCDIRS:=\
+  coqpp                                                                                 \
+  config 	clib 		lib		kernel		kernel/byterun	library \
+  engine 	pretyping	interp	proofs	parsing 	printing \
+  tactics 	vernac		stm		toplevel
+
+PLUGINDIRS:=\
+  omega		romega 		micromega 	quote \
+  setoid_ring 	extraction \
+  cc 		funind 		firstorder 	derive \
+  rtauto 	nsatz           syntax          btauto \
+  ssrmatching	ltac		ssr
+
+SRCDIRS:=\
+  $(CORESRCDIRS)  \
+  tools 	tools/coqdoc	\
+  $(addprefix plugins/, $(PLUGINDIRS))
+
+COQRUN := coqrun
+LIBCOQRUN:=kernel/byterun/lib$(COQRUN).a
+DLLCOQRUN:=$(dir $(LIBCOQRUN))dll$(COQRUN)$(DLLEXT)
+
+BYTERUN:=$(addprefix kernel/byterun/, \
+  coq_fix_code.o coq_memory.o coq_values.o coq_interp.o )
+
+# LINK ORDER:
+# respecting this order is useful for developers that want to load or link
+# the libraries directly
+
+CORECMA:=clib/clib.cma lib/lib.cma kernel/kernel.cma library/library.cma \
+        engine/engine.cma pretyping/pretyping.cma interp/interp.cma proofs/proofs.cma \
+        parsing/parsing.cma printing/printing.cma tactics/tactics.cma vernac/vernac.cma \
+        stm/stm.cma toplevel/toplevel.cma
+
+GRAMMARCMA:=grammar/grammar.cma
+
+###########################################################################
+# plugins object files
+###########################################################################
+
+OMEGACMO:=plugins/omega/omega_plugin.cmo
+ROMEGACMO:=plugins/romega/romega_plugin.cmo
+MICROMEGACMO:=plugins/micromega/micromega_plugin.cmo
+QUOTECMO:=plugins/quote/quote_plugin.cmo
+RINGCMO:=plugins/setoid_ring/newring_plugin.cmo
+NSATZCMO:=plugins/nsatz/nsatz_plugin.cmo
+EXTRACTIONCMO:=plugins/extraction/extraction_plugin.cmo
+FUNINDCMO:=plugins/funind/recdef_plugin.cmo
+FOCMO:=plugins/firstorder/ground_plugin.cmo
+CCCMO:=plugins/cc/cc_plugin.cmo
+BTAUTOCMO:=plugins/btauto/btauto_plugin.cmo
+RTAUTOCMO:=plugins/rtauto/rtauto_plugin.cmo
+SYNTAXCMO:=$(addprefix plugins/syntax/, \
+        r_syntax_plugin.cmo \
+	int31_syntax_plugin.cmo \
+	ascii_syntax_plugin.cmo \
+        string_syntax_plugin.cmo \
+	numeral_notation_plugin.cmo)
+DERIVECMO:=plugins/derive/derive_plugin.cmo
+LTACCMO:=plugins/ltac/ltac_plugin.cmo plugins/ltac/tauto_plugin.cmo
+SSRMATCHINGCMO:=plugins/ssrmatching/ssrmatching_plugin.cmo
+SSRCMO:=plugins/ssr/ssreflect_plugin.cmo
+
+PLUGINSCMO:=$(LTACCMO) $(OMEGACMO) $(ROMEGACMO) $(MICROMEGACMO) \
+        $(QUOTECMO) $(RINGCMO) \
+        $(EXTRACTIONCMO) \
+        $(CCCMO)  $(FOCMO) $(RTAUTOCMO) $(BTAUTOCMO) \
+        $(FUNINDCMO) $(NSATZCMO) $(SYNTAXCMO) \
+	$(DERIVECMO) $(SSRMATCHINGCMO) $(SSRCMO)
+
+ifeq ($(HASNATDYNLINK)-$(BEST),false-opt)
+ STATICPLUGINS:=$(PLUGINSCMO)
+ PLUGINS:=
+else
+ STATICPLUGINS:=
+ PLUGINS:=$(PLUGINSCMO)
+endif
+PLUGINSOPT:=$(PLUGINSCMO:.cmo=.cmxs)
+
+LINKCMO:=$(CORECMA) $(STATICPLUGINS)
+LINKCMX:=$(CORECMA:.cma=.cmxa) $(STATICPLUGINS:.cmo=.cmx)
+
+ALLSTDLIB := test-suite/misc/universes/all_stdlib
+
+# For emacs:
+# Local Variables:
+# mode: makefile
+# End:

@@ -1,0 +1,14 @@
+.coqdeps.d
+*.v.d
+*.vo
+*.aux
+*.glob
+*.o
+*.cmo
+*.cmx
+build
+_build
+deps.dot
+deps.jpg
+Makefile.coq
+Makefile.coq.conf

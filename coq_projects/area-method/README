@@ -1,0 +1,36 @@
+            Implementation of the Area Method
+                 Julien Narboux
+             University of Strasbourg             
+
+This contribution consists in the formalization of a decision procedure for constructive theorems in Euclidean plane geometry. The procedure implemented is the area method by Chou, Gao and Zhang. 
+
+More than 100 example theorems are available among them:
+
+- Ceva
+- Desargues
+- Pappus
+- Menelaus
+- Gauss line
+- Euler line
+- Centroïd
+- Pascal
+- Napoleon
+
+More information about this implementation is available at :
+
+http://dpt-info.u-strasbg.fr/~narboux/area_method.html
+
+History:
+2004 : implementation of the method for affine plane geometry
+2009 : extension of the implementation to deal with euclidean geometry
+
+References:
+__________
+
+Chou, Gao and Zhang - Machine Proofs in Geometry, Automated Production of Readable Proofs for Geometry Theorems, World Scientific 1994.
+
+Julien Narboux - A decision procedure for geometry in Coq, Proceedings of TPHOLs'2004,Slind Konrad and Bunker Annett and Gopalakrishnan Ganesh editors, LNCS 3223, Springer-Verlag 2004.
+
+Julien Narboux - Thèse : Formalisation et automatisation du raisonnement géométrique, 2006.
+
+Predrag Janicic and Julien Narboux, and Pedro Quaresma - The Area Method : a recapitulation, submitted, 2009.

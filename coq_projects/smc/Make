@@ -1,0 +1,18 @@
+-R . SMC
+alloc.v
+bool_fun.v
+config.v
+gc.v
+make.v
+misc.v
+munew.v
+muset.v
+mu.v
+myMap.v
+neg.v
+op.v
+or.v
+quant.v
+smc.v
+tauto.v
+univ.v

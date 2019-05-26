@@ -1,0 +1,23 @@
+Name: ParamPi
+Title: Coding of a typed monadic pi-calculus using parameters for free names
+Author: Loïc Henry-Gréard
+Www: http://www.inria.fr/meije/personnel/Loic.Henry-Greard
+Email: lhenrygr@cma.inria.fr
+Institution: INRIA, MEIJE research project
+Date: 1998-09-30
+Description: 
+This development contains the specification for a monadic
+pi-calculus using the same coding method for names than
+J. Mc Kinna and R. Pollack used for PTS in LEGO:
+"Some Lambda Calculus and Type Theory Formalized".
+
+The basic, monadic calculus encoded here has a type system
+restraining the direction of communication for processes' names.
+
+A number of lemmas usefull for doing proofs on that coding
+are included, and subject reduction properties for each kind
+of transition is made as an example of actually using the
+coding to mechanize proofs on the pi-calculus.
+
+Keywords: Pi-Calculus
+Category: Computer Science/Lambda Calculi

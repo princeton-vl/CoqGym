@@ -1,0 +1,84 @@
+\begin{minipage}{0.45\textwidth}
+\begin{coql}
+Goal exists (f: nat -> nat),
+  1 <= f 0 /\
+  monotonic f /\
+  forall n, 0 < n -> 2 + f (n/2) <= f n.
+Proof.
+  /&begin defer assuming a b c&/. /*(1)*/
+  \exists (fun n => if zerop n then c else a * log2 n + b).
+  repeat split.
+  { simpl. /*(2)*/ /&defer&/. /*(3)*/ }
+  { ... (* c <= b *) /&defer&/. ... }
+  { intros.
+    ... (* 2 + c <= b *) /&defer&/.
+    ... (* 2 <= a *) /&defer&/. }
+  /&end defer&/.
+  /*(4)*/ eomega.
+Qed.
+\end{coql}
+\end{minipage}%
+\hfill%
+\begin{minipage}{0.5\textwidth}
+\begin{adjustbox}{minipage={0.97\textwidth},fbox}
+\begin{coql}
+a: ?x
+b: ?x0
+c: ?x1
+g: Group (?G a b c)
+@*\grule*@
+ exists f: nat -> nat,
+   1 <= f 0 /\ monotonic f /\ forall n, 0 < n -> 2 + f (n/2) <= f n
+\end{coql}%
+\nointerlineskip%
+\makebox[0pt]{%
+  \begin{tikzpicture}[overlay]
+    \node at (7.4, 2.7) { \footnotesize{(1)} };
+  \end{tikzpicture}%
+}%
+\end{adjustbox}
+
+\vspace{0.3em}
+
+\begin{adjustbox}{minipage={0.45\textwidth},fbox}
+\begin{coql}
+a, b, c: nat
+g: Group (?G a b c)
+@*\grule*@
+ 1 <= c
+\end{coql}
+\nointerlineskip%
+\begin{tikzpicture}[overlay]
+  \node at (3.3, 1.55) { \footnotesize{(2)} };
+\end{tikzpicture}
+\end{adjustbox}%
+\hfill%
+\begin{adjustbox}{minipage={0.45\textwidth},fbox}
+\begin{coql}
+a, b, c: nat
+g: Group (1 <= c /\ ?Goal0)
+@*\grule*@
+ Subgoal solved
+\end{coql}
+\nointerlineskip%
+\begin{tikzpicture}[overlay]
+  \node at (3.3, 1.55) { \footnotesize{(3)} };
+\end{tikzpicture}
+\end{adjustbox}
+
+\vspace{0.3em}
+
+\begin{adjustbox}{minipage={0.97\textwidth},fbox}
+\vspace{-0.7em}
+\begin{coql}
+@*\grule*@
+ exists a b c, 1 <= c /\ c <= b /\ 2 + c <= b /\ 2 <= a
+\end{coql}
+\nointerlineskip%
+\makebox[0pt]{%
+\begin{tikzpicture}[overlay]
+  \node at (7.4, 0.55) { \footnotesize{(4)} };
+\end{tikzpicture}%
+}
+\end{adjustbox}
+\end{minipage}

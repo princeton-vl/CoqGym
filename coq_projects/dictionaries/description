@@ -1,0 +1,17 @@
+Name: Dictionaries
+Title: Dictionaries (with modules)
+Author: Pierre Castéran
+Email: casteran@labri.fr
+Institution: Labri, Université Bordeaux 1, INRIA Futurs
+Date: 2003-02-6
+Description: This file contains a specification for dictionaries, and
+  an implementation using binary search trees. Coq's module system, 
+  with module types and functors, is heavily used. It can be considered 
+  as a certified version of an example proposed by Paulson in Standard ML.
+  A detailed description (in French) can be found in the chapter 11 of
+  The Coq'Art, the book written by Yves Bertot and Pierre Castéran
+  (please follow the link http://coq.inria.fr/doc-eng.html)
+
+Keywords: modules  functors search-trees
+Category: Computer Science/Data Types and Data Structures
+Category: Miscellaneous/Extracted Programs/Data structures

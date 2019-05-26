@@ -1,0 +1,17 @@
+opam-version: "1.2"
+name: "coq-metalib"
+version: "dev"
+synopsis: "Locally Nameless Metatheory Library"
+maintainer: "Stephanie Weirich <sweirich@cis.upenn.edu>"
+authors: "Stephanie Weirich <sweirich@cis.upenn.edu>"
+license: "MIT"
+tags: "org:plclub"
+homepage: "https://github.com/plclub/metalib"
+bug-reports: "https://github.com/plclub/metalib/issues"
+depends: [
+  "coq" {>= "8.6" < "8.9~"}
+]
+build: [make "-j%{jobs}%" "-C" "Metalib"]
+install: [make "-C" "Metalib" "install"]
+remove: ["rm" "-rf" "%{lib}%/coq/user-contrib/Metalib"]
+dev-repo: "git+https://github.com/plclub/metalib"

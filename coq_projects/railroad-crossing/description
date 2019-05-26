@@ -1,0 +1,16 @@
+Name: RailroadCrossing
+Title: The Railroad Crossing Example.
+Author: Carlos Daniel Luna
+Homepage: http://www.fing.edu.uy/~cluna
+Institution: Computing Science Department (InCo) at the Engineering
+School of the Universidad de la Republica, Montevideo, Uruguay.
+Date: February-March 2000
+Description: This library present the specification and verification of
+one real time system: the Railroad Crossing Problem, which has been
+proposed as a benchmark for the comparison of real-time formalisms. We
+specify the system using timed automatas (timed graphs) with discrete
+time and we prove invariants, the system safety property and the NonZeno
+property, using the logics CTL and TCTL.
+Keywords: CTL, TCTL, Real Time Systems, Timed Automatas, Safety, 
+ Concurrency Properties, Invariants, NonZeno, Discrete Time.
+Category: Computer Science/Concurrent Systems and Protocols/Correctness of specific protocols

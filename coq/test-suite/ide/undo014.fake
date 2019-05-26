@@ -1,0 +1,27 @@
+# Script simulating a dialog between coqide and coqtop -ideslave
+# Run it via fake_ide
+#
+# Test backtracking in presence of nested proofs
+# Third, undo inside an inner proof
+#
+ADD { Set Nested Proofs Allowed. }
+ADD { Lemma aa : True -> True /\ True. }
+ADD { intro H. }
+ADD { split. }
+ADD { Lemma bb : False -> False. }
+ADD { intro H. }
+ADD { apply H. }
+ADD { Qed. }
+ADD { apply H. }
+ADD { Lemma cc : False -> True. }
+ADD here { intro H. }
+ADD { destruct H. }
+EDIT_AT here
+# <replay>
+ADD { destruct H. }
+# </replay>
+ADD { Qed. }
+ADD { apply H. }
+ADD { Qed. }
+QUERY { Fail Show. }
+QUERY { Check (aa,bb,cc). }

@@ -1,0 +1,8 @@
+set terminal pdf
+set title "Space Usage For Positives Using Cheerios and Marshal"
+set xlabel "Length (# constructors)"
+set ylabel "Space (bytes)"
+set xtic 50000
+set yrange [0:230000]
+plot "test/positive_bench.dat" using 1:2 title "Cheerios" with linespoints , \
+     "test/positive_bench.dat" using 1:3 title "Marshal" with linespoints

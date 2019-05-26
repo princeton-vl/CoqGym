@@ -1,0 +1,8 @@
+Name: Circuits
+Title:Some proofs of hardware (adder, multiplier, memory block instruction)
+Author:Laurent Arditi
+Institution: Laboratoire I3S. CNRS ura 1376, Universite de Nice - Sophia Antipolis 
+Description:definition and proof of a combinatorial adder, a
+sequential multiplier, a memory block instruction
+Keywords: hardware verification
+Category: Computer Science/Architecture

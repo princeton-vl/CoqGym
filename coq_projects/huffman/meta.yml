@@ -1,0 +1,78 @@
+---
+fullname: Huffman
+shortname: huffman
+
+description: |
+  This projects contains a proof of correctness of the Huffman coding
+  algorithm, as described in the paper
+  [A Method for the Construction of Minimum-Redundancy Codes][paper],
+  Proc. IRE, pp. 1098-1101, September 1952.
+
+  [paper]: http://compression.ru/download/articles/huff/huffman_1952_minimum-redundancy-codes.pdf
+
+authors:
+- name: Laurent Théry
+  initial: true
+
+maintainers:
+- name: Karl Palmskog
+  nickname: palmskog
+
+opam-file-maintainer: palmskog@gmail.com
+
+license:
+  fullname: GNU Lesser General Public License v2.1 or later
+  identifier: LGPL-2.1-or-later
+
+supported_coq_versions:
+  text: Coq 8.7 or later
+  opam: '{(>= "8.7" & < "8.10~") | (= "dev")}'
+
+tested_coq_versions:
+- version_or_url: https://github.com/coq/coq/tarball/master
+- version_or_url: 8.9
+- version_or_url: 8.8
+- version_or_url: 8.7
+
+tested_coq_opam_version: dev
+
+namespace: Huffman
+
+keywords:
+- name: data compression
+- name: code
+- name: huffman tree
+
+categories:
+- name: Computer Science/Decision Procedures and Certified Algorithms/Correctness proofs of algorithms
+- name: Miscellaneous/Extracted Programs/Combinatorics
+
+documentation: |
+  ## Documentation
+    
+  To run the algorithm, open an OCaml toplevel (`ocaml`) and do
+  ```ocaml
+  #use "run_huffman.ml";;
+  ```
+  
+  To get the code that gives the frequency string:  
+  ```ocaml
+  let code = huffman "abbcccddddeeeee";;
+  ```
+  
+  To code a string:
+  ```ocaml
+  let c = encode code "abcde";;
+  ```
+
+  To decode a string:
+  ```ocaml
+  decode code c;;
+  ```
+
+  Some more information on the development is available:
+  ftp://ftp-sop.inria.fr/marelle/Laurent.Thery/Huffman/index.html
+  
+  In particular, a note in PDF format describes the formalization:
+  ftp://ftp-sop.inria.fr/marelle/Laurent.Thery/Huffman/Note.pdf
+---

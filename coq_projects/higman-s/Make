@@ -1,0 +1,7 @@
+-R . HigmanS
+
+./higman_aux.v
+./tree.v
+./higman.v
+./inductive_wqo.v
+./list_embeding.v

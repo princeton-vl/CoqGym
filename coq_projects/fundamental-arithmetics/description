@@ -1,0 +1,13 @@
+Name: FundamentalArithmetics
+Title: Fundamental theorems of arithmetic
+Author: Sébastien Briais
+Email: sebastien.briais at ens-lyon.fr
+Homepage: http://perso.ens-lyon.fr/sebastien.briais/
+Institution: ENS Lyon, France
+Date: 2008-02-1
+Description: 
+Url: http://perso.ens-lyon.fr/sebastien.briais/tools/Arith_080201.tar.gz
+License: LGPL
+Keywords: arithmetic, number theory
+Require:
+Category: Mathematics/Arithmetic and Number Theory/Miscellaneous

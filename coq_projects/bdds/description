@@ -1,0 +1,18 @@
+Name: BDDs
+Title: BDD algorithms and proofs in Coq, by reflection
+Author: Kumar Neeraj Verma
+Institution: Dyade/INRIA projet Coq/IIT Delhi
+Date: May-July 1999
+Description: Provides BDD algorithms running under Coq.
+        (BDD are Binary Decision Diagrams.)
+        Allows one to do classical validity checking by
+        reflection in Coq using BDDs, can also be used
+        to get certified BDD algorithms by extraction.
+        First step towards actual symbolic model-checkers
+        in Coq.  See file README for operation.
+Keywords: BDD, binary decision diagrams, classical logic,
+	  propositional logic, validity, satisfiability, 
+	  model-checking, reflection
+Require: IntMap
+Category: Computer Science/Decision Procedures and Certified Algorithms/Decision procedures
+Category: Miscellaneous/Extracted Programs/Decision procedures

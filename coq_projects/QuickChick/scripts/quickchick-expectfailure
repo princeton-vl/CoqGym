@@ -1,0 +1,17 @@
+#!/bin/sh
+
+# Run a QuickChick test executable ($1) with a given mutant ($2) and ensure at
+# least one test fails.
+
+set -e
+
+QC_OUT_DIR=qc-out
+mkdir -p $QC_OUT_DIR/
+
+LOG_FILE=$QC_OUT_DIR/testlog-${1##*/}-${2##*/}
+
+echo "Mutant $2: Testing..."
+QC_MUTANT=$2 $1 > $LOG_FILE
+grep -q '^\*\*\* Failed' $LOG_FILE \
+  || (echo "Mutant $2: Tests passed, but failure was expected."; exit 1)
+echo "Mutant $2: Killed!"

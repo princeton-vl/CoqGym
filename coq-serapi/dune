@@ -1,0 +1,8 @@
+(env
+ (dev     (flags :standard -rectypes))
+ (release (flags :standard -rectypes)))
+
+(install
+ (section share_root)
+ (files (sertop.el as emacs/site-lisp/sertop.el)))
+

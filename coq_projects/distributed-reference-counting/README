@@ -1,0 +1,121 @@
+ 
+         A Construction of Distributed Reference Counting
+
+                   Luc Moreau and Jean Duprat
+
+
+
+This directory contains the constructive proof of correctness of
+several variants of a distributed reference counting algorithm.
+
+Each variant of the algorithm is encoded as an abstract machine whose
+definition and related proofs appear in a corresponding subdirectory.
+
+At the toplevel, we find the following directories:
+
+- abstract: properties that are independant of all algorithm variants.
+            That includes, amongst others, queues manipulation, and tables.
+
+- machine0:  the initial implementation where a global notion of time
+             is introduced to prove the safety.
+
+- machine1:  the same algorithm but the proof does not rely on a
+             notion of time.
+
+- machine2:  a variant of machine2 where copy messages are allowed to
+             be sent to the owner.
+
+- machine3: contains an new rule, which is an optimisation!
+           It replaces an (inc_dec s) followed by a dec to the owner
+           by a dec  to s immediately.
+   This strategy is in fact Piquer's indirect reference counting,
+   where inc_dec messages are never sent, and the owner is never directly
+   informed of the pointers that are accessible remotely.
+
+   The proof is not complete because I did not prove any of the ancestor
+   business.
+
+   However, an new definition of alternate was given.
+
+   Note that this optimisation alone is not too useful because
+   it cannot be used for the sequence inc_dec, copy, dec.
+   So i delay the rest of the proof till machine 4.
+
+
+- machine4: 
+   Contains a second optimisation by which one shows that copy messages
+   can be sent and delivered in  any order.
+   The rationale behind this rule is that copy is not a gc message but
+   a message of the application (such a remote method invocation that 
+   copies pointers).  In some cases, we don't want gc activity to
+   slow down the real computation.
+
+   So, we show that copy messages are in fact do not have to be synchronised
+   with the gc activity.  Note that this variant assumes an underlying
+   machine2 and not a machine1.
+
+   Intuitively: it is safe to change the order of copy messages in machine2,
+   because EVERY copy message has increased the send_table (including 
+   when sent to the owner).  On the other hand, it is unsafe to change
+   the order in machine 1, because changing the message order, would allow
+   copy messages to be overtaken by dec messages, which may set the
+   send_table on the owner to 0, which a copy message towards the owner
+   is still in transit.
+
+   
+
+----------------------------------------------------------------------
+
+In every machine(i) subdirectory we find:   
+   
+abstract_machine.v
+   
+  This file is (hopefully) independent of all abstract machines.  In
+  particular, it is independent of the transitions and messages.
+
+
+machine.v
+  This file contains a complete descriptions of the gc-machine, with in
+  particular messages, configurations and transitions.  
+
+
+cardinal.v
+comm.v
+   These files contain very general lemma which are message/configuration
+   dependent.  I expect these lemmas to hold for all abstract
+   machines.
+
+
+
+invariant0.v
+invariant1.v
+invariant2.v
+invariant3.v
+invariant4.v
+invariant5.v
+invariant6.v
+invariant7.v
+liveness.v
+safety.v
+  These files contain invariants (and safety property) for machine1.
+
+----------------------------------------------------------------------
+
+The directory machine0 contains Jean's original proof, which uses a
+different technique to prove the safety lemma.  It assumes the
+existence of a notion of global time.
+
+   table_act.v
+   machine.v
+   copy.v
+   counting.v
+   del.v
+   evol.v
+   init.v
+   mess_act.v
+   rece_copy1.v
+   rece_copy2.v
+   rece_copy3.v
+   rece_dec.v
+   rece_inc.v
+

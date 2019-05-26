@@ -1,0 +1,148 @@
+\documentclass{beamer}
+
+\setbeamertemplate{theorems}[normal font]
+\setbeamertemplate{navigation symbols}{}
+
+\usepackage[utf8]{inputenc}
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{supertabular}
+
+\usepackage{mathpartir}
+\usepackage{listings}
+\usepackage{lstlangcoq}
+\lstset{basicstyle=\ttfamily,language=Coq}
+
+\input{stlc-rules}
+
+
+\title{Specifying higher-order languages}
+\author{Stephanie Weirich}
+\institute{University of Pennsylvania}
+\date{2017}
+
+
+
+\begin{document}
+
+\frame{\titlepage}
+
+\begin{frame}
+\frametitle{Specifying and Implementing STLC}
+
+\begin{enumerate}
+\item Locally nameless representation, good for specifications
+\item Nominal representation, good for implementations
+\item Connecting them together
+\end{enumerate}
+
+\end{frame}
+
+
+\begin{frame}
+\frametitle{Syntax of STLC}
+
+\ottgrammar{}
+
+%\ottdefntyping{}
+
+%\ottdefnstep{}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Typing rules for STLC}
+
+\ottdefntyping{}
+
+\end{frame}
+
+
+\begin{frame}
+\frametitle{Small-step rules for STLC}
+
+\ottdefnstep{}
+
+Alpha-equivalence
+\[
+  [[\x.x]] \equiv [[\y.y]]
+\]
+Capture-avoiding substitution:
+\[ [[ (\y.z) [z ~> \x. y] ]] \equiv [[\y1.\x. y]] \]
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Lessons}
+
+\begin{enumerate}
+\item Use an adequate representation to specify this language
+\item Prove that your optimized rep implements that specification
+\item Structurally-recursive definitions are important (and hard to come by!)
+\item Tool support helps immensely
+\end{enumerate}
+
+\end{frame}
+
+
+\begin{frame}[fragile]
+\frametitle{Many adequate representations with tool support:}
+\begin{enumerate}
+\item Nominal terms (Nominal Isabelle)
+\item De Bruijn indices (Coq: Autosubst, Needle/Knot)
+\item Locally nameless (Coq: Ott/LNgen)
+\end{enumerate}
+
+Locally nameless representation:
+\begin{enumerate}
+\item Bound variables represented by indices
+  (all $\alpha$-equiv terms are equal)
+\item Free variables represented by names
+\end{enumerate}
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Locally nameless representation}
+
+\begin{lstlisting}
+ Inductive exp : Set :=
+ | var_b (n:nat)          (* index    *)
+ | var_f (x:var)          (* name    *)
+ | abs (T:typ) (e:exp)    (* no name *)
+ | app (e1:exp) (e2:exp).
+\end{lstlisting}
+
+Alpha-equivalence is definitional equality
+\[ [[\x.x]] = \mbox{\lstinline|abs (var_b 0)|} \qquad
+[[\y.y]] = \mbox{\lstinline|abs (var_b 0)|} \]
+
+\end{frame}
+
+
+\begin{frame}[fragile]
+\frametitle{Capture-avoiding substitution is structurally recursive}
+Capture avoiding substitution
+\[ [[ (\y.z) [z ~> \x. y] ]] \equiv [[\y1.\x. y]]  \]
+
+\centerline{\lstinline|abs(var_f Z)[Z ~> abs(var_f Y)] = abs (abs (var_f Y))|}
+
+\begin{block}{Implementation}
+\begin{lstlisting}
+Fixpoint subst_exp (u:exp) (y:var) (e:exp) : exp :=
+  match e with
+  | (var_b n)   => var_b n
+  | (var_f x)   => if x == y then u
+                   else (var_f x)
+  | (abs e1)    => abs (subst_exp u y e1)
+  | (app e1 e2) =>
+      app (subst_exp u y e1) (subst_exp u y e2)
+end.
+\end{lstlisting}
+\end{block}
+\end{frame}
+
+\begin{frame}[fragile]
+\end{frame}
+
+\end{document}

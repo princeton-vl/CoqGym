@@ -1,0 +1,19 @@
+-R . lazyPCF
+
+OpSem/environments.v
+OpSem/freevars.v
+OpSem/OSrules.v
+OpSem/rename.v
+OpSem/syntax.v
+OpSem/typecheck.v
+OpSem/utils.v
+SubjRed/ApTypes.v
+SubjRed/envprops.v
+SubjRed/mapsto.v
+SubjRed/NFprops.v
+SubjRed/NF.v
+SubjRed/subjrnf.v
+SubjRed/TypeThms.v
+SubjRed/valid.v
+
+

@@ -1,0 +1,35 @@
+opam-version: "2.0"
+name: "coq-scev"
+version: "0.1"
+synopsis: "A verification of the chains of recurrences (Scalar Evolution) theory in Coq"
+description: """
+The chains of recurrences theory allows one to recover closed forms for
+recurrences, starting by knowing constants. 
+
+It creates an algebra of "basic recurrences" and "chains of recurrences",
+and provides rules as to how recurrences combine to form larger recurrences.
+
+This theory is now used in modern compiler backends such as LLVM to perform
+loop analysis.
+
+This pacakge formalises the theorems from the paper, and also provides a small
+expression language from which recurrences can be recovered. This can be used
+by other libraries to find closed forms of arithmetic expressions.
+
+Citation: "Chains of Recurrences: A method to expedite the evaluation of closed
+form functions"
+
+Link: http://dl.acm.org/citation.cfm?id=269286
+"""
+maintainer: "Siddharth Bhat <siddu.druid@gmail.com>"
+authors: "Siddharth Bhat <siddu.druid@gmail.com>"
+license: "MIT"
+homepage: "https://www.github.com/bollu/coq-scev"
+bug-reports: "https://www.github.com/bollu/coq-scev/issues"
+dev-repo: "https://www.github.com/bollu/coq-scev"
+depends: [ "ocaml" "ocamlfind" ]
+build: [
+  [make]
+]
+install: [make "install"]
+

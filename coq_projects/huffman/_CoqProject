@@ -1,0 +1,31 @@
+-Q theories Huffman
+
+-arg -w -arg +default
+-arg -w -arg -auto-template
+
+theories/Aux.v
+theories/Cover.v
+theories/HeightPred.v
+theories/Ordered.v
+theories/SubstPred.v
+theories/sTactic.v
+theories/OrderedCover.v
+theories/UList.v
+theories/BTree.v
+theories/CoverMin.v
+theories/ISort.v
+theories/PBTree.v
+theories/UniqueKey.v
+theories/Huffman.v
+theories/Restrict.v
+theories/Build.v
+theories/PBTree2BTree.v
+theories/Weight.v
+theories/Code.v
+theories/Frequency.v
+theories/OneStep.v
+theories/Permutation.v
+theories/Prod2List.v
+theories/SameSumLeaves.v
+theories/WeightTree.v
+theories/Extraction.v

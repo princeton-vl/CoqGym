@@ -1,0 +1,11 @@
+(alias
+ (name runtest)
+ (deps (:input ab.v))
+ (action (ignore-outputs
+           (bash "%{bin:sercomp} --quick %{input}"))))
+
+(alias
+ (name runtest)
+ (deps (:input assoc.v))
+ (action (ignore-outputs
+           (bash "%{bin:sercomp} --quick %{input}"))))

@@ -1,0 +1,28 @@
+Contribution
+------------
+This directory contains: A Proof of Subject Reduction for Lazy PCF 
+Author & Date          : Jill Seaman
+                         AT&T Bell Labs
+                         November 1993
+
+This directory contains the Coq commands necessary to implement
+a proof of the subject reduction theorem for Lazy PCF.  It depends
+on the implementation of the operational semantics rules found
+in the OpSem directory.
+
+Type make to install
+--------------------
+The subject reduction proof can be loaded into Coq with the 
+following commands:
+
+Load paths.
+Require subjrnf.
+
+Comments
+--------
+This contribution was originally developped for CoqV5.8, and has been
+updated for CoqV5.10 by the Coq Workgroup (ENS-CNRS INRIA-Rocquencourt) in
+January 1995.
+
+
+

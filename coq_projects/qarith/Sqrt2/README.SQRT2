@@ -1,0 +1,40 @@
+(****   A quick & dirty implementation of constructive reals. ****)
+(****                  P. Letouzey                            ****)
+(****      Based on Pr. Schwichtenberg lecture notes.         ****)
+(****      Main objective: sqrt(2) as root of X^2 -2 in [1;2] ****)
+
+Developped july - sept 2003 at Marktoberdorf summer school
+with the great help of Pr. Schwichtenberg. 
+
+Details of files: 
+-----------------
+
+Reals.v: the main job
+
+nat_log.v: adaptation of Zlogarithm.v, but output in nat instead of Z. 
+
+sqrt2.ml: 
+sqrt2.mli: 
+ The two extracted files. Automatically generated. Do not modify. 
+
+sqrt2_main.ml: 
+ Input/Output wrapper around Sqrt2. Manually generated. 
+
+
+Compilation: 
+-----------
+
+	make 
+
+should produce a sqrt2 binary
+
+
+Computing sqrt(2):
+-----------------
+
+	./sqrt2 n 	
+
+should produce a rational number giving at least n binary digits of sqrt(2)
+
+
+

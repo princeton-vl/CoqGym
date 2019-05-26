@@ -1,0 +1,508 @@
+\documentclass[xetex,format=acmlarge,screen=true,authorversion=true]{acmart-modified}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{color}
+%\usepackage{fontspec}
+\usepackage{graphicx}
+%\usepackage[bookmarks=true,bookmarksopen=true,colorlinks=true,linkcolor=blue,citecolor=blue,urlcolor=blue]{hyperref}
+\usepackage{listings}
+\usepackage{xcolor}
+\input{tango-colors}
+\definecolor{dktest}{rgb}{0.9,0.9,0.9}
+\definecolor{ltblue}{rgb}{0,0.4,0.4}
+\definecolor{dkblue}{rgb}{0,0.1,0.6}
+\definecolor{dkgreen}{rgb}{0,0.2,0}
+\definecolor{dkviolet}{rgb}{0.3,0,0.5}
+\definecolor{dkred}{rgb}{0.5,0,0}
+\usepackage{lstcoq}
+\usepackage{adjustbox}
+\usepackage{tikz}
+\usepackage{tikzpagenodes}
+\usepackage{enumitem}
+\setitemize{itemsep=0.5em}
+
+\newcommand{\grule}{\rule{0.8\textwidth}{.4pt}}
+
+%% % ------------------------------------------------------------------------------
+%% % Headings.
+
+\begin{document}
+
+\title{%
+  Procrastination
+}
+\subtitle{%
+  A proof engineering technique
+}
+
+\maketitle
+
+\vspace{-1em}
+
+% ------------------------------------------------------------------------------
+
+\begin{flushright}
+  {\sc Have you seen those procrastinators the monks use? \\
+    Wonderful things. They can move time, store it, stretch it... \\
+    quite ingenious. }
+
+  \vspace{0.3em}
+
+  --- Terry Pratchett, \emph{Thief of Time}
+\end{flushright}
+
+\vspace{1em}
+
+\section*{Abstract}
+We present a small Coq library for collecting side conditions and deferring
+their proof.
+
+\section{Introduction}
+
+What are the different ways of proving an assertion of the form ``\co{exists x,
+  P x}''? From the perspective of the final proof term, there is only one:
+providing a witness. However, from a ``proof engineering'' perspective, Coq
+enables a wider range of possible approaches thanks to its powerful feature of
+``evars'' \cite[\S2.11]{coq}.
+
+We describe existing approaches for proving such a goal, and propose a new one,
+supported by a small library dubbed \emph{Procrastination}
+\cite{procrastination}, which itself relies on evars. We believe it captures a
+useful proof pattern, where one wishes to first continue with the proof of \co{P
+  x}, in order to discover which constraints \co{x} must satisfy, before
+providing a value for \co{x} and proving the side conditions.
+
+We used this library with success in our work on verifying the asymptotic
+complexity of programs \cite{gueneau-chargueraud-pottier-coq-bigO}.
+
+\section{Proving existential quantifications in Coq}
+
+\subsubsection*{Manually guessing a witness}
+%
+The most straightforward option to prove a Coq goal ``\co{exists x, P x}'' is to
+guess and provide upfront a witness, using the \texttt{exists} tactic. This is
+often a good way of providing external knowledge about how the proof should
+continue.
+
+\subsubsection*{Delaying the instantiation using \emph{evars}}
+%
+However this falls short if the only intuition is that \texttt{x} should be
+``whatever makes
+%% the rest of
+the proof work''. A trial-and-error process can be attempted, where the user
+alternatively adjusts the witness and the proof until it passes. This does not
+lead to maintainable proof scripts: in the end, only a ``magic'' witness
+remains; it may be large and duplicate information; it may also have to
+change in the future, following updates to the rest of the proof.
+
+To allow delaying the instantiation of \texttt{x}, Coq provides a versatile
+feature: evars. An evar corresponds to a ``hole'' in the proof, and only exists
+during the pre-typing phase -- it will not appear in the proof term, and only
+helps elaborating it. Using the \texttt{eexists} tactic on the goal
+``\co{exists x, P x}'' turns it into ``\co{P ?x}'', introducing a fresh evar
+\co{?x}. Later, it can be discovered that this hole should be (definitionally)
+equal to some term: the evar then gets instantiated. %% with the desired term
+%
+This is generally performed automatically by Coq tactics through unification.
+
+
+%% There are of course restrictions on the terms that can be used to instantiate an
+%% evar. For an instantiation to make sense, it has to be valid in the context in
+%% which the evar was first introduced. An evar therefore carries around a context
+%% that restricts its possible instantiations.
+
+% NB: les evars sont et restent le mécanisme central qui permet de retarder
+% l'instantiation d'existentielles. ce qui est présenté après sont différents
+% workflows ou patterns pour les utiliser, mais ultimement sont construits par
+% dessus la feature d'evars qui est très expressive, et n'étendent pas coq avec
+% de nouvelles features.
+
+\subsubsection*{``Big enough'' existentials}
+
+This technique again falls short if continuing with the proof of \co{P ?x} does
+not exhibit a term that \co{?x} must be \emph{equal} to, but e.g. \emph{lower
+  bounds} on \co{?x}. Cohen \cite[\S5.1.4]{cohen-12} shows that it is a common
+situation in analysis, where a proof is established by picking a ``big enough
+\co{x}''. During the proof, inequalities of the form ``\co{a <= x}'', ``\co{b <=
+  x}'', ... are all trivially satisfied provided that ``\co{x} is big enough''.
+
+%% none of these would allow to instantiate \co{x} by itself,
+%% but it seems undesirable to have to guess a value beforehand that satisfy all of
+%% them.
+
+Cohen formalizes this seemingly fuzzy reasoning in a small tactic library. On a
+``\co{exists x, P x}'' goal, a tactic instantiates \co{x} with the iterated maximum of
+a list of terms, this list being initially an evar. It is then possible to
+progressively populate this list, automatically discharging subgoals of the
+form ``\co{a <= x}''.
+%
+%The approach generalizes to any meet semi-lattice.
+
+% Ce trick permet donc un workflow où on peut remettre à plus tard
+% l'instanciation d'une existentielle ``assez grande'' pour laquelle on déduira
+% des inégalités.
+
+\section{The \emph{Procrastination} library}
+
+We are interested in the situation where arbitrary side conditions about \co{x}
+may be encountered -- e.g. inequalities of both the form ``\co{a <= x}'' and
+``\co{x <= b}''. We might also be trying to infer not an arithmetic value but a
+function, e.g. \co{f} satisfying ``\co{forall n, f(n) >= 1 + f(n-1)}''. In this
+situation, it seems difficult to guess the shape of \co{x} or \co{f} beforehand
+(e.g. as an iterated maximum).
+%
+% la contrainte a la forme d'une définition récursive, mais une
+% evar ne peut être mentionnée dans sa définition (et il faudrait prouver que la
+% def est bien fondée, hum).
+%
+% (RQ: (cf remarque de JH) dans ce cas précis, on pourrait peut être inférer un
+% fix, ou juste une fct en récursion ouverte...)
+
+We introduce a small Coq library named \emph{Procrastination}, which generalizes
+the ideas of Cohen, and allows collecting arbitrary side conditions (to be
+proved later) about zero, one or several variables. It is more general than
+``big enough'' in the sense that it can deal with arbitrary side conditions, but
+it does not try to solve these side conditions: this is typically done in a
+second time by a dedicated procedure (e.g. for ``big enough'' this procedure
+would take the running maximum of the lower-bounds collected).
+
+In other words, the library enforces a pattern where the proof is separated in
+two phases: first side conditions are collected about some variables, then they
+are solved and the variables are instantiated. This is crucial in limiting the
+proliferation of evars, which tend to produce brittle proofs because they can
+might get incorrectly instantiated by unrelated tactics.
+ \footnote{For example, we noticed that \texttt{ring\_simplify} is
+   particularly careless (or sometimes crashes)
+   when the goal contains evars.}
+
+The implementation provides reusable Ltac components, with the hope that they
+can help applying this technique even in more exotic scenarios. The code is
+freely available online \cite{procrastination}.
+
+\section{Example: solving recurrence (in)equations}
+\label{sec:example1}
+
+Our initial motivation for this work was analyzing the time complexity of
+programs, where one has to find a solution for a set of inequations about a
+program's execution time.
+%
+%(and typically also show that the solution admits the
+%desired $O()$ bound).
+%
+One approach is using Cormen \emph{et al.}'s substitution
+method~\cite[\S4]{cormen-en}. The idea is to guess a parameterized \emph{shape}
+for the solution; substitute this shape into the goal; gather a set of
+constraints the parameters must satisfy for the goal to hold; finally, show that
+these constraints are indeed satisfiable.
+
+We demonstrate this strategy using \emph{Procrastination} on cost inequations
+derived from a binary search program. We ``guess'' that the solution should be a
+monotonic function $f$ with shape
+%
+%% $
+%% \lambda n. \;
+%% \begin{cases}
+%% a \log{n} + b & \text{if } 0 < n \\
+%% c & \text{if } n = 0
+%% \end{cases}
+%% $
+%
+$\lambda n. \; \text{if} \; n = 0 \; \text{then} \; c \; \text{else} \; (a \log{n} + b)$;
+%
+where $a$, $b$ and $c$ are parameters, about which we wish to gradually
+accumulate a set of constraints.
+
+\vspace{0.5em}
+
+\input{example}
+
+\vspace{0.5em}
+
+The script starts with \texttt{begin defer assuming a b c} which
+introduces the parameters, as well as a ``group'' $g$, using an evar to collect
+the constraints (1). Note that $a$, $b$ and $c$ are not evars themselves,
+instead they appear as abstract variables. Note also that
+the type of these variables
+%
+is inferred to be \co{nat} only further on in the proof script. After
+instantiating the function with the proposed solution, the first inequality
+simplifies to a condition on $c$ (2). This condition is stored (in $g$) for
+later retrieval, using the \texttt{defer} tactic, which discharges the
+subgoal (3). Similarly, the other two inequalities yield side conditions about
+$a$, $b$ and $c$ that can be \texttt{defer}red. Finally, \texttt{end
+  defer} retrieves the collected conditions, which the user must then
+prove. Here, this is done by an ad hoc user-defined tactic, \co{eomega}.
+
+Observe that the final proof script never mentions the actual witnesses: we
+expect the proof to be robust in the face of minor changes in the cost
+inequations, as long as the \emph{shape} of the solution remains valid.
+
+\section{Example: simplifying recurrence (in)equations}
+
+An other application of the approach, also coming from our work on complexity
+analysis, is to simplify (in)equations about a function. The inequalities
+constituting the goal of the example in Section~\ref{sec:example1} have in fact
+already been simplified. In practice, analyzing the complexity of a program
+yields a set of constraints $C$ and a goal $\exists f, C(f)$. $C$ has typically
+been elaborated automatically from the program, and one wants to simplify the
+goal into $\exists f, C'(f)$, where $C'$ is a simpler set of constraints.
+
+In this example we show that we can use \emph{Procrastination} to collect
+constraints not only about natural numbers (as in the previous example), but
+also about functions. Starting from constraints (on the program execution time)
+that are close to what an automated program analysis would produce, we are able
+to simplify them to finally obtain the simpler constraints of the previous
+example.
+
+\vspace{1em}
+
+\input{example2}
+
+\vspace{1em}
+
+The first step of the proof is to start collecting constraints about \co{f},
+using \co{begin defer assuming f} (1). This gives us a new identifier
+\co{f}, that we can use right away as a witness for the existential
+quantification at the head of the goal. Case splitting first allows extracting
+the inequation for the base case (2). Some work can be done in the recursive
+case (3), if we additionally assume that \co{f} is monotonic (4). In that case
+the \co{max ...} can be simplified to its first argument (5). The inequation at
+(5) is the simplified inequation for the recursive case. However, it is not
+possible to call \co{defer} at this point: the goal depends on the local
+variable \co{n}, while the set of collected constraints can only depend on
+\co{f}. The solution is to generalize the goal to any positive \co{n} (6), by
+moving \co{n} and \co{Hn} from the local context to the goal. Finishing the
+deferring process yields the set of simplified constraints, which corresponds to
+the initial goal of the previous example (7).
+
+Here again, the point of using \emph{Procrastination} is to impose a \emph{proof
+  discipline} that improves the robustness of the proof script. In this example,
+we assumed that the goal has been produced by a mechanized process. We would
+like the proof script to be maintainable, with respect to (non-fundamental)
+changes in this mechanized process. \emph{Procrastination} is used a first time
+to extract a set of simplified constraints, then a second time (as detailed in
+Section~\ref{sec:example1}) to find a solution for the simplified constraints,
+without relying on the exact values in these constraints. By explicitly
+splitting the proof into two parts that operate at two different levels of
+abstraction, we can hope that if the structure of the initial goal changes, only
+the first half of the proof will need to be updated.
+
+\section{\emph{Procrastination} and the proof context}
+
+As illustrated previously, one can think of \emph{Procrastination} as a way of
+incrementally collecting some side-conditions \co{P}, \co{Q}, \co{R} about some
+variables \co{a}, \co{b}, \co{c} in order to eventually produce the goal:
+\co{exists a b c, P /\\ Q /\\ R}.
+
+There are two key aspects to this process.
+
+\paragraph{Side-conditions are collected and gathered under a common context.}
+Specifically, it is the context at the point of calling``\co{begin}
+\co{defer assuming a b c}'', extended with the names \co{a},
+\co{b} and \co{c}. Only side-conditions \co{P}, \co{Q} and \co{R} that make
+sense in this context can be deferred using \co{defer}.
+
+More generally, to each ``defer block'' (beginning with \co{begin
+  defer} and ending with \co{end defer}) corresponds a proof
+context in which the side-conditions will be gathered. This is in fact
+materialized by an assumption of type ``\co{Group (...)}'' added to the context
+by \co{begin defer}. This assumption stores the current collection of
+side-conditions, and can be named explicitly by the user.
+
+Requiring all side-conditions to be expressed in the same context allows the
+library to collect them as a conjunction in a single final subgoal \co{exists a
+  b c, P /\\ Q /\\ R}. This is crucial, since the motivation is to find values
+for \co{a}, \co{b}, \co{c} by inspecting the side-conditions \co{P}, \co{Q},
+\co{R} altogether (using a tactic or manually).
+
+
+\paragraph{When collecting side-conditions, variables \co{a}, \co{b}, \co{c} are rigid.}
+Because the end goal is to find an instantiation for \co{a}, \co{b} and \co{c},
+one could think of first introducing evars for these, and then try to collect
+side-conditions. However, this quickly becomes unwieldy, as the evar for
+collecting side-conditions will depend itself on evars for \co{a}, \co{b} and
+\co{c}. This is in general tricky to handle, the main risk being that \co{a},
+\co{b} or \co{c} get accidentally instantiated in undesired ways while trying
+to collect side-conditions about them.
+
+\emph{Procrastination} imposes a two-step process, where side-conditions are
+first collected with respect to ``rigid'' names for \co{a}, \co{b} and \co{c}.
+This limits the number of evars involved to a single one in ``\co{Group
+  (...)}'', which is only manipulated by the library tactics. After the
+side-conditions have been collected, the user is free to introduce evars for
+\co{a}, \co{b} and \co{c}, if needed to prove the goal \co{exists a b c, P /\\ Q
+  /\\ R}.
+
+\section{Nesting \texttt{defer} blocks}
+
+Interestingly, it is possible to nest defer blocks in an arbitrary way.
+In some sense, collecting side-conditions is done in a ``well-scoped'' manner.
+For example, it is possible to open a second defer block while being in
+a defer block. Then, the nested block will have a larger context than
+the enclosing block. When using \co{defer} on a side-condition, the user
+can control in which \co{Group} (and therefore in which context) the
+side-condition gets collected.
+
+%% \section{\emph{Procrastination} and shelving}
+
+%% %% on peut se demander quelle est la différence avec shelve/unshelve.
+%% %% le point est que shelve capture un subgoal et tout son contexte.
+%% %% alors que nous on capture un ensemble de subgoals sous un contexte commun.
+%% %% shelve n'aide pas si on veut instantier une variable dont les différents
+%% %% subgoals dépendent: quand on est dans un subgoal on ne voit pas les autres.
+%% %%
+%% %% alors qu'avec procrastination on récupère l'ensemble des "contraintes" et
+%% %% on peut les inspecter en parallèle afin de déduire l'instanciation.
+%% %% can be contrasted w/ shelve
+%%
+%% This is in contrast with Coq's \emph{shelving} mechanism. Just like
+%% \co{defer}, \emph{shelving} discharges a subgoal by putting it away and
+%% storing it for later. Then, \emph{unshelving} retrieves the collected subgoals.
+%% This may seem very similar to \emph{Procrastinate} -- but there are crucial
+%% differences. Shelving a subgoal captures the whole context of the subgoal. Then,
+%% unshelving restores the captured subgoals, as as many distinct subgoals.
+%% \emph{Procrastinate} requires the user to discharge side-conditions under a
+%% common context, but in the end gathers them all in a single subgoal (given by
+%% \co{end defer}).
+
+
+\section{Implementing \emph{Procrastination}: core ideas}
+
+In essence, the implementation of \emph{Procrastination} is extremely simple. As
+its core, ``\co{begin defer} \co{assuming a}'' is nothing more than
+``\co{eapply defer\_1}'', where \co{defer\_1} is the following
+tautological lemma:
+
+\begin{coq}
+  Lemma defer_1 : forall A (P: Prop) (Q: A -> Prop),
+    (forall a, Q a -> P) ->
+    (exists a, Q a) ->
+    P.
+\end{coq}
+
+This lemma (and the rest of the library) comes from the combination of two main
+ideas, described below.
+
+\subsection{Collecting side-conditions}
+
+Independently from reasoning on additional parameters \co{a}, \co{b}, \co{c}...,
+the first idea is the one of incrementally collecting side-conditions while
+progressing through a proof.
+
+Introducing additional facts in the middle of a proof corresponds to the usual
+\emph{Cut} rule (or \co{cut} tactic). \emph{Cut} can be stated as the following
+Coq lemma ``on a goal \co{P}, we can assume some facts \co{Q} if we prove them
+later'':
+
+\begin{coq}
+  Lemma cut_lemma : forall (Q P: Prop), (Q -> P) -> Q -> P.
+\end{coq}
+
+When using \co{cut} (the tactic) or when doing \co{apply cut_lemma}, the user
+needs to state upfront which the additional facts \co{Q} that are being assumed
+(and which proof is deferred for later) -- e.g. \co{apply (cut_lemma (foo
+  /\\ bar))}.
+
+Now, interestingly, one can also delay giving \co{Q}, by calling ``\co{eapply
+  cut_lemma}''. This makes use of Coq's evars mechanism, and introduces an evar
+for \co{Q}, since it hasn't been determined yet.
+
+\begin{coq}
+  Goal P.
+    eapply cut_lemma.
+    - intro H.
+      (* H: ?Q |- P *)
+    - (* |- ?Q *)
+\end{coq}
+
+In the first subgoal, we get an assumption \co{H} which type is an evar. Should
+\co{P} yield a subgoal \co{P'} that we may want to prove later, \co{P'} can
+simply be discharged by applying \co{H}. This will cause the evar \co{?Q} to get
+instantiated with \co{P'} -- requiring \co{P'} to be proved in the second
+subgoal spawned by \co{eapply cut_lemma} as a side effect.
+
+\begin{coq}
+  Goal P.
+    eapply cut_lemma.
+    - intro H.
+      (* H: ?Q |- P *)
+      ...
+      (* H: ?Q |- P' *)
+      now apply H.
+      (* H: P' *)
+    - (* |- P' *)
+\end{coq}
+
+\vspace{0.8em}
+
+This trick can be made a bit more useful by using \co{H} to discharge not only
+one subgoal, but several. This can be achieved (e.g. using a small amount of
+\emph{Ltac}) by instantiating \co{H} into an iterated conjunction of already
+discharged subgoals, and an evar for future ones. For instance:
+
+\begin{coq}
+  Goal P.
+    eapply cut_lemma.
+    - intro H. (* H: ?Q |- P *) ...
+      (* H: ?Q |- P' *) now eapply (proj1 H). ...
+      (* H: P' /\ ?Q |- P'' *) now eapply (proj1 (proj2 H)). ...
+      (* H: P' /\ P'' /\ ?Q |- ... *)
+    - (* |- P' /\ P'' /\ ?Q *)
+\end{coq}
+
+\vspace{0.3em}
+
+This is in fact precisely how the \co{defer} tactic is implemented.
+
+\subsection{Dealing with existentials in the goal: avoiding the proliferation of evars}
+
+Let us now consider the more specific case where \co{P} is of the form
+``\co{exists x, P x}''. In order to collect side-conditions that may talk about
+\co{x}, one possibility is to first call \texttt{eexists}, introducing an evar
+for \co{x}, and then use the technique described previously.
+
+\begin{coq}
+  Goal exists x, P x.
+    \eexists. (* |- P ?x *)
+\end{coq}
+
+As mentioned earlier, in our experience this does not scale up very well. The
+risk is that might \co{?x} get instantiated by mistake while simply trying to
+collect side-conditions about it, or while progressing through the proof of
+\co{P ?x}.
+
+Therefore, the second main idea is to use variants of the \co{cut} lemma for
+collecting side-conditions ``under existential quantifications''. For example,
+we can easily prove the following lemma:
+
+\begin{coq}
+  Lemma cut_ex1_lemma: forall A (P Q : A -> Prop),
+    (forall x, Q x -> P x) ->
+    (exists x, Q x) ->
+    exists x, P x.
+\end{coq}
+
+By doing \co{eapply cut_ex1_lemma}, we can collect side-conditions about \co{x}
+in \co{?Q x}, without introducing an evar for \co{x}. All in all, all this does
+is massaging the proof so that it is setup more conveniently.
+
+Finally, the lemma above can be generalized to support an arbitrary number of
+quantified variables (including 0, in which case this corresponds to the
+previous subsection). This is in essence how \co{begin defer} is
+implemented.
+
+%%\subsection{}
+%%% 3) reusable ltac components
+
+% because of pandoc
+\def\tightlist{}
+\input{tactics_reference}
+
+% ------------------------------------------------------------------------------
+% Bibliography.
+
+\bibliographystyle{splncs03} % splncs (older) or splncs03 (more recent)
+\hbadness=10000
+\bibliography{local}
+
+\end{document}

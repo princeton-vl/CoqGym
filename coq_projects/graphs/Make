@@ -1,0 +1,12 @@
+-R . Graphs
+
+cgraph.v
+zcgraph.v
+-extra checker.ml zcgraph.vo "$(COQBIN)coqtop $(COQLIBS) $(COQFLAGS) -silent -batch -load-vernac-source extract.v"
+
+-extra checker.cmi checker.ml "$(CAMLOPTLINK) -o checker.cmi checker.mli"
+-extra checker checker.ml "$(CAMLOPTLINK) -o checker unix.cmxa checker.ml $(PP) main.ml"
+-extra test checker
+        "@echo '****** test: checking transitivity *******'
+	echo 'x<y -> y<z -> x<z' |  ./checker
+	@echo '************** End of test ****************'"

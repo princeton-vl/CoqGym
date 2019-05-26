@@ -1,0 +1,20 @@
+Name: Angles
+Title: Formalization of the oriented angles theory
+Author: Frédérique Guilhot
+Email: Frederique.Guilhot@sophia.inria.fr
+Institution: INRIA Sophia Antipolis, projet Lemme
+Date: 2002-01-15
+
+Description: The basis of the contribution is a formalization of the
+theory of oriented angles of non-zero vectors. Then, we prove some
+classical plane geometry theorems: the theorem which gives a necessary
+and sufficient condition so that four points are cocyclic, the one
+which shows that the reflected points with respect to the sides of a
+triangle orthocenter are on its circumscribed circle, the Simson's
+theorem and the Napoleon's theorem. The reader can refer to the
+associated research report (http://www-sop.inria.fr/lemme/FGRR.ps) and
+the README file of the contribution.
+
+Keywords: Pcoq, geometry, plane geometry, oriented angles
+Require:
+Category: Mathematics/Geometry/General

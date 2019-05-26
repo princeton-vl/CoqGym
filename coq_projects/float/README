@@ -1,0 +1,78 @@
+This directory contains a library for floating point numbers.
+
+
+-  This library is described in
+    `A generic library of floating-point number and its application
+     to exact computing' in TPHOLs 2001.
+
+
+To build the directory, do
+
+  coq_makefile *.v > Makefile
+
+Then
+
+  make depend;make all
+  
+
+ Laurent Thery & Sylvie Boldo & Laurence Rideau
+ thery@sophia.inria.fr Sylvie.Boldo@ens-lyon.fr lrg@sophia.inria.fr
+
+
+	Summary of what is in the library:
+
+AllFloat.v : load all the definitions and theorems of the library
+
+Float.v : definition of floating point number as pair of mantissa
+          and exponent
+     Record float : Set := Float {
+       Fnum: Z;
+       Fexp: Z }.
+
+Fop.v : usual operation on floats: +, -, *
+
+Fbound.v: Definition of a bound  and what it is to be bounded for a float 
+
+            Record Fbound : Set := Bound {
+              vNum: nat;
+              dExp: nat }.
+
+ 
+          Definition Fbounded :=
+           [b : Fbound] [d : float]
+           ((Zle (Zopp (vNum b)) (Fnum d)) /\ (Zle (Fnum d) (vNum b))) /\
+            (Zle (Zopp (dExp b)) (Fexp d)).
+
+Fnorm.v: Definition of normal, subnormal and canonical numbers
+
+FSucc.v : The successor function for bounded numbers
+
+FPred.v : The predecessor function for bounded numbers
+
+Fprop.v : The proof of Sternbenz property
+
+MSB.v   : Definition of Most Signigicant Bit and Least Significant Bit
+
+Fround.v: Defintion of rounding as a relation between a real and a float:
+          (P r f) means f is a rounded value of r
+          Definitions of the usual rounding modes.
+
+FroundProp.v: Standard properties of rounding
+
+FroundPlus.v: Standard properties of rounding for addition
+
+FroundMult.v: Standard properties of rounding for multiplication
+
+Closest.v: Definition of rounding to the closest
+
+ClosestProp.v: Standard properties of rounding to the closest
+
+ClosestPlus.v: Standard properties of rounding to the closest for addition
+
+ClosestMult.v: Standard properties of rounding to the closest for multiplication
+
+Closest2Prop.v: Standard properties of rounding to the closest in base 2
+
+Closest2Plus.v: Standard properties of rounding to the closest for addition in base 2
+
+Pradix.v : a simple verification of a program that computes the base.

@@ -1,0 +1,10 @@
+Name: DepMap
+Title: Dependent Maps
+Description: A rudimentary library for dependent maps that contain their domain in the type.
+Keywords: Maps, Dependent maps, domain
+Category: Computer Science/Data Types and Data Structures
+Author: Lionel Rieg
+Email: lionel.rieg@college-de-france.fr
+Institution: College de France
+Require: 
+License: CeCILL-B

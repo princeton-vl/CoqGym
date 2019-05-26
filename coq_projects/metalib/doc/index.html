@@ -1,0 +1,228 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+
+<meta http-equiv="imagetoolbar" content="no" />
+<meta name="MSSmartTagsPreventParsing" content="TRUE" />
+<meta name="googlebot" content="noodp" />
+
+<title>Metatheory library - Documentation</title>
+
+<style type="text/css" media="all">
+@import "css/_defaults.css";
+@import "css/mediumLayout.css";
+@import "css/nosideLayout.css";
+@import "css/custom.css";
+</style>
+<!--[if IE]>
+<link rel="stylesheet" type="text/css" href="css/ie.css" media="all" />
+<![endif]-->
+<link rel="stylesheet" type="text/css" href="css/mediumPrint.css" media="print" />
+</head>
+
+<!--
+<body class="three-column">
+-->
+<body>
+
+<div id="container">
+
+<div id="header" class="clearfix">
+
+<!-- change image to school or deptartment logo-->
+<div class="navigation-logo">
+<a href="http://www.upenn.edu/" title="University of Pennsylvania homepage"><img
+  src="logo.gif"
+  width="175"
+  height="55"
+  alt="University of Pennsylvania logo" /></a>
+</div> <!-- End class="navigation-logo" -->
+<div class="top-navigation">
+  <!-- These are the links at the top of the page -->
+  <ul class="clearfix">
+    <li class="first"><a href="http://www.seas.upenn.edu/"
+    title="School of Engineering and Applied Science">SEAS</a></li>
+    <li><a href="http://www.cis.upenn.edu/" title="Department of
+    Computer and Information Science">CIS</a></li>
+    <li><a href="http://www.cis.upenn.edu/~plclub/" title="Programming
+    Languages Research at Penn">PLClub</a></li>
+  </ul>
+  <!-- Replace the image with an image of the department name -->
+  <!--
+  <div class="department-logo">
+    <a href="#" title="Department Name"><img src="../../images/dept_title_blue_back.jpg" alt="Department Name"/></a>
+  </div>
+  -->
+</div> <!-- End class="top-navigation" -->
+</div> <!-- End id="header" -->
+
+<div id="wrapper">
+<div id="content">
+
+<div id="mainContent" class="clearfix">
+
+<h1>Metatheory library - Documentation</h1>
+
+<p style="margin-bottom: 1em">
+  The <a href="http://www.plclub.org/">Penn PLClub</a> has developed, and
+  continues to work on, a collection of Coq libraries for mechanizing
+  programming language metatheory in the <a href="http://coq.inria.fr/">Coq
+  proof assistant</a>.  The original design and implementation of the
+  library includes work by Arthur Chargu&eacute;raud and was distributed
+  with <a href="http://doi.acm.org/10.1145/1328897.1328443">Engineering
+  Formal Metatheory</a>.  The library has evolved since then, but its
+  purpose has remained the same.
+</p>
+
+<h2>Installation</h2>
+
+<p>
+  To compile this library, run '<code>make coq</code>' in the
+  directory containing all of the .v files.  If you don't
+  have <code>make</code>, run the following commands.  (You may need
+  to replace <code>coqc</code> with the full path to the executable.)
+</p>
+
+<pre>
+      coqc -q  -I . CoqFSetDecide.v
+      coqc -q  -I . CoqUniquenessTac.v
+      coqc -q  -I . CoqListFacts.v
+      coqc -q  -I . LibTactics.v
+      coqc -q  -I . AssocList.v
+      coqc -q  -I . CoqEqDec.v
+      coqc -q  -I . CoqFSetInterface.v
+      coqc -q  -I . CoqUniquenessTacEx.v
+      coqc -q  -I . FSetExtra.v
+      coqc -q  -I . FSetWeakNotin.v
+      coqc -q  -I . LibDefaultSimp.v
+      coqc -q  -I . MetatheoryAtom.v
+      coqc -q  -I . Metatheory.v
+      coqc -q  -I . LibLNgen.v
+      coqc -q  -I . AssumeList.v
+      coqc -q  -I . MetatheoryAlt.v
+      coqc -q  -I . Fsub_LetSum_Definitions.v
+      coqc -q  -I . Fsub_LetSum_Infrastructure.v
+      coqc -q  -I . Fsub_LetSum_Lemmas.v
+      coqc -q  -I . Fsub_LetSum_Soundness.v
+      coqc -q  -I . CoqIntro.v
+      coqc -q  -I . STLCsol.v</pre>
+
+<p>
+  To use the library in your development, do one of the following:
+</p>
+
+<ul>
+  <li>
+    Put your development in the same directory as the library.
+  </li>
+  <li>
+    Use <code>Add LoadPath</code> directives in your files to specify the
+    location of the library.
+  </li>
+  <li>
+    Use the <code>-I</code> flags to the Coq executables
+    (<code>coqtop</code>, <code>coqide</code>, and <code>coqc</code>) to
+    specify the location of the library.
+  </li>
+</ul>
+
+<h2>Documentation</h2>
+
+<p>
+  The metatheory library consists of quite a few files.  From a user's
+  perspective, the main files are the ones below.  Documentation for
+  the others can be reached by following links or by looking in the
+  <code>doc/html/</code> directory of the distribution.
+</p>
+
+<dl>
+  <dt><a href="html/Metatheory.html">Metatheory</a></dt>
+  <dd>
+    This is the library to <code>Require</code>, since it exports all
+    the useful libraries that come with the metatheory library.  It
+    adds to those libraries a collection of hints and notations that
+    makes them easier to use.  It also defines a tactic for working
+    with cofinite quantification.
+  </dd>
+  <dt><a href="html/MetatheoryAtom.html">MetatheoryAtom</a></dt>
+  <dd>
+    An implementation of atoms, an infinite collection of
+    structureless objects with decidable equality, and finite sets of
+    atoms.  One can generate an atom fresh from a given finite set of
+    atoms.  The implementation of finite sets of atoms is based on Coq's
+    FSets library and includes several tactics for reasoning about
+    finite sets.
+  </dd>
+  <dt><a href="html/AssocList.html">AssocList</a></dt>
+  <dd>
+    A library for association lists.  The implementation is a functor
+    parameterized over the type of keys.  Association lists are
+    suitable for representing the environments that show up in
+    programming language metatheory.
+    The <a href="html/Metatheory.html">Metatheory</a> library
+    instantiates this library so that the keys are atoms.
+  </dd>
+</dl>
+
+<h2>Tutorials and examples</h2>
+
+<p>
+  The library comes with two tutorials and one extended example.  The
+  first tutorial, CoqIntro.v, is a general introduction to Coq.
+  Solutions to exercises are at the end of the file.  The second
+  tutorial, STLC.v, is an introduction to locally nameless
+  representations and the metatheory library using the simply typed
+  lambda calculus as a running example.  Solutions to exercises are in
+  STLCsol.v.  The extended example, in the files Fsub_*.v, is System F
+  with subtyping, extended with let-bindings and sum types.  We prove
+  preservation and progress for this language.
+</p>
+
+<h2>Unstable code</h2>
+
+<p>
+  <a href="html/MetatheoryAlt.html">MetatheoryAlt</a> is an alternate
+  version of the <a href="html/Metatheory.html">Metatheory</a> library
+  that uses "assumption lists", as implemented
+  in <a href="html/AssumeList.html">AssumeList</a>.  This
+  implementation lags behind the "main" one and is subject to change
+  radically in future releases.
+</p>
+
+
+
+<h2>Contact</h2>
+
+<p>
+  If you have any questions about the library, feel free to contact <a
+  href="http://www.cis.upenn.edu/~baydemir/">Brian Aydemir</a>.
+</p>
+
+</div> <!-- End id="mainContent" -->
+
+<!--
+<div id="rightColumn">
+<div id="spotlight">
+<h2>Spotlight</h2>
+<p>EEP!</p>
+</div>
+</div>
+-->
+
+<div id="footer">
+
+<p>
+  <a href="http://validator.w3.org/check?uri=referer">Valid XHTML 1.0</a>
+  and
+  <a href="http://jigsaw.w3.org/css-validator/check/referer">Valid CSS</a>.
+</p>
+
+</div>
+
+</div> <!-- End id="content" -->
+</div> <!-- End id="wrapper" -->
+</div> <!-- End id="container" -->
+
+</body>
+</html>

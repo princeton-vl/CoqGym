@@ -1,0 +1,6 @@
+Version 1.1, 2018-07-10  [for Coq 8.8, 8.7, 8.6]
+- Fix handling of comments at beginning of line in proof scripts (PR#1).
+
+Version 1.0, 2017-07-15  [for Coq 8.6]
+- Reused from the CompCert distribution, revised, and extended.
+- First standalone release.

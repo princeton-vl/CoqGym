@@ -1,0 +1,12 @@
+Name:TreeAutomata
+Title:Tree automatas
+Author:Xavier Rival
+Homepage: http://www.eleves.ens.fr/home/rival
+Institution: Dyade / INRIA Rocquencourt
+Date:september 1999
+Description: provides tree automatas algorithms in Coq (merge,
+  intersection, vacuity test, deletion of empty states, coaccessiblity test,
+  deletion of non coaccessible states)
+Keywords:tree automatas, bottom up reflexion terms 
+Require: IntMap
+Category: Computer Science/Formal Languages Theory and Automata

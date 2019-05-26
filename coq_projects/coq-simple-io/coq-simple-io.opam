@@ -1,0 +1,28 @@
+opam-version: "1.2"
+name: "coq-simple-io"
+version: "dev"
+synopsis: "IO monad for Coq"
+description: "
+  This library provides tools to implement IO programs directly in Coq, in a
+  similar style to Haskell. Facilities for formal verification are not
+  included.
+
+  IO is defined as a parameter with a purely functional interface in
+  Coq, to be extracted to OCaml. Some wrappers for the basic types and
+  functions in the OCaml Pervasives module are provided, and users are free to
+  define their own APIs on top of this IO type."
+maintainer: "Li-yao Xia <lysxia@gmail.com>"
+authors: "Li-yao Xia"
+homepage: "https://github.com/Lysxia/coq-simple-io"
+dev-repo: "https://github.com/Lysxia/coq-simple-io.git"
+bug-reports: "https://github.com/Lysxia/coq-simple-io/issues"
+license: "MIT"
+build: [ make "build" ]
+run-test: [ make "test" ]
+install: [ make "install" ]
+remove: [ make "uninstall" ]
+depends: [
+  "coq"
+  "coq-ext-lib" {>= "0.10.0"}
+  "ocamlbuild" {test & >= "0.9.0"}
+]

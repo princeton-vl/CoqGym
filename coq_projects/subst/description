@@ -1,0 +1,9 @@
+Name: Subst
+Title: The confluence of Hardin-Lévy lambda-sigma-lift-calcul
+Author: Amokrane Saïbi
+Institution: INRIA Rocquencourt
+Description: The confluence of Hardin-Lévy lambda-sigma-lift-calcul is
+proven.  By the way, several standard definition and results about
+rewriting systems are proven (Newman's lemma, Yokouchi's lemma, ...).
+Keywords: lambda-sigma-lift-calculus, explicit substitution, Newman's lemma, Yokouchi's lemma, confluence, rewriting
+Category: Computer Science/Lambda Calculi

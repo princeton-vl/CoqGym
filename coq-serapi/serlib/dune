@@ -1,0 +1,8 @@
+(library
+ (name serlib)
+ (public_name coq-serapi.serlib)
+ (wrapped false)
+ (synopsis "Serialization Library for Coq")
+ (preprocess (staged_pps ppx_import ppx_sexp_conv))
+ (libraries coq.stm sexplib))
+

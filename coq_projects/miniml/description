@@ -1,0 +1,10 @@
+Name: MiniML
+Title: Correctness of the compilation of Mini-ML into the Categorical Abstract Machine
+Author: Samuel Boutin
+Institution: INRIA Rocquencourt
+Description: A formalisation of Mini-ML and of the Categorical
+Abstract Machine (C.A.M) in natural semantics. It also contains the
+definition of the translation from Mini-ML to the CAM and the proof
+that this translation is correct
+Keywords: functional programming, Categorical Abstract Machine, compilation, natural semantics
+Category: Computer Science/Semantics and Compilation/Compilation

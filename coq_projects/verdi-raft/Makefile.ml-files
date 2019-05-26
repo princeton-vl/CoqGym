@@ -1,0 +1,5 @@
+VARDML = extraction/vard/ml/VarDRaft.ml extraction/vard/ml/VarDRaft.mli
+VARDSERML = extraction/vard-serialized/ml/VarDRaftSerialized.ml extraction/vard-serialized/ml/VarDRaftSerialized.mli
+VARDLOGML = extraction/vard-log/ml/VarDRaftLog.ml extraction/vard-log/ml/VarDRaftLog.mli
+VARDSERLOGML = extraction/vard-serialized-log/ml/VarDRaftSerializedLog.ml extraction/vard-serialized-log/ml/VarDRaftSerializedLog.mli
+VARDDEBUGML = extraction/vard-debug/ml/VarDRaftDebug.ml extraction/vard-debug/ml/VarDRaftDebug.mli

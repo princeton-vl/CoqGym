@@ -1,0 +1,13 @@
+# Script simulating a dialog between coqide and coqtop -ideslave
+# Run it via fake_ide
+#
+# bug #2569 : Undoing inside modules
+#
+ADD { Module M. }
+ADD here { Definition x := 0. }
+ADD { End M. }
+EDIT_AT here
+# <replay>
+ADD { End M. }
+# </replay>
+QUERY { Check M.x. }

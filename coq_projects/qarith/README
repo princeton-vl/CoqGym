@@ -1,0 +1,69 @@
+          A Library for Rational Numbers (QArith)
+
+                       P. Letouzey
+
+This contribution is a proposition for what could become a QArith 
+Standard Library. The need for such a QArith Standard Library seems
+clear from the number of users contribution dealing with Rationals.
+There are at least: 
+
+Rocq/RATIONAL
+Nijmegen/QArith
+Nijmegen/C-CoRN/model/field/Fraction_Rat.v
+
+and probably more. The present contribution is based on C-CoRN 
+(former FTA) file,  enhanced via the use of Coq's tools for Setoids. 
+In particular, it inherits its definition of Q datatype: 
+
+Record Q : Set :=  Qmake { Qnum: Z; Qden: positive }.
+
+The immediate problem with this representation is the lack of 
+canonicity. In particular, from the Coq point of view, 1/2 <> 2/4. 
+In Rocq/RATIONAL, this issue is addressed via a quotient type. 
+In Nijmegen/QArith, another representation is chosen, that fulfill 
+the canonicity. The third way we propose is to stick to the simple 
+original definition, and to define a setoid equality predicate over Q.
+
+Two reasons for this third way:
+
+- Coq has now tools to deal with Setoid equalities, Setoid Rewrite and 
+Setoid Replace. There is even a Setoid Ring adapation of the Ring 
+tactic (see file Qring.v)
+
+- This simple representation allows a relatively small library, and at
+the same time gives relatively efficient extracted functions. On the 
+contrary, the Nijmegen/QArith clever data-representation seems to have
+as drawback slow operations (Qplus is done via decoding to nat numbers, 
+adding in nat, and then recoding, is that correct ?)
+
+
+THE FILES:
+
+QArith.v: basic definitions and lemmas, Q seen as a Setoid. 
+
+Qring.v: Q seen as a Setoid Ring, some example of Ring tactic being used.
+
+Qreals.v: Unlike Ring, the Field tactic does currently not work over 
+ Setoids. In the meanwhile, we can emulate a Field over Q by injecting the 
+ equality inside Coq Reals, and then using Field. This file provides a 
+ tactic QField which do that. 
+
+Qreduction.v: Transforming a fraction into its reduced form. 
+
+SQRT2: 
+
+In this subdirectory can be found a small experiment about constructive 
+reals made with the help of H. Schwichtenberg. Even if this experiment 
+is not in a finished state, I've included it along with QArith as a 
+example of use for these rationals and as a test-suite. 
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,68 @@
+HIGH PRIORITY:
+  - We need a way of naming mutants so that, for example, we can test just a
+    single mutant (that we have just added) instead of all mutants.  I'm
+    going to guess that this will be so common a usage mode that we are
+    going to want to name ALL mutants.  This will also be a more convenient
+    way of printing them than printing diffs.
+  - We probably also need a syntax for nested mutants
+
+  - When displaying counterexamples, would it be easy to print the name of
+    each bound variable along with the failing value that's been found for
+    it? 
+
+  - The top-level QC interface should expose as little as possible, so that
+    modules that Import QC do not have their namespaces too polluted.  (And
+    there should be a single file that most users import, rather than
+    several.)
+        - At the moment, most files that use QC include this at the top -- how
+          much of it is really needed??
+                 From QuickChick Require Export QuickChick.
+                 Set Bullet Behavior "Strict Subproofs".
+                 Import QcNotation. Open Scope qc_scope.
+                 Import GenLow GenHigh.
+                 Require Import List ZArith.
+                 Import ListNotations.
+                 Set Warnings "-extraction-opaque-accessed,-extraction".
+                 Unset Refine Instance Mode.  (* Don't be too automatic! *)
+
+  - Can we try again to fix the "Section... extends..." parsing issue?
+
+  * Make a simpler tactic for deriving equality.
+       Derive Arbitrary, Show, Eq for file_access_mode.
+  * play with precedence for ? -- should bind tigher than implication
+       - and could we automatically make decidable props checkable, without ?
+
+MINOR:
+  - Figure out how to check different mutants in parallel 
+  - Catch C-c and terminate QC tool 
+  - Add
+       Set Warnings "-notation-overridden,-parsing".
+    to all .v files to get rid of compilation warnings.
+  - eliminate the rest of the compilation warnings (including nonexhaustive
+    patterns!) 
+
+COSMETIC:
+  - Document (for emacs compile users):
+      (require 'ansi-color)
+      (defun endless/colorize-compilation ()
+        "Colorize from `compilation-filter-start' to `point'."
+        (let ((inhibit-read-only t))
+          (ansi-color-apply-on-region
+           compilation-filter-start (point))))
+
+      (add-hook 'compilation-filter-hook
+                #'endless/colorize-compilation)  
+
+ABOUT DECIDABILITY:
+  - Can we make every EqDec automatically be a Dec?
+  - Dec seems not to be working as intended.  Leo hoped that the ? would not
+    be necessary to coerce a (decidable) Prop to a Checkable...
+  - How do I create a Dec instance for options?  
+  - How should we phrase specs like the one for filesystem operations in DW?
+    Is there a way of using Dec to (semi?-)automatically calculate decision
+    procedures for things like /\ and forall formulas?
+
+TASKS FOR THE SUMMER SCHOOL:
+  - documentation -- coqdoc comments, especially on the most user-visible
+    parts!
+  - update and test opam package

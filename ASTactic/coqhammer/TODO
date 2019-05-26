@@ -1,0 +1,22 @@
+1. Make boolean reflection work. Make CoqHammer usable with MathComp.
+
+2. For reconstruction: look at the discrimination (also injection?)
+   axioms used in the ATP proofs and add them to the context before
+   invoking a reconstruction tactic.
+
+3. Explicitly state the types of non-trivial terms. E.g. if f:nat->nat
+   and 0:nat and (f 0) occurs (in the goal or hypothesis?) then state
+   (f 0):nat as an axiom. More general: consider non-trivial terms as
+   possible dependencies.
+
+4. Omit (some) type arguments (inductive type parameters?) to
+   polymorphic functions/constructors (e.g. cons).
+
+5. Omit (some) type guards when the type may be inferred (e.g. forall
+   x : nat, Even(x) -> phi probably may be translated to forall x,
+   Even(x) -> phi', because Even(x) implies nat(x)).
+
+6. Heuristic monomorphisation (instantiation of polymorphic
+   definitions with types).
+
+7. Remove dependence on "grep".

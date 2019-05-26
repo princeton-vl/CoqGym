@@ -1,0 +1,23 @@
+
+   The documentation is written in html.
+   Please read the file README.html with your favourite Web
+   reader.
+   In general, for each module foo, you will find a foo.html file,
+   in addition to the foo.v (vernacular) and foo.vo (compiled)
+   files.
+
+   
+   Some questions ? Constructive remarks ?
+   mail to Pierre.Casteran@labri.u-bordeaux.fr
+
+   And now, please compile the vernacular files with the command "make all".
+
+In case of trouble ...
+*********************
+In the file "main.v" we used a patch of the "Program" tactic; if you have a 
+too old version, please do the corrections given in "corrections.txt".
+
+
+
+
+

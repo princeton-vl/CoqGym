@@ -1,0 +1,32 @@
+-Q src ""
+
+# Core Logics
+src/ChargeCore/Logics/ILogic.v
+src/ChargeCore/Logics/BILInsts.v
+src/ChargeCore/Logics/BILogic.v
+src/ChargeCore/Logics/IBILogic.v
+src/ChargeCore/Logics/ILEmbed.v
+src/ChargeCore/Logics/ILInsts.v
+src/ChargeCore/Logics/ILogicIso.v
+src/ChargeCore/Logics/Later.v
+src/ChargeCore/Logics/PureInsts.v
+src/ChargeCore/Logics/Pure.v
+
+# Open Logics, i.e. logics with variables
+src/ChargeCore/Open/OpenILogic.v
+src/ChargeCore/Open/Open.v
+src/ChargeCore/Open/OptionILogic.v
+src/ChargeCore/Open/Stack.v
+src/ChargeCore/Open/Subst.v
+
+# Separation Algebra
+src/ChargeCore/SepAlg/SepAlgInsts.v
+src/ChargeCore/SepAlg/SepAlgPfun.v
+src/ChargeCore/SepAlg/SepAlg.v
+src/ChargeCore/SepAlg/UUSepAlg.v
+
+# Tactics
+src/ChargeCore/Tactics/Indexed.v
+src/ChargeCore/Tactics/Lemmas.v
+src/ChargeCore/Tactics/Model.v
+src/ChargeCore/Tactics/Tactics.v

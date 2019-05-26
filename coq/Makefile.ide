@@ -1,0 +1,292 @@
+##########################################################################
+##         #   The Coq Proof Assistant / The Coq Development Team       ##
+##  v      #   INRIA, CNRS and contributors - Copyright 1999-2018       ##
+## <O___,, #       (see CREDITS file for the list of authors)           ##
+##   \VV/  ###############################################################
+##    //   #    This file is distributed under the terms of the         ##
+##         #     GNU Lesser General Public License Version 2.1          ##
+##         #     (see LICENSE file for the text of the license)         ##
+##########################################################################
+
+## Makefile rules for building the CoqIDE interface
+
+## NB: For the moment, the build system of CoqIDE is part of
+## the one of Coq. In particular, this Makefile.ide is included in
+## Makefile.build. Please ensure that the rules define here are
+## indeed specific to files of the form ide/*
+
+## Coqide-related variables set by ./configure in config/Makefile
+
+#COQIDEINCLUDES : something like -I +lablgtk2
+#HASCOQIDE : opt / byte / no
+#IDEFLAGS : some extra cma, for instance
+#IDEOPTCDEPS : on windows, ide/ide_win32_stubs.o ide/coq_icon.o
+#IDECDEPS
+#IDECDEPSFLAGS
+#IDEINT : X11 / QUARTZ / WIN32
+
+## CoqIDE Executable
+
+COQIDEBYTE:=bin/coqide.byte$(EXE)
+COQIDE:=bin/coqide$(EXE)
+COQIDEAPP:=bin/CoqIDE_$(VERSION).app
+COQIDEINAPP:=$(COQIDEAPP)/Contents/MacOS/coqide
+
+## CoqIDE source directory and files
+
+# Note : for just building bin/coqide, we could only consider
+# config, lib, ide and ide/utils. But the coqidetop plugin (the
+# one that will be loaded by coqidetop) refers to some
+# core modules of coq, for instance printing/*.
+
+IDESRCDIRS:= $(CORESRCDIRS) ide ide/protocol
+
+COQIDEFLAGS=$(addprefix -I , $(IDESRCDIRS)) $(COQIDEINCLUDES)
+
+IDEDEPS:=clib/clib.cma lib/lib.cma ide/protocol/ideprotocol.cma
+IDECMA:=ide/ide.cma
+IDETOPEXE=bin/coqidetop$(EXE)
+IDETOP=bin/coqidetop.opt$(EXE)
+IDETOPBYTE=bin/coqidetop.byte$(EXE)
+
+LINKIDE:=$(IDEDEPS) $(IDECDEPS) $(IDECMA) ide/coqide_main.mli ide/coqide_main.ml
+LINKIDEOPT:=$(IDEOPTCDEPS) $(patsubst %.cma,%.cmxa,$(IDEDEPS:.cmo=.cmx)) $(IDECMA:.cma=.cmxa) ide/coqide_main.mli ide/coqide_main.ml
+
+IDEFILES=$(wildcard ide/*.lang) ide/coq_style.xml ide/coq.png ide/MacOS/default_accel_map
+
+## GTK for Coqide MacOS bundle
+
+GTKSHARE=$(shell pkg-config --variable=prefix gtk+-2.0)/share
+GTKBIN=$(shell pkg-config --variable=prefix gtk+-2.0)/bin
+GTKLIBS=$(shell pkg-config --variable=libdir gtk+-2.0)
+PIXBUFBIN=$(shell pkg-config --variable=prefix gdk-pixbuf-2.0)/bin
+SOURCEVIEWSHARE=$(shell pkg-config --variable=prefix gtksourceview-2.0)/share
+
+###########################################################################
+# CoqIde special targets
+###########################################################################
+
+.PHONY: coqide coqide-opt coqide-byte coqide-files coqide-binaries
+.PHONY: ide-toploop ide-byteloop ide-optloop
+
+# target to build CoqIde (native version) and the stuff needed to lauch it
+coqide: coqide-files coqide-opt theories/Init/Prelude.vo
+
+# target to build CoqIde (in native and byte versions), and no more
+# NB: this target is used in the opam package coq-coqide
+coqide-binaries: coqide-opt coqide-byte
+
+ifeq ($(HASCOQIDE),opt)
+coqide-opt: $(COQIDE) ide-toploop
+else
+coqide-opt: ide-toploop
+endif
+
+ifeq ($(HASCOQIDE),no)
+coqide-byte: ide-byteloop
+else
+coqide-byte: $(COQIDEBYTE) ide-byteloop
+endif
+
+coqide-files: $(IDEFILES)
+
+ide-byteloop: $(IDETOPBYTE)
+ide-optloop: $(IDETOP)
+ide-toploop: $(IDETOPEXE)
+
+ifeq ($(HASCOQIDE),opt)
+$(COQIDE): $(LINKIDEOPT)
+	$(SHOW)'OCAMLOPT -o $@'
+	$(HIDE)$(OCAMLOPT) $(COQIDEFLAGS) $(OPTFLAGS) -o $@ \
+	       -linkpkg -package str,unix,dynlink,threads,lablgtk2.sourceview2 $(IDEFLAGS:.cma=.cmxa) $^
+	$(STRIP_HIDE) $@
+else
+$(COQIDE): $(COQIDEBYTE)
+	cp $< $@
+endif
+
+$(COQIDEBYTE): $(LINKIDE)
+	$(SHOW)'OCAMLC -o $@'
+	$(HIDE)$(OCAMLC) $(COQIDEFLAGS) $(BYTEFLAGS) -o $@ \
+	       -linkpkg -package str,unix,dynlink,threads,lablgtk2.sourceview2 $(IDEFLAGS) $(IDECDEPSFLAGS) $^
+
+ide/coqide_main.ml: ide/coqide_main.ml4 config/Makefile # no camlp5deps here
+	$(SHOW)'CAMLP5O   $<'
+	$(HIDE)$(CAMLP5O) -I $(MYCAMLP5LIB) $(PR_O) $(CAMLP5USE) -D$(IDEINT) -impl $< -o $@
+
+
+ide/%.cmi: ide/%.mli
+	$(SHOW)'OCAMLC    $<'
+	$(HIDE)$(OCAMLC) $(COQIDEFLAGS) $(BYTEFLAGS) -c $<
+
+ide/%.cmo: ide/%.ml
+	$(SHOW)'OCAMLC    $<'
+	$(HIDE)$(OCAMLC) $(COQIDEFLAGS) $(BYTEFLAGS) -c $<
+
+ide/%.cmx: ide/%.ml
+	$(SHOW)'OCAMLOPT  $<'
+	$(HIDE)$(OCAMLOPT) $(COQIDEFLAGS) $(OPTFLAGS) -c $<
+
+# We need to compile this file without -safe-string due mess with
+# lablgtk API. Other option is to require lablgtk >= 2.8.16
+ide/ideutils.cmo: ide/ideutils.ml
+	$(SHOW)'OCAMLC    $<'
+	$(HIDE)$(filter-out -safe-string,$(OCAMLC)) $(COQIDEFLAGS) $(BYTEFLAGS) -c $<
+
+ide/ideutils.cmx: ide/ideutils.ml
+	$(SHOW)'OCAMLOPT  $<'
+	$(HIDE)$(filter-out -safe-string,$(OCAMLOPT)) $(COQIDEFLAGS) $(filter-out -safe-string,$(OPTFLAGS)) -c $<
+
+IDETOPCMA:=ide/ide_common.cma
+IDETOPCMX:=$(IDETOPCMA:.cma=.cmxa)
+
+# Special rule for coqidetop
+$(IDETOPEXE): $(IDETOP:.opt=.$(BEST))
+	cp $< $@
+
+$(IDETOP): ide/idetop.ml $(LINKCMX) $(LIBCOQRUN) $(IDETOPCMX)
+	$(SHOW)'COQMKTOP -o $@'
+	$(HIDE)$(OCAMLOPT) -linkall -linkpkg $(MLINCLUDES) -I ide -I ide/protocol/ \
+			   $(SYSMOD) -package camlp5.gramlib \
+			   $(LINKCMX) $(IDETOPCMX) $(OPTFLAGS) $(LINKMETADATA) $< -o $@
+	$(STRIP_HIDE) $@
+	$(CODESIGN_HIDE) $@
+
+$(IDETOPBYTE): ide/idetop.ml $(LINKCMO) $(LIBCOQRUN) $(IDETOPCMA)
+	$(SHOW)'COQMKTOP -o $@'
+	$(HIDE)$(OCAMLC) -linkall -linkpkg $(MLINCLUDES) -I ide -I ide/protocol/ \
+	                 -I kernel/byterun/ -cclib -lcoqrun $(VMBYTEFLAGS) \
+			 $(SYSMOD) -package camlp5.gramlib \
+			 $(LINKCMO) $(IDETOPCMA) $(BYTEFLAGS) $< -o $@
+
+####################
+## Install targets
+####################
+
+.PHONY: install-coqide install-ide-bin install-ide-toploop install-ide-files install-ide-info install-ide-devfiles install-ide-byte install-ide-toploop-byte install-coqide-byte
+
+ifeq ($(HASCOQIDE),no)
+install-coqide: install-ide-toploop
+else
+install-coqide: install-ide-bin install-ide-toploop install-ide-files install-ide-info install-ide-devfiles
+endif
+ifeq ($(HASCOQIDE),no)
+install-coqide-byte: install-ide-toploop-byte
+else
+install-coqide-byte: install-ide-toploop-byte install-ide-byte
+endif
+
+# Apparently, coqide.byte is not meant to be installed
+
+install-ide-byte:
+	$(MKDIR) $(FULLCOQLIB)
+	$(INSTALLSH) $(FULLCOQLIB) $(IDECMA)
+
+install-ide-bin:
+	$(MKDIR) $(FULLBINDIR)
+	$(INSTALLBIN) $(COQIDE) $(FULLBINDIR)
+
+install-ide-toploop:
+ifeq ($(BEST),opt)
+	$(INSTALLBIN) $(IDETOPEXE) $(IDETOP) $(FULLBINDIR)
+endif
+install-ide-toploop-byte:
+ifneq ($(BEST),opt)
+	$(INSTALLBIN) $(IDETOPEXE) $(IDETOPBYTE) $(FULLBINDIR)
+endif
+
+install-ide-devfiles:
+	$(MKDIR) $(FULLCOQLIB)
+	$(INSTALLSH) $(FULLCOQLIB) \
+	  $(foreach lib,$(IDECMA:.cma=_MLLIB_DEPENDENCIES),$(addsuffix .cmi,$($(lib))))
+ifeq ($(BEST),opt)
+	$(INSTALLSH) $(FULLCOQLIB) $(IDECMA:.cma=.cmxa) $(IDECMA:.cma=.a)
+endif
+
+install-ide-files: #Please update $(COQIDEAPP)/Contents/Resources/ at the same time
+	$(MKDIR) $(FULLDATADIR)
+	$(INSTALLLIB) ide/coq.png ide/*.lang ide/coq_style.xml $(FULLDATADIR)
+	$(MKDIR) $(FULLCONFIGDIR)
+	if [ $(IDEINT) = QUARTZ ] ; then $(INSTALLLIB) ide/mac_default_accel_map $(FULLCONFIGDIR)/coqide.keys ; fi
+
+install-ide-info:
+	$(MKDIR) $(FULLDOCDIR)
+	$(INSTALLLIB) ide/FAQ $(FULLDOCDIR)/FAQ-CoqIde
+
+###########################################################################
+# CoqIde MacOS special targets
+###########################################################################
+
+.PHONY: $(COQIDEAPP)/Contents
+
+$(COQIDEAPP)/Contents:
+	rm -rdf $@
+	$(MKDIR) $@
+	sed -e "s/VERSION/$(VERSION4MACOS)/g" ide/MacOS/Info.plist.template > $@/Info.plist
+	$(MKDIR) "$@/MacOS"
+
+$(COQIDEINAPP): ide/macos_prehook.cmx $(LINKIDEOPT) | $(COQIDEAPP)/Contents
+	$(SHOW)'OCAMLOPT -o $@'
+	$(HIDE)$(OCAMLOPT) $(COQIDEFLAGS) $(OPTFLAGS) -o $@ \
+	        -linkpkg -package str,unix,dynlink,threads,lablgtk2.sourceview2 $(IDEFLAGS:.cma=.cmxa) $^
+	$(STRIP_HIDE) $@
+
+$(COQIDEAPP)/Contents/Resources/share: $(COQIDEAPP)/Contents
+	$(MKDIR) $@/coq/
+	$(INSTALLLIB) ide/coq.png ide/*.lang ide/coq_style.xml $@/coq/
+	$(MKDIR) $@/gtksourceview-2.0/{language-specs,styles}
+	$(INSTALLLIB) "$(SOURCEVIEWSHARE)/"gtksourceview-2.0/language-specs/{def.lang,language2.rng} $@/gtksourceview-2.0/language-specs/
+	$(INSTALLLIB) "$(SOURCEVIEWSHARE)/"gtksourceview-2.0/styles/{styles.rng,classic.xml} $@/gtksourceview-2.0/styles/
+	cp -R "$(GTKSHARE)/"locale $@
+	cp -R "$(GTKSHARE)/"themes $@
+
+$(COQIDEAPP)/Contents/Resources/loaders: $(COQIDEAPP)/Contents
+	$(MKDIR) $@
+	$(INSTALLLIB) $$("$(PIXBUFBIN)/gdk-pixbuf-query-loaders" | sed -n -e '5 s!.*= \(.*\)$$!\1!p')/libpixbufloader-png.so $@
+
+$(COQIDEAPP)/Contents/Resources/immodules: $(COQIDEAPP)/Contents
+	$(MKDIR) $@
+	$(INSTALLLIB) "$(GTKLIBS)/gtk-2.0/2.10.0/immodules/"*.so $@
+
+
+$(COQIDEAPP)/Contents/Resources/etc: $(COQIDEAPP)/Contents/Resources/lib
+	$(MKDIR) $@/xdg/coq
+	$(INSTALLLIB) ide/MacOS/default_accel_map $@/xdg/coq/coqide.keys
+	$(MKDIR) $@/gtk-2.0
+	{ "$(PIXBUFBIN)/gdk-pixbuf-query-loaders" $@/../loaders/*.so |\
+	 sed -e "s!/.*\(/loaders/.*.so\)!@executable_path/../Resources/\1!"; } \
+	> $@/gtk-2.0/gdk-pixbuf.loaders
+	{ "$(GTKBIN)/gtk-query-immodules-2.0" $@/../immodules/*.so |\
+	 sed -e "s!/.*\(/immodules/.*.so\)!@executable_path/../Resources/\1!" |\
+	 sed -e "s!/.*\(/share/locale\)!@executable_path/../Resources/\1!"; } \
+	> $@/gtk-2.0/gtk-immodules.loaders
+	$(MKDIR) $@/pango
+	echo "[Pango]" > $@/pango/pangorc
+
+$(COQIDEAPP)/Contents/Resources/lib: $(COQIDEAPP)/Contents/Resources/immodules $(COQIDEAPP)/Contents/Resources/loaders $(COQIDEAPP)/Contents $(COQIDEINAPP)
+	$(MKDIR) $@
+	macpack -d ../Resources/lib $(COQIDEINAPP)
+	for i in $@/../loaders/*.so $@/../immodules/*.so; \
+	do \
+	  macpack -d ../lib $$i; \
+	done
+
+$(COQIDEAPP)/Contents/Resources:$(COQIDEAPP)/Contents/Resources/etc $(COQIDEAPP)/Contents/Resources/share
+	$(INSTALLLIB) ide/MacOS/*.icns $@
+
+$(COQIDEAPP):$(COQIDEAPP)/Contents/Resources
+	$(CODESIGN_HIDE) $@
+
+###########################################################################
+# CoqIde for Windows special targets
+###########################################################################
+
+%.o: %.rc
+	$(SHOW)'WINDRES    $<'
+	$(HIDE)i686-w64-mingw32-windres -i $< -o $@
+
+
+# For emacs:
+# Local Variables:
+# mode: makefile
+# End:

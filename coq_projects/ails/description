@@ -1,0 +1,10 @@
+Name : AILS
+Title : Proof of AILS algorithm
+Author : Olivier Desmettre
+Institution : INRIA Rocquencourt
+Date : 2002
+Description : An aircraft trajectory modeling and analysis using the AILS
+              algorithm (Airborne Information for Lateral Spacing) to warn
+              against possible collisions.
+Keywords : ails, aircraft, trajectory, conflict, collision
+Category: Computer Science/Decision Procedures and Certified Algorithms/Correctness proofs of algorithms

@@ -1,0 +1,10 @@
+Name: FreeGroups
+Title: Free Groups
+Description: This small contribution is a formalization of van der Waerden's proof of the construction of a free group on a set of generators, as the reduced words where a letter is a generator or its formal inverse.
+
+Keywords: free group
+Category: Mathematics/Algebra
+Author: Daniel Schepler
+Email: dschepler@gmail.com
+Require: 
+License: LGPL

@@ -1,0 +1,15 @@
+name: coq_gym
+channels:
+  - defaults
+dependencies:
+  - numpy=1.16.2
+  - numpy-base=1.16.2
+  - python=3.7.1
+  - pip=19.0.3
+  - pip:
+    - lark-parser==0.6.5
+    - lmdb==0.94
+    - pandas==0.24.2
+    - pexpect==4.6.0
+    - progressbar2==3.39.3
+    - sexpdata==0.0.3

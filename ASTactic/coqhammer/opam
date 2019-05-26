@@ -1,0 +1,31 @@
+opam-version: "1.2"
+maintainer: "palmskog@gmail.com"
+
+homepage: "https://github.com/lukaszcz/coqhammer"
+dev-repo: "https://github.com/lukaszcz/coqhammer.git"
+bug-reports: "https://github.com/lukaszcz/coqhammer/issues"
+license: "LGPL-2.1-only"
+
+build: [ make "-j%{jobs}%" ]
+build-test: [ make "tests" ]
+install: [ make "install" ]
+remove: [
+  ["sh" "-c" "rm -rf '%{lib}%/coq/user-contrib/Hammer'"]
+  ["sh" "-c" "rm -f '%{bin}%/predict' '%{bin}%/htimeout'"]
+]
+depends: [
+  "coq" {>= "8.8" & < "8.10~"}
+]
+
+tags: [
+  "category:Miscellaneous/Coq Extensions"
+  "keyword:automation"
+  "keyword:hammer"
+  "logpath:Hammer"
+]
+
+authors: [
+  "Lukasz Czajka <lukaszcz@mimuw.edu.pl>"
+  "Cezary Kaliszyk <cezary.kaliszyk@uibk.ac.at>"
+  "Burak Ekici <burak.ekici@uibk.ac.at>"
+]

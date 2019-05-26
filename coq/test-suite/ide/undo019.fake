@@ -1,0 +1,14 @@
+# Script simulating a dialog between coqide and coqtop -ideslave
+# Run it via fake_ide
+#
+# bug #2569 : Undoing a focused subproof
+#
+ADD { Goal True. }
+ADD { \{ }
+ADD here { exact I. }
+ADD { \} }
+EDIT_AT here
+# <replay>
+ADD { \} }
+# </replay>
+ADD { Qed. }

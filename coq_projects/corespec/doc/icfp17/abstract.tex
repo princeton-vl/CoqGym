@@ -1,0 +1,13 @@
+We propose a core semantics for Dependent Haskell, an extension of Haskell
+with full-spectrum dependent types. Our semantics consists of two related
+languages. The first is a Curry-style dependently-typed language with
+nontermination, irrelevant arguments, and equality abstraction. The second,
+inspired by the Glasgow Haskell Compiler's core language FC, is its
+explicitly-typed analogue, suitable for implementation in GHC. All of our
+results---chiefly, type safety, along with theorems that relate these two
+languages---have been formalized using the Coq proof assistant. Because our
+work is backwards compatible with Haskell, our type safety proof holds in the
+presence of nonterminating computation. However, unlike other full-spectrum
+dependently-typed languages, such as Coq, Agda or Idris, because of this
+nontermination, Haskell's term language does not correspond to a consistent
+logic.

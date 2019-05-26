@@ -1,0 +1,350 @@
+(** Extraction of computations to OCaml. *)
+Require Import Coq.Lists.List.
+Require Import Coq.NArith.NArith.
+Require Import Coq.PArith.PArith.
+Require Import Coq.Strings.String.
+Require Import ExtrOcamlBasic.
+Require Import ExtrOcamlBigIntConv.
+Require Import ExtrOcamlString.
+Require Import ErrorHandlers.All.
+Require Import FunctionNinjas.All.
+Require Import ListString.All.
+Require Import Computation.
+Require Import Events.
+Require Import Run.
+
+Import ListNotations.
+Local Open Scope string.
+Local Open Scope list.
+
+(** The module to access to OCaml functions. *)
+Module Native.
+  (** Sequence two instructions. *)
+  Parameter seq : forall A, (unit -> unit) -> (unit -> A) -> A.
+  Arguments seq [A] _ _.
+  Extract Constant seq => "Native.seq".
+
+  (** To manipulate OCaml strings. *)
+  Module String.
+    (** The OCaml's `string` type. *)
+    Parameter t : Set.
+    Extract Constant t => "string".
+
+    (** Import an OCaml string. *)
+    Parameter to_string : t -> LString.t.
+    Extract Constant to_string => "Native.String.to_string".
+
+    (** Export a string to OCaml. *)
+    Parameter of_string : LString.t -> t.
+    Extract Constant of_string => "Native.String.of_string".
+
+    (** Concatenate two strings. *)
+    Parameter append : t -> t -> t.
+    Extract Constant append => "Native.String.append".
+
+    (** Split a string at each space. *)
+    Parameter tokenize : t -> list t.
+    Extract Constant tokenize => "Native.String.tokenize".
+
+    (** Test if a string is empty. *)
+    Parameter is_empty : t -> bool.
+    Extract Constant is_empty => "Native.String.is_empty".
+  End String.
+
+  (** The base64 format. *)
+  Module Base64.
+    (** Encode an OCaml string in base64. *)
+    Parameter encode : String.t -> String.t.
+    Extract Constant encode => "Base64.encode".
+
+    (** Decode an OCaml string in base64. *)
+    Parameter decode : String.t -> String.t.
+    Extract Constant decode => "Base64.decode".
+  End Base64.
+
+  (** Handle communication with a son process through a pipe. *)
+  Module Process.
+    (** A process is the pipe to communicate with it. *)
+    Parameter t : Set.
+    Extract Constant t => "Native.Process.t".
+
+    (** Start a new process. *)
+    Parameter run : String.t -> t.
+    Extract Constant run => "Native.Process.run".
+
+    (** Send a message to a pipe. *)
+    Parameter print_line : String.t -> t -> unit.
+    Extract Constant print_line => "Native.Process.print_line".
+
+    (** Handle messages from a pipe using a fold. *)
+    Parameter fold_lines : forall A, t -> A -> (A -> String.t -> option A) -> unit.
+    Extract Constant fold_lines => "Native.Process.fold_lines".
+  End Process.
+
+  (** Unbounded integers. *)
+  Module BigInt.
+    (** The OCaml's `bigint` type. *)
+    Definition t : Type := bigint.
+
+    (** Export to an OCaml string. *)
+    Parameter to_string : t -> String.t.
+    Extract Constant to_string => "Native.BigInt.to_string".
+
+    (** Import from an OCaml string. *)
+    Parameter of_string : String.t -> option t.
+    Extract Constant of_string => "Native.BigInt.of_string".
+
+    (** Export to a `positive`. *)
+    Definition to_positive : t -> positive := pos_of_bigint.
+
+    (** Import from a `positive`. *)
+    Definition of_positive : positive -> t := bigint_of_pos.
+
+    (** Export to a `N`. *)
+    Definition to_N : t -> N := n_of_bigint.
+
+    (** Import from a `N`. *)
+    Definition of_N : N -> t := bigint_of_n.
+  End BigInt.
+
+  (** Print an error message on `stderr`. *)
+  Parameter print_error : String.t -> unit.
+  Extract Constant print_error => "Native.print_error".
+
+  (** The list of arguments of the program. *)
+  Parameter argv : list String.t.
+  Extract Constant argv => "Native.argv".
+End Native.
+
+(** Import input events. *)
+Module Input.
+  (** An associative list of the commands. *)
+  Definition commands : list (string * Command.t) := [
+    ("Log", Command.Log);
+    ("FileRead", Command.FileRead);
+    ("ServerSocketBind", Command.ServerSocketBind);
+    ("ClientSocketRead", Command.ClientSocketRead);
+    ("ClientSocketWrite", Command.ClientSocketWrite);
+    ("ClientSocketClose", Command.ClientSocketClose);
+    ("Time", Command.Time)].
+
+  (** Try to import a command string. *)
+  Definition import_command (command : Native.String.t) : option Command.t :=
+    let command := Native.String.to_string command in
+    Option.bind (commands |> List.find (fun x =>
+      LString.eqb command @@ LString.s @@ fst x)) (fun x =>
+    Some (snd x)).
+
+  (** Try to import the string of a boolean. *)
+  Definition import_bool (b : Native.String.t) : option bool :=
+    let b := Native.String.to_string b in
+    if LString.eqb b (LString.s "false") then
+      Some false
+    else if LString.eqb b (LString.s "true") then
+      Some true
+    else
+      None.
+
+  (** Try to import the string of a `positive`. *)
+  Definition import_positive (n : Native.String.t) : option positive :=
+    option_map Native.BigInt.to_positive (Native.BigInt.of_string n).
+
+  (** Try to import the string of a `N`. *)
+  Definition import_N (n : Native.String.t) : option N :=
+    option_map Native.BigInt.to_N (Native.BigInt.of_string n).
+
+  (** Try to import a string in base64. *)
+  Definition import_string (s : Native.String.t) : LString.t :=
+    Native.String.to_string (Native.Base64.decode s).
+
+  (** Try to import the option of an argument. *)
+  Definition import_option (s : Native.String.t) : option Native.String.t :=
+    if Native.String.is_empty s then
+      None
+    else
+      Some s.
+
+  (** Import an input message. May return an error message. *)
+  Definition import (input : Native.String.t) : Input.t + LString.t :=
+    match Native.String.tokenize input with
+    | command :: id :: arguments =>
+      match (import_command command, import_positive id) with
+      | (None, _) => inr (LString.s "Unknown command.")
+      | (_, None) => inr (LString.s "Invalid id.")
+      | (Some command, Some id) =>
+        match (command, arguments) with
+        | (Command.Log, [is_success]) =>
+          match import_bool is_success with
+          | None => inr (LString.s "Invalid boolean.")
+          | Some is_success => inl (Input.New Command.Log id is_success)
+          end
+        | (Command.FileRead, [content]) =>
+          let content := option_map import_string (import_option content) in
+          inl (Input.New Command.FileRead id content)
+        | (Command.ServerSocketBind, [client_id]) =>
+          match import_option client_id with
+          | None => inl (Input.New Command.ServerSocketBind id None)
+          | Some client_id =>
+            match import_N client_id with
+            | None => inr (LString.s "Invalid client_id.")
+            | Some client_id =>
+              let client_id := ClientSocketId.New client_id in
+              inl (Input.New Command.ServerSocketBind id (Some client_id))
+            end
+          end
+        | (Command.ClientSocketRead, [content]) =>
+          let content := option_map import_string (import_option content) in
+          inl (Input.New Command.ClientSocketRead id content)
+        | (Command.ClientSocketWrite, [is_success]) =>
+          match import_bool is_success with
+          | None => inr (LString.s "Invalid boolean.")
+          | Some is_success => inl (Input.New Command.ClientSocketWrite id is_success)
+          end
+        | (Command.ClientSocketClose, [is_success]) =>
+          match import_bool is_success with
+          | None => inr (LString.s "Invalid boolean.")
+          | Some is_success => inl (Input.New Command.ClientSocketClose id is_success)
+          end
+        | (Command.Time, [time]) =>
+          match LString.to_N 10 (Native.String.to_string time) with
+          | None => inr (LString.s "Invalid integer.")
+          | Some time => inl (Input.New Command.Time id time)
+          end
+        | _ => inr (LString.s "Wrong number of arguments.")
+        end
+      end
+    | _ => inr (LString.s "The input must have at least two elements.")
+    end.
+End Input.
+
+(** Export output events. *)
+Module Output.
+  (** Concatenate two strings with a space in between. *)
+  Definition join (s1 s2 : Native.String.t) : Native.String.t :=
+    Native.String.append (Native.String.append s1
+      (Native.String.of_string (LString.s " "))) s2.
+
+  (** Export a boolean. *)
+  Definition export_bool (b : bool) : Native.String.t :=
+    if b then
+      Native.String.of_string (LString.s "true")
+    else
+      Native.String.of_string (LString.s "false").
+
+  (** Export a `positive`. *)
+  Definition export_positive (n : positive) : Native.String.t :=
+    Native.BigInt.to_string (Native.BigInt.of_positive n).
+
+  (** Export a `N`. *)
+  Definition export_N (n : N) : Native.String.t :=
+    Native.BigInt.to_string (Native.BigInt.of_N n).
+
+  (** Export a client socket id. *)
+  Definition export_client_id (client_id : ClientSocketId.t) : Native.String.t :=
+    match client_id with
+    | ClientSocketId.New client_id => export_N client_id
+    end.
+
+  (** Export a string in base64. *)
+  Definition export_string (s : LString.t) : Native.String.t :=
+    Native.Base64.encode (Native.String.of_string s).
+
+  (** Export an output message to a string. *)
+  Definition export (output : Output.t) : Native.String.t :=
+    let id := export_positive (Output.id output) in
+    let start (s : string) :=
+      join (Native.String.of_string (LString.s s)) id in
+    match output with
+    | Output.New Command.Log _ message =>
+      let message := export_string message in
+      join (start "Log") message
+    | Output.New Command.FileRead _ file_name =>
+      join (start "FileRead") (export_string file_name)
+    | Output.New Command.ServerSocketBind _ port =>
+      join (start "ServerSocketBind") (export_N port)
+    | Output.New Command.ClientSocketRead _ client_id =>
+      join (start "ClientSocketRead") (export_client_id client_id)
+    | Output.New Command.ClientSocketWrite _ (client_id, content) =>
+      join (start "ClientSocketWrite")
+        (join (export_client_id client_id) (export_string content))
+    | Output.New Command.ClientSocketClose _ client_id =>
+      join (start "ClientSocketClose") (export_client_id client_id)
+    | Output.New Command.Time _ _ => start "Time"
+    end.
+End Output.
+
+(** Run a program on an initial memory. *)
+Definition run {sig : Signature.t} (mem : Memory.t sig)
+  (program : list LString.t -> C.t sig unit) : unit :=
+  (* The proxy to talk with. *)
+  let system := Native.Process.run @@ Native.String.of_string @@
+    LString.s "coqConcurrencyProxy.native" in
+  (* Print a list of outputs. *)
+  let fix print_outputs outputs :=
+    match outputs with
+    | [] => tt
+    | output :: outputs =>
+      Native.seq
+        (fun _ => Native.Process.print_line (Output.export output) system)
+        (fun _ => print_outputs outputs)
+    end in
+  (* The program arguments. *)
+  let argv := List.map Native.String.to_string Native.argv in
+  (* Run the program on its arguments. *)
+  match Run.run (CallBacks.empty _) mem [] (program argv) with
+  | (result, call_backs, mem, outputs) =>
+    Native.seq
+      (* Send the outputs. *)
+      (fun _ => print_outputs outputs)
+      (fun _ =>
+        (* Check if the program exited. *)
+        match result with
+        | None => tt (* Exit. *)
+        | Some _ => (* Continue. *)
+          let state := (call_backs, mem) in
+          (* We loop on the resulting events sent back by the system. *)
+          Native.Process.fold_lines _ system state (fun state input =>
+            let (call_backs, mem) := state in
+            (* Try to import the input. *)
+            match Input.import input with
+            (* The input was valid. *)
+            | inl (Input.New command id argument) =>
+              (* Get the corresponding callback. *)
+              match CallBacks.find call_backs id with
+              | None => Some state
+              | Some (CallBack.New <%= "_" if version[0..2] == "8.4" %> a handler) =>
+                (* Run the callback. *)
+                match Run.run call_backs mem [] (handler a argument) with
+                | (result, call_backs, mem, outputs) =>
+                  Native.seq
+                    (* Send the outputs. *)
+                    (fun _ => print_outputs outputs)
+                    (fun _ =>
+                      (* Check if the callback exited the program. *)
+                      match result with
+                      | None => None (* `None` to terminate the fold on the inputs. *)
+                      | Some a =>
+                        let call_backs :=
+                          (* Check if the callback is terminated. *)
+                          match a with
+                          | None => CallBacks.remove call_backs id
+                          | Some a =>
+                            (* Update the store of the callback if it is not terminated. *)
+                            let call_back := CallBack.New a handler in
+                            CallBacks.update call_backs id call_back
+                          end in
+                        Some (call_backs, mem)
+                      end)
+                end
+              end
+            (* The input was invalid. Should not happen. *)
+            | inr error_message =>
+              let error_message :=
+                LString.s "Input '" ++ Native.String.to_string input ++
+                LString.s "'ignored: " ++ error_message in
+              Native.seq
+                (fun _ => Native.print_error (Native.String.of_string error_message))
+                (fun _ => Some state)
+            end)
+        end)
+  end.

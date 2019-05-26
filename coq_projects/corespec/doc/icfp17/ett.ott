@@ -1,0 +1,1742 @@
+%% This file uses the Ott tool to specify the grammar, typing and
+%% evaluation rules for the implicit and explicit languages
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% METAVARIABLES
+
+metavar tmvar, x, y, f, m, n ::=
+  {{ repr-locally-nameless }}
+  {{ com variables }}
+  {{ lex alphanum }}
+
+metavar covar, c ::=
+  {{ repr-locally-nameless }}
+  {{ com coercion variables }}
+  {{ lex alphanum }}
+
+metavar datacon, K ::= {{ coq atom }}
+
+metavar const, T ::= {{ coq atom }}
+  {{ lex Alphanum }}
+
+metavar tyfam, F ::= {{ coq atom }}
+  {{ lex Alphanum }}
+
+indexvar index, i ::=
+  {{ tex \mathit{[[index]]} }} {{ com indices }} {{ coq nat }}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% GRAMMAR
+
+grammar
+
+relflag, rho {{ tex \rho }} :: '' ::= {{ com relevance flag }}
+   | +             ::   :: Rel
+   | -             ::   :: Irrel
+
+constraint, phi {{ tex \phi }} :: '' ::= {{ com props }}
+   | a ~ b : A        ::   :: Eq
+     {{ tex [[a]] [[~]]_{[[A]]} [[b]] }}
+   | ( phi )          :: S :: Paren
+     {{ coq ([[phi]]) }}
+   | phi { b / x }    :: S :: Subst
+     {{ coq (open_constraint_wrt_tm [[x b]] [[phi]]) }}
+   | | phi |          :: S :: Erase
+     {{ coq (erase_constraint [[phi]]) }}
+%% TODO: think about adding this constraint
+%% | phi1 ~ phi2       ::   :: CoIso
+
+
+tm, a, b, v, w, A, B :: 'a_' ::= {{ com types and kinds }}
+   | TYPE               ::   :: Star
+     {{ tex \star }}
+   | x                  ::   :: Var
+   | \ rho x : A . b    ::   :: Abs (+ bind x in b +)
+     {{ tex \mathrm{\lambda}^[[rho]][[x]]\!:\![[A]].[[b]] }}
+   | \ rho x . b        ::   :: UAbs (+ bind x in b +)
+     {{ tex \mathrm{\lambda}^[[rho]][[x]].[[b]] }}
+   | a rho b            ::   :: App
+     {{ tex [[a]]\ [[b]]^{[[rho]]}  }}
+   | F                  ::   :: Fam
+   | T                  ::   :: Const
+   | all rho x : A -> B ::   :: Pi (+ bind x in B +)
+     {{ tex \mathrm{\Pi}^[[rho]][[x]]\!:\![[A]][[->]][[B]] }}
+   | a |> g             ::   :: Conv
+   | all c : phi . B    ::   :: CPi (+ bind c in B +)
+     {{ tex [[all]][[c]]\!:\![[phi]].[[B]] }}
+   | /\ c : phi . b     ::   :: CAbs (+ bind c in b +)
+     {{ tex [[/\]][[c]]\!:\![[phi]].[[b]] }}
+   | /\ c  . b          ::   :: UCAbs (+ bind c in b +)
+     {{ tex [[/\]][[c]].[[b]] }}
+   | a [ g ]            ::   :: CApp
+   | []                 ::   :: Bullet
+
+   %% currently unused but ready for extension
+   | K                ::   :: DataCon
+   | match a with brs ::   :: Case
+
+
+   %% standard substitution, using open
+   | a { b / x }      :: S :: Subst
+     {{ coq (open_tm_wrt_tm [[x a]] [[b]]) }}
+
+   %% this is a hack for when a substitution {x/x} is necessary for the
+   %% locally nameless backend to generate the correct code, but we don't
+   %% want this substitution to show in the tex output
+   | a {{{ b / x }}}  :: S :: SecretSubst
+     {{ coq (open_tm_wrt_tm [[x a]] [[b]]) }}
+     {{ tex [[a]] }}
+
+   | a { g / c }      :: S :: SubstC
+     {{ coq (open_tm_wrt_co [[c a]] [[g]])  }}
+   | a {{{ g / c }}}  :: S :: SecretSubstC
+     {{ coq (open_tm_wrt_co [[c a]] [[g]])  }}
+     {{ tex [[a]] }}
+
+
+   | ( a )            :: S :: Paren
+     {{ coq ([[a]]) }}
+   %% Ott parsing precedence is hard
+   | (# a #)          :: S :: SecretParen
+     {{ coq [[a]] }} {{ tex [[a]] }}
+     {{ com parsing precedence is hard }}
+
+   |  | a |           :: S :: Erase   {{ coq (erase_tm [[a]]) }}
+
+   %% abbreviations for examples
+   | Int              :: S :: Int    {{ coq 0 }}
+   | Bool             :: S :: Bool   {{ coq 0 }}
+   | Nat              :: S :: Nat    {{ coq 0 }}
+   | Vec              :: S :: Vec    {{ coq 0 }}
+   | 0                :: S :: Zero   {{ coq 0 }}
+   | Succ             :: S :: Succ   {{ coq 0 }} {{ tex \mathsf{S} }}
+   | True             :: S :: True   {{ coq 0 }}
+   | Fix              :: S :: Fix    {{ coq 0 }}
+   | a -> b           :: S :: Arrow  {{ coq (a_Pi [[a]] [[b]]) }}
+   | phi => A         :: S :: CArrow {{ coq (a_CPi [[phi]] [[A]]) }}
+   | a b              :: S :: RelApp
+     {{ coq (a_App [[a]] Rel [[b]]) }}
+   | \ x . a          :: S :: RelUAbs
+     {{ coq (a_UAbs Rel [[a]]) }}
+     {{ tex \lambda [[x]].[[a]] }}
+   | \ x : A . a      :: S :: RelAbs
+     {{ coq (a_Abs Rel [[A]] [[a]]) }}
+     {{ tex \lambda [[x]]\!:\![[A]].[[a]] }}
+   | all x : A -> B   :: S :: RelPi
+     {{ coq (a_Pi  Rel [[A]] [[B]]) }}
+
+%% Currently unused
+brs :: 'br_' ::=    {{ com case branches }}
+   | none             ::   :: None
+   | K => a ; brs     ::   :: One
+   | brs { a / x }    :: S :: Subst  {{ coq (open_brs_wrt_tm [[x brs]] [[a]]) }}
+   | brs { g / c }    :: S :: SubstC {{ coq (open_brs_wrt_co [[c brs]] [[g]]) }}
+   | ( brs )          :: S :: Paren  {{ coq ([[brs]]) }}
+
+co, g {{ tex \gamma }} :: 'g_' ::= {{ com explicit coercions }}
+   | o                    ::   :: Triv
+   | c                    ::   :: Var
+   | red a b              ::   :: Beta
+
+   | refl a               ::   :: Refl
+   | refl2 a b g          ::   :: Refl2
+     {{ tex ([[a]]\mathrel{|\!\!=\!\!|}_{[[g]]}[[b]]) }}
+   | sym g                ::   :: Sym
+   | g1 ; g2              ::   :: Trans
+
+   | all rho x : g1 -> g2 ::   :: PiCong (+ bind x in g2 +)
+     {{ tex \mathrm{\Pi}^[[rho]][[x]]\!:\![[g1]].[[g2]] }}
+
+   | \ rho x : g1 . g2    ::   :: AbsCong (+ bind x in g2 +)
+     {{ tex \mathrm{\lambda}^[[rho]][[x]]\!:\![[g1]].[[g2]] }}
+
+   | g1 rho g2            ::   :: AppCong
+     {{ tex [[g1]]\ [[g2]]^[[rho]] }}
+
+   | piFst g              ::   :: PiFst
+   | cpiFst g             ::   :: CPiFst
+   | isoSnd g            ::   :: IsoSnd
+   | g1 @ g2              ::   :: PiSnd
+
+   | all c : g1 . g3      ::   :: CPiCong (+ bind c in g3 +)
+     {{ tex [[all]][[c]]\!:\![[g1]].[[g3]] }}
+
+   | \ c : g1 . g3 @ g4   ::   :: CAbsCong (+ bind c in g3 +)
+     {{ tex \mathrm{\lambda}[[c]]\!:\![[g1]].[[g3]][[@]][[g4]] }}
+
+   | g ( g1 , g2 )        ::   :: CAppCong
+   | g @ ( g1 , g2 )      ::   :: CPiSnd
+     {{ tex [[g]] [[@]] ([[g1]] \sim [[g2]]) }}
+   | g1 |> g2             ::   :: Cast
+   | g1 ~ A  g2           ::   :: EqCong
+     {{ tex [[g1]] [[~]]_{[[A]]} [[g2]] }}
+   | conv phi1 phi2 g     ::   :: IsoConv
+     {{ tex [[conv]]\ [[phi1]]\sim_[[g]] [[phi2]] }}
+
+   | eta a                ::   :: Eta
+   | left g g'            ::   :: Left
+   | right g g'           ::   :: Right
+
+   | ( g )                :: S :: Paren   {{ coq ([[g]]) }}
+   | (# g #)              :: S :: SecretParen
+     {{ coq [[g]] }} {{ tex [[g]] }}
+   | g { a / x }          :: S :: TSubst
+     {{ coq open_co_wrt_tm [[x g]] [[a]] }}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+substitutions
+  single a x   :: tm_subst_tm
+  single g x   :: co_subst_tm
+  single a c   :: tm_subst_co
+  single g c   :: co_subst_co
+  single brs x :: brs_subst_tm
+  single brs c :: brs_subst_co
+
+freevars
+  a x   :: fv_tm_tm
+  g x   :: fv_co_tm
+  a c   :: fv_tm_co
+  g c   :: fv_co_co
+  brs x :: fv_tm_brs
+  brs c :: fv_co_brs
+
+parsing
+  a_Abs right a_App
+  a_UAbs right a_App
+  a_Abs <= a_RelApp
+  a_UAbs <= a_RelApp
+  a_App left a_App
+  a_RelApp left a_App
+  a_App left a_RelApp
+  a_RelApp left a_RelApp
+  a_CApp left a_App
+  a_App left a_CApp
+  a_CApp left a_RelApp
+  a_RelApp left a_CApp
+
+  a_Arrow right a_Arrow
+  a_App right a_Arrow
+  a_RelApp right a_Arrow
+  a_Pi right a_Arrow
+  a_CPi right a_Arrow
+
+  a_Arrow <= a_Pi
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%  This part is not handled by LNgen
+
+grammar
+
+sig_sort :: '' ::= {{ com signature classifier }}
+   | Cs A            ::    :: Cs
+   | Ax a A          ::    :: Ax
+
+sort :: '' ::= {{ com binding classifier }}
+   | Tm A             ::   :: Tm
+   | Co phi           ::   :: Co
+
+
+grammar
+
+context, G {{ tex \Gamma }} :: 'ctx_' ::= {{ com contexts }}
+                                          {{ coq list ( atom * sort ) }}
+   | empty           ::    :: Empty   {{ coq nil }}
+
+   | G , x : A       ::    :: ConsTm  {{ coq (([[x]]~ Tm [[A]]) ++ [[G]]) }}
+   | G , c : phi     ::    :: ConsCo  {{ coq (([[c]]~ Co [[phi]]) ++ [[G]]) }}
+   | G { b / x }     :: M  :: SubstA  {{ coq (open_context_wrt_tm [[x G]][[b]] }}
+   | G { g / c }     :: M  :: SubstG  {{ coq (open_context_wrt_co [[c G]][[g]]  }}
+   | G ++ G'         :: M  :: Append  {{ coq ([[G]] ++ [[G']]) }}
+     {{ tex [[G]], [[G']] }}
+   | | G |           :: M  :: Erase   {{ coq (erase_context [[G]]) }}
+   | ( G )           :: M  :: Paren   {{ coq ([[G]]) }}
+   | (# G #)         :: M  :: SecretParen {{ coq [[G]] }} {{ tex [[G]] }}
+
+available_props, D {{ tex \Delta }} :: 'D_' ::= {{ coq atoms }} {{ coq-universe Type }}
+   | emptyD          ::    :: Empty   {{ coq AtomSetImpl.empty }} {{ tex \varnothing }}
+   | D , c           ::    :: ConsCo  {{ coq (singleton [[c]] \u [[D]]) }}
+   | dom G           :: M  :: DomG    {{ coq (dom [[G]]) }} {{ tex \widetilde {[[G]]} }}
+   | ( D )           :: M  :: Paren   {{ coq ([[D]]) }}
+
+sig, S {{ tex \Sigma }} :: 'sig_' ::= {{ com signatures }} {{ coq list (atom * sig_sort) }}
+   | emptyS         ::    :: Empty       {{ coq nil }}
+     {{ tex \varnothing }}
+   | S , T : A      ::    :: ConsCs      {{ coq (([[T]]~ Cs[[A]])++[[S]]) }}
+     {{ tex [[S]] \cup \{[[T]] : [[A]]\} }}
+   | S , F ~ a : A  ::    :: ConsAx      {{ coq (([[F]]~ Ax[[a]][[A]])++[[S]]) }}
+     {{ tex [[S]] \cup \{[[F]]\sim[[a]] : [[A]]\} }}
+   | toplevel       :: M  :: Toplevel
+     {{ coq toplevel }}
+     {{ tex \Sigma_0 }}
+   | an_toplevel    :: M  :: AnToplevel
+     {{ coq an_toplevel }}
+     {{ tex \Sigma_1 }}
+   | | S |          :: M  :: Erase  {{ coq (erase_sig [[S]]) }}
+
+
+
+substitutions
+  single G x :: ctx_subst_tm
+  single G c :: ctx_subst_co
+
+freevars
+  G x :: fv_ctx_tm
+  G c :: fv_ctx_co
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%  Terminals  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+grammar
+
+terminals :: 'terminals_' ::=
+  | <->               ::   :: iso           {{ tex \leftrightarrow }}
+  | <=>               ::   :: lrarrow       {{ tex \Leftrightarrow }}
+  | -->               ::   :: step          {{ tex \longrightarrow }}
+  | min               ::   :: min           {{ tex \mathsf{min} }}
+  | ==                ::   :: definitional  {{ tex \equiv }}
+  | all               ::   :: forall     {{ tex \forall }}
+  | in                ::   :: in         {{ tex \in }}
+  | notin             ::   :: notin      {{ tex \not\in }}
+  | <=                ::   :: check      {{ tex \Leftarrow }}
+  | =>                ::   :: infer      {{ tex \Rightarrow }}
+  | =>*               ::   :: minfer      {{ tex \Rightarrow^{\ast} }}
+  | ->                ::   :: arrow      {{ tex \to }}
+  | /\                ::   :: ilam       {{ tex \mathrm{\Lambda} }}   % Swag
+  | <-|               ::   :: mapsfrom   {{ tex \mapsfrom }}
+  | []                ::   :: box        {{ tex \Box }}
+  | |-                ::   :: entails    {{ tex \vdash }}
+  | -|                ::   :: produces   {{ tex \dashv }}
+  | |=                ::   :: hs_entails {{ tex \vDash }}
+  | |==               ::   :: hs_entaill {{ tex \vDash }}
+  | /=                ::   :: neq        {{ tex \neq }}
+  | |>                ::   :: cast       {{ tex \triangleright }}
+  | ok                ::   :: ok         {{ tex \ \mathsf{ok} }}
+  | _                 ::   :: blank      {{ tex \_ }}
+  | ~>                ::   :: produce    {{ tex \leadsto }}
+  | ~>*               ::   :: multistep  {{ tex \leadsto^{\ast} }}
+  | ~>h               ::   :: steph      {{ tex \leadsto }}
+  | empty             ::   :: empty      {{ tex \varnothing }}
+  | hole              ::   :: hole       {{ tex \circ }}
+  | fv                ::   :: fv         {{ tex \mathsf{fv}\! }}
+  | dom               ::   :: dom        {{ tex \mathsf{dom} }}
+  | ~                 ::   :: twiddle    {{ tex \sim }}
+  | ~~                ::   :: compatible {{ tex \asymp }}
+  | '|'               ::   :: bar        {{ tex | }}
+  | o                 ::   :: bullet     {{ tex \bullet }}
+  | fst               ::   :: fst
+  | snd               ::   :: snd
+  | |=>|              ::   :: erasesto   {{ tex \mathrel{|\Rightarrow|} }}
+  | |-=               ::   :: turneq     {{ tex \vdash_{=} }}
+  | refl2             ::   :: refl2      {{ tex \mathbf{refl_2}  }}
+  | ++                ::   :: concat     {{ tex \mathop{++} }}
+
+formula :: 'formula_' ::=
+  | judgement                ::   :: judgement
+  | x : A in G               ::   :: inG
+    {{ coq binds [[x]] (Tm [[A]]) [[G]] }}
+
+  | c : phi  in G         ::   :: inGP
+    {{ coq binds [[c]] (Co [[phi]]) [[G]] }}
+
+  | T : A in S             ::   :: inGF
+    {{ coq binds [[T]] (Cs [[A]]) [[S]] }}
+
+  | F ~ a : A in S             ::   :: inGFam
+    {{ coq binds [[F]] (Ax [[a]][[A]]) [[S]] }}
+
+  | K : T G in S               ::   :: inSD
+    {{ coq binds [[K]] ([[T]],[[G]]) [[S]] }}
+
+  | x in D                   ::   :: availx
+    {{ coq AtomSetImpl.In [[x]] [[D]] }}
+  | c in D                   ::   :: avail
+    {{ coq AtomSetImpl.In [[c]] [[D]] }}
+  | c not relevant in g      ::   :: notrelevant
+    {{ coq [[c]] \notin (fv_relevant [[g]]) }}
+  | x notin fv a             ::   :: fresh
+    {{ coq [[x]] \notin fv_tm_tm_tm [[a]] }}
+  | x notin dom G            ::   :: notInGx
+    {{ coq ~ AtomSetImpl.In [[x]] (dom [[G]]) }}
+  | c notin dom G            ::   :: notInGc
+    {{ coq ~ AtomSetImpl.In [[c]] (dom [[G]]) }}
+  | T notin dom S            ::   :: notInST
+    {{ coq ~ AtomSetImpl.In [[T]] (dom [[S]]) }}
+  | F notin dom S            ::   :: notInSF
+    {{ coq ~ AtomSetImpl.In [[F]] (dom [[S]]) }}
+  | a = b                    ::   :: equal
+    {{ coq ([[a]] = [[b]]) }}
+  |  phi1 =  phi2       ::   :: erasedphi
+    {{ coq ([[phi1]] = [[phi2]]) }}
+  | G1 = G2                  ::   :: equalctx
+    {{ coq ([[G1]] = [[G2]]) }}
+  | g1 = g2                  ::   :: equalco
+    {{ coq ([[g1]] = [[g2]]) }}
+  | not formula              ::   :: not
+    {{ coq not ([[formula]]) }}
+  | formula1 /\ formula2     ::   :: and
+    {{ coq [[formula1]] /\ [[formula2]] }}
+  | formula1 \/ formula2     ::   :: or
+    {{ coq [[formula1]] \/ [[formula2]] }}
+  | formula1 implies formula2     ::   :: implies
+    {{ coq [[formula1]] -> [[formula2]] }}
+  | ( formula )              ::   :: Paren
+    {{ coq ([[formula]]) }}
+  | [ formula ]              ::   :: Regular
+    {{ coq ([[formula]]) }}
+    {{ tex \suppress{[[formula]]} }}
+  | c : (a : A ~ b : B) in G ::   :: Alt
+    {{ coq True }}
+  | nolc A                   ::   :: NoLC
+    {{ com suppress lc hypothesis generated by Ott }}
+    {{ coq True }}
+	 {{ tex      }}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Coq Definitions necessary to specify the semantics
+
+embed {{ coq
+Fixpoint erase_tm (a : tm) : tm :=
+   match a with
+   | a_Star    => a_Star
+   | a_Var_b n => a_Var_b n
+   | a_Var_f x => a_Var_f x
+   | a_Abs rho A b => a_UAbs rho (erase_tm b)
+   | a_UAbs rho b => a_UAbs rho (erase_tm b)
+   | a_App a Rel b => a_App (erase_tm a) Rel (erase_tm b)
+   | a_App a Irrel b => a_App (erase_tm a) Irrel a_Bullet
+   | a_Const T => a_Const T
+   | a_Fam F => a_Fam F
+   | a_Pi rho A B => a_Pi rho (erase_tm A) (erase_tm B)
+   | a_Conv a _ => erase_tm a
+   | a_CPi phi B => a_CPi (erase_constraint phi) (erase_tm B)
+   | a_CAbs phi b => a_UCAbs (erase_tm b)
+   | a_UCAbs b => a_UCAbs (erase_tm b)
+   | a_CApp a g => a_CApp (erase_tm a) g_Triv
+   | a_DataCon K => a_Star  (* a_DataCon K *)
+   | a_Case a brs => a_Star (* a_Case (erase_tm a) (erase_brs brs) *)
+   | a_Bullet => a_Bullet
+   end
+with erase_brs (x : brs) : brs :=
+   match x with
+   | br_None => br_None
+   | br_One k a y => br_One k (erase_tm a) (erase_brs y)
+   end
+with erase_constraint (phi : constraint) : constraint :=
+   match phi with
+   | Eq A B A1 => Eq (erase_tm A) (erase_tm B) (erase_tm A1)
+   end.
+
+Definition erase_sort s :=
+ match s with
+ | Tm a => Tm (erase_tm a)
+ | Co p => Co (erase_constraint p)
+end.
+
+
+Definition erase_csort s :=
+ match s with
+ | Cs a   => Cs (erase_tm a)
+ | Ax a A => Ax (erase_tm a) (erase_tm A)
+end.
+
+Definition erase_context G := map erase_sort G.
+Definition erase_sig S := map erase_csort S.
+
+(* -------------- A specific signature with Fix ------------ *)
+Definition Fix : atom.
+  pick fresh F.
+  exact F.
+Qed.
+
+Definition FixDef : tm :=
+  (a_Abs Irrel a_Star
+         (a_Abs Rel (a_Pi Rel (a_Var_b 0) (a_Var_b 1))
+                (a_App (a_Var_b 0) Rel
+                       (a_App (a_App (a_Fam Fix) Irrel (a_Var_b 1)) Rel (a_Var_b 0))))).
+
+Definition FixTy : tm :=
+  a_Pi Irrel a_Star
+       (a_Pi Rel (a_Pi Rel (a_Var_b 0) (a_Var_b 1))
+             (a_Var_b 1)).
+
+
+Definition an_toplevel : sig := Fix ~ Ax FixDef FixTy.
+
+Definition toplevel : sig := erase_sig an_toplevel.
+
+}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% "Syntactic" definitions
+
+defns
+JSyn :: '' ::=
+
+
+defn
+Path T a  ::  :: Path :: 'Path_'
+{{ com Type headed by constant }}
+by
+
+--------- :: Const
+Path T T
+
+Path T a
+----------------- :: App
+Path T (a rho b)
+
+Path T a
+----------------  :: CApp
+Path T (a [g])
+
+Path T a
+-----------------  :: Conv
+Path T (a |> g)
+
+
+defns
+JValue :: '' ::=
+
+defn
+CoercedValue A ::   :: CoercedValue :: ''
+{{ com Values with at most one coercion at the top }}
+by
+
+Value a
+----------------- :: CV
+CoercedValue a
+
+Value a
+---------------------- :: CC
+CoercedValue (a |> g)
+
+defn
+Value A  ::   :: Value    :: 'Value_'
+{{ com values }}
+{{ tex \suppress{\mathsf{Value}\ [[A]]} }}
+by
+
+------- :: Star
+Value TYPE
+
+-------------------------- :: Pi
+Value all rho x : A -> B
+
+-------------------- :: CPi
+Value all c : phi. B
+
+--------------------- :: AbsRel
+Value \ + x:A. a
+
+--------------------- :: UAbsRel
+Value \ + x. a
+
+Value a
+--------------------- :: UAbsIrrel
+Value \ - x. a
+
+CoercedValue a
+-------------------- :: AbsIrrel
+Value \ - x:A. a
+
+--------------------- :: CAbs
+Value /\c:phi.a
+
+--------------------- :: UCAbs
+Value /\c .a
+
+
+--------------------- :: Const
+Value T
+
+Path T a
+Value a
+--------------------- :: App
+Value (a rho b)
+
+
+Path T a
+Value a
+--------------------- :: CApp
+Value (a [g])
+
+
+defn
+ValueType A ::   :: value_type :: 'value_type_'
+{{ com Types with head forms (erased language) }}
+by
+
+------- :: Star
+ValueType TYPE
+
+-------------------------- :: Pi
+ValueType all rho x : A -> B
+
+-------------------- :: CPi
+ValueType all c : phi. B
+
+------------------------ :: Const
+ValueType T
+
+Path T a
+Value a
+----------------------- :: App
+ValueType (a rho b)
+
+Path T a
+Value a
+----------------------- :: CApp
+ValueType (a [g])
+
+
+defn
+DataTy a b ::   :: DataTy :: 'DT_'
+{{ com extract the result of a data constructor }}
+by
+
+---------------- :: Star
+DataTy TYPE TYPE
+
+Path T A
+----------- :: Path
+DataTy A A
+
+DataTy B  b
+---------------------------- :: Pi
+DataTy (all rho x:A -> B) b
+
+DataTy B b
+---------------------------- :: CPi
+DataTy (all c:phi. B) b
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Definitions for consistency proof
+
+defns
+   Jconsistent :: '' ::=
+
+defn
+   consistent a b ::  :: consistent :: 'consistent_a_'
+   {{ com (erased) types do not differ in their heads }}
+by
+
+---------------------- :: Star
+consistent TYPE TYPE
+
+------------------------ :: Pi
+consistent (all rho x1:A1 -> B1) (all rho x2:A2 -> B2)
+
+------------------------ :: CPi
+consistent (all c1:phi1. A1) (all c2 :phi2. A2)
+
+Path T a1
+Path T a2
+----------------- :: Path
+consistent a1 a2
+
+not ValueType b
+---------------------- :: Step_R
+consistent a b
+
+not ValueType a
+---------------------- :: Step_L
+consistent a b
+
+defns
+  Jerased :: '' ::=
+
+defn
+  erased_tm a ::  :: erased_tm :: 'erased_a_'
+by
+
+--------- :: Bullet
+erased_tm []
+
+------------  :: Star
+erased_tm TYPE
+
+-------- :: Var
+erased_tm x
+
+erased_tm a
+-------------------- :: Abs
+erased_tm (\rho x.a)
+
+erased_tm a
+erased_tm b
+----------------- :: App
+erased_tm (a + b)
+
+erased_tm a
+----------------- :: AppIrrel
+erased_tm (a - [])
+
+erased_tm A
+erased_tm B
+------------------------- :: Pi
+erased_tm (all rho x:A -> B)
+
+erased_tm a
+erased_tm b
+erased_tm A
+erased_tm B
+---------------------------------- :: CPi
+erased_tm (all c:a ~ b : A. B)
+
+erased_tm b
+--------------- :: CAbs
+erased_tm (/\c. b)
+
+erased_tm a
+--------------- :: CApp
+erased_tm (a [o])
+
+--------- :: Const
+erased_tm T
+
+-------- :: Fam
+erased_tm F
+
+defns
+JChk :: '' ::=
+
+defn
+rho => check x in A ::    :: RhoCheck :: 'Rho_'
+{{ tex ([[rho]] = +) \vee ([[x]]\not\in\mathsf{fv}\; [[A]]) }}
+{{ com irrelevant argument check }}
+by
+
+nolc A
+-------------------- :: Rel
++ => check x in A
+
+x notin fv A
+-------------------- :: IrrRel
+- => check x in A
+
+
+% defns
+%  JRhoEta :: '' ::=
+
+% defn
+% rho => eta x in b  ::    :: RhoEta :: 'RhoEta_'
+% by
+%
+% ------------------- :: Rel
+% + => eta x in x
+%
+% ------------------  :: Irrel
+% - => eta x in []
+
+
+defns
+  Jpar :: '' ::=
+
+
+defn
+G ; D |- a => b ::  :: Par :: 'Par_'
+{{ tex \vDash [[a]] [[=>]] [[b]] }}
+{{ com parallel reduction (implicit language) }}
+by
+
+----------------------- :: Refl
+G ; D |- a => a
+
+
+G ; D |- a => (\+ x.a')
+G ; D |- b => b'
+---------------------------- :: Beta
+G ; D |- a + b => a' { b' / x }
+
+G ; D |- a => (\- x.a')
+---------------------------- :: BetaIrrel
+G ; D |- a - [] => a' { [] / x }
+
+G ; D |- a => a'
+G ; D |- b => b'
+-------------------------- :: App
+G ; D |- a + b => a' + b'
+
+G ; D |- a => a'
+-------------------------- :: AppIrrel
+G ; D |- a - [] => a' - []
+
+G ; D |- a => (/\c .a')
+----------------------- :: CBeta
+G ; D |- a [o] => a' { o / c }
+
+G ; D |- a => a'
+----------------------- :: CApp
+G ; D |- a [o] => a' [o]
+
+G ; D |- a => a'
+-------------------------------- :: Abs
+G ; D |- \ rho x. a => \ rho x. a'
+
+G ; D |- A => A'
+G ; D |- B => B'
+-------------------------------------------- :: Pi
+G ; D |- all rho x:A -> B => all rho x:A' -> B'
+
+G ; D |- a => a'
+--------------------------- :: CAbs
+G ; D |- /\c . a => /\c . a'
+
+G ; D |- A => A'
+G ; D |- B => B'
+G ; D |- a => a'
+G ; D |- A1 => A1'
+----------------------------------------- :: CPi
+G ; D |- all c:A~B:A1. a => all c:A'~B':A1'. a'
+
+% NOTE: toplevel is assumed to be locally closed
+F ~ a : A in toplevel
+-------------------------------- :: Axiom
+G ; D |- F => a
+
+G ; D |- b => b'
+a = b + x
+----------------------------- :: Eta
+G ; D |- \+ x. a => b'
+
+
+G ; D |- b => b'
+a = b - []
+----------------------------- :: EtaIrrel
+G ; D |- \- x. a => b'
+
+G ; D |- b => b'
+a = b [o]
+----------------------------- :: EtaC
+G ; D |- /\c. a => b'
+
+
+defn
+G ; D |- a =>* b ::   :: MultiPar :: 'MP_'
+{{ tex [[|-]] [[a]] [[=>*]] [[b]] }}
+{{ com multistep parallel reduction }}
+by
+
+------------------ :: Refl
+G ; D |- a =>* a
+
+G ; D |- a => b
+G ; D |- b =>* a'
+--------------------- :: Step
+G ; D |- a =>* a'
+
+defn
+G ; D |- a <=> b ::   :: joins :: ''
+{{ tex [[|-]] [[a]] [[<=>]] [[b]] }}
+{{ com parallel reduction to a common term }}
+by
+
+G ; D |- a1 =>* b
+G ; D |- a2 =>* b
+------------------------ :: join
+G ; D |- a1 <=> a2
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Implicit (or erased) language reductions
+
+defns
+ Jbeta :: '' ::=
+
+defn
+|= a > b  ::     :: Beta :: 'Beta_'
+{{ com primitive reductions on erased terms }}
+by
+
+------------------------------------ :: AppAbs
+|= (\+ x.v) + b > v { b / x }
+
+Value (\- x. v)
+------------------------------------ :: AppAbsIrrel
+|= (\- x.v) - [] > v { [] / x }
+
+
+------------------------------- :: CAppCAbs
+|= (/\c .a') [o] > a' { o / c }
+
+
+F ~ a : A in toplevel
+-------------------------------- :: Axiom
+|= F > a
+
+
+defn
+ |= a ~> b ::   :: reduction_in_one :: 'E_'
+{{ com single-step head reduction for implicit language }}
+by
+
+|= a ~> a'
+-------------------------  :: AbsTerm
+|= \- x.a ~> \- x.a'
+
+|= a ~> a'
+-------------------------  :: AppLeft
+|= a + b ~> a' + b
+
+|= a ~> a'
+-------------------------  :: AppLeftIrrel
+|= a - [] ~> a' - []
+
+|= a  ~> a'
+-----------------------------   :: CAppLeft
+|= a [o]  ~> a' [o]
+
+
+----------------------------------  :: AppAbs
+|= (\+ x.v) + a ~> v { a / x}
+
+Value (\- x. v)
+----------------------------------  :: AppAbsIrrel
+|= (\- x.v) - [] ~> v { [] / x}
+
+--------------------------------  :: CAppCAbs
+|= (/\c .b) [o] ~> b { o / c}
+
+F ~ a : A in toplevel
+-------------------- :: Axiom
+|= F ~> a
+
+
+defn
+
+|= a ~>* b ::  :: reduction :: ''
+{{ com multistep reduction }}
+by
+
+------------------- :: Equal
+|= a ~>* a
+
+|= a ~> b
+|= b ~>* a'
+------------------- :: Step
+|= a ~>* a'
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Implicit (or erased) language type system
+
+defns
+Jett :: '' ::=
+
+
+defn
+G |= phi ok ::    :: PropWff :: 'E_'
+{{ com Prop wellformedness }}
+by
+
+G |= a : A
+G |= b : A
+[ G |= A : TYPE ]
+---------------------------  :: Wff
+G |= a ~ b : A  ok
+
+defn
+
+G |= a : A ::   :: Typing :: 'E_'
+{{ com typing }}
+by
+
+|= G
+------------  :: Star
+G |= TYPE : TYPE
+
+|= G
+x:A in G
+------------------ :: Var
+G |= x : A
+
+%% 2nd premise is redundant, but convenient for IH
+G, x:A |= B : TYPE
+[ G |= A : TYPE ]
+------------------------------------ :: Pi
+G |= all rho x:A -> B : TYPE
+
+G, x:A |= a : B
+[ G |= A : TYPE ]
+rho => check x in a
+---------------------------------- :: Abs
+G |= \ rho x . a : all rho x:A -> B
+
+G |= b : all+ x : A -> B
+G |= a : A
+------------------------------------- :: App
+G |= b + a : B { a / x }
+
+G |= b : all - x : A -> B
+G |= a : A
+------------------------------------- :: IApp
+G |= b - [] : B { a / x }
+
+
+G |= a : A
+G ; dom G |= A == B : TYPE
+[ G |= B : TYPE ]
+----------------------------- :: Conv
+G |= a : B
+
+G, c : phi |= B : TYPE
+[ G |= phi ok ]
+-------------------------------- :: CPi
+G |= all c:phi. B : TYPE
+
+G, c:phi |= a : B
+[ G |= phi ok ]
+------------------------------------------------- :: CAbs
+G |= /\ c . a : all c:phi. B
+
+G |= a1 : all c : (a ~ b : A) . B1
+G ; dom G |= a == b : A
+------------------------------------------- :: CApp
+G |= a1 [ o ] : B1 { o / c }
+
+|= G
+T : A in toplevel
+[ empty |= A : TYPE ]
+---------------------- :: Const
+G |= T : A
+
+|= G
+F ~ a : A in toplevel
+[ empty |= A : TYPE ]
+------------------ :: Fam
+G |= F : A
+
+
+defn
+G ; D |= phi1 == phi2  ::    :: Iso :: 'E_'
+{{ com prop equality }}
+by
+
+G ; D |= A1 == A2 : A
+G ; D |= B1 == B2 : A
+---------------------------------------- :: PropCong
+G ; D |= A1 ~ B1 : A == A2 ~ B2 : A
+
+G ; D |= A == B : TYPE
+G |= A1 ~ A2 : A ok
+G |= A1 ~ A2 : B ok
+----------------------------------------- :: IsoConv
+G ; D |= A1 ~ A2 : A == A1 ~ A2 : B
+
+G ; D |= all c:phi1. B1 == all c:phi2. B2 : TYPE
+------------------------------------------------- :: CPiFst
+G ; D |=  phi1 == phi2
+
+
+defn
+
+G ; D |= a == b : A ::     :: DefEq :: 'E_'
+{{ com definitional equality }}
+by
+
+|= G
+c: (a ~ b : A) in G
+c in D
+-------------------- :: Assn
+G ; D |= a == b : A
+
+G |= a : A
+-------------------- :: Refl
+G ; D |= a == a : A
+
+G ; D |= b == a : A
+-------------------- :: Sym
+G ; D |= a == b : A
+
+G ; D |= a == a1 : A
+G ; D |= a1 == b : A
+------------------------------------- :: Trans
+G ; D |= a == b : A
+
+
+G |= a1 : B
+[G |= a2 : B]
+|= a1 > a2
+--------------------------------  :: Beta
+G ; D |= a1 == a2 : B
+
+%% Rules related to functions
+
+G ; D |=  A1 == A2 : TYPE
+G, x:A1; D |= B1 == B2 : TYPE
+%% this needed by weakening IH
+[G |= A1 : TYPE]
+%% these two needed by regularity
+[G |= all rho x:A1 -> B1 : TYPE]
+[G |= all rho x:A2 -> B2 : TYPE]
+---------------------------------------------------------- :: PiCong
+G ; D |= (all rho x:A1 -> B1) == (all rho x:A2 -> B2) : TYPE
+
+
+G, x:A1 ; D |= b1 == b2 : B
+[ G |= A1 : TYPE ]
+rho => check x in b1
+rho => check x in b2
+-------------------------------------------------------------- :: AbsCong
+G ; D |=  (\ rho x. b1) == (\ rho x. b2) : all rho x:A1 -> B
+
+G ; D |= a1 == b1 : all + x:A -> B
+G ; D |= a2 == b2 : A
+-------------------------------------- :: AppCong
+G ; D |= a1 + a2 == b1 + b2 : B { a2 / x }
+
+
+G ; D |= a1 == b1 : all - x:A -> B
+G |= a : A
+------------------------------------------ :: IAppCong
+G ; D |= a1 - [] == b1 - [] : B { a / x }
+
+
+G ; D |= all rho x:A1 -> B1 == all rho x:A2 -> B2 : TYPE
+------------------------------------------------- :: PiFst
+G ; D |=  A1 == A2 : TYPE
+
+G ; D |= all rho x:A1 -> B1 == all rho x:A2 -> B2 : TYPE
+G ; D |= a1 == a2 : A1
+------------------------------------------- :: PiSnd
+G ; D |=  B1 {a1 /x}  == B2 {a2/x} : TYPE
+
+%% Rules related to Coercion Abstraction
+
+G ; D |= phi1 == phi2
+G, c: phi1 ; D |= A == B : TYPE
+[G |= phi1 ok]
+[G |= all c:phi1. A : TYPE]
+[G |= all c:phi2. B : TYPE]
+--------------------------------------------------------- :: CPiCong
+G ; D |= all c:phi1. A  == all c:phi2. B : TYPE
+
+G, c: phi1 ; D |= a == b : B
+[ G |= phi1 ok ]
+------------------------------------------------------------ :: CAbsCong
+G ; D |=  (/\c . a) == (/\ c . b) : all c:phi1. B
+
+G ; D |= a1 == b1 : all c:(a ~ b : A). B
+G ; dom G |= a == b : A
+-------------------------------------- :: CAppCong
+G ; D |= a1 [o] == b1 [o] : B { o / c }
+
+G ; D |= all c:(a1 ~ a2 : A). B1 == all c:(a1'~ a2' : A'). B2 : TYPE
+G ; dom G |= a1 == a2 : A
+G ; dom G |= a1' == a2' : A'
+---------------------------------------------- :: CPiSnd
+G ; D |=  B1 { o / c} == B2 { o / c } : TYPE
+
+%% Other rules
+
+G ; D |= a == b : A
+G ; D |= a ~ b : A == a' ~ b' : A'
+-------------------------------------- :: Cast
+G ; D |= a' == b' : A'
+
+G ; D |= a == b : A
+G ; dom G |= A == B : TYPE
+-------------------------------------- :: EqConv
+G ; D |= a == b : B
+
+G ; D |= a ~ b : A == a' ~ b' : A'
+-------------------------------------- :: IsoSnd
+G ; D |= A == A' : TYPE
+
+G |= b : all + x:A -> B
+a = b + x
+------------------------------------------ :: EtaRel
+G ; D |= \+ x. a == b : all + x:A -> B
+
+%% TODO: Future extensions, more Eta rules
+
+G |= b : all - x:A -> B
+a = b - []
+------------------------------------------ :: EtaIrrel
+G ; D |= \- x. a == b : all - x:A -> B
+
+G |= b : all c:phi. B
+a = b [o]
+------------------------------------------ :: EtaC
+G ; D |= /\c. a == b : all c:phi. B
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Temporarily removing these from the development
+% to prepare for merge
+
+% sadly, I don't think any of these hypotheses are
+% admissible
+
+% We need all typing assumptions about a & a' to make sure that
+% a and a' are equated at the same type.
+
+% We need the typing assumptions about b & b', as well as the equality
+% assumption, to make sure that the type we pick for a & a' is consistent with
+% the applications.  i.e. we don't know that "a + b" actually used A as the
+% type of B.... maybe this type doesn't make sense in this context.
+
+% It's annoying that we need so much bookkeeping for this rule.
+
+% Path T a
+% Path T a'
+% G |= a : all +x:A -> B
+% G |= b : A
+% G |= a' : all +x:A -> B
+% G |= b' : A
+% G ; D |= a + b == a' + b' : B { b / x }
+% G ; dom G |= B {b/x} == B {b'/x} : TYPE
+% -------------------------------------- :: LeftRel
+% G ; D |= a == a' : all + x: A -> B
+
+% Path T a
+% Path T a'
+% G |= a : all -x:A -> B
+% G |= b : A
+% G |= a' : all -x:A -> B
+% G |= b' : A
+% G ; D |= a - [] == a' - [] : B { b / x }
+% G ; dom G |= B {b/x} == B {b'/x} : TYPE
+% -------------------------------------- :: LeftIrrel
+% G ; D |= a == a' : all -x: A -> B
+
+
+% Path T a
+% Path T a'
+% G |= a : all +x:A -> B
+% G |= b : A
+% G |= a' : all +x:A -> B
+% G |= b' : A
+% G ; D |= a + b == a' + b' : B { b / x }
+% G ; dom G |= B {b/x} == B {b'/x} : TYPE
+% ------------------------------------ :: Right
+% G ; D |= b == b' : A
+
+
+% Path T a
+% Path T a'
+% G |= a  : all c:(a1 ~ a2:A). B
+% G |= a' : all c:(a1 ~ a2:A). B
+% G ; dom G |= a1 == a2 : A
+% G ; D |= a [o] == a' [o] : B {o/c}
+% ---------------------------------- :: CLeft
+% G ; D |= a == a' : all c:(a1 ~ a2:A). B
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%% We can also add many more rules about "injectivity"
+%% to this language including:
+
+% G ; D |=  (/\c . a) == (/\ c . b) : all c:phi1. B
+% ------------------------------------------------------------ :: CAbsFst
+% G, c: phi1 ; D |= a == b : B
+
+% G ; D |=  (\ rho x. b1) == (\ rho x. b2) : all rho x:A1 -> B
+% -------------------------------------------------------------- :: AbsFst
+% G, x:A1 ; D |= b1 == b2 : B
+
+% G |= a1 : all - x:A -> B
+% G |= b1 : all - x:A -> B
+% G ; D |= a1 - [] == b1 - [] : B { a / x }
+% ------------------------------------------ :: IAppFst
+% G ; D |= a1 == b1 : all - x:A -> B
+
+
+% G |= a1 : all c:a ~ b : A. B
+% G |= b1 : all c:a ~ b : A. B
+% G ; D |= a1 [o] == b1 [o] : B { o / c }
+% -------------------------------------- :: CAppFst
+% G ; D |= a1 == b1 : all c:a ~ b : A. B
+
+
+defn
+|= G ::    :: Ctx  :: 'E_'
+{{ com context wellformedness }}
+by
+
+---------- :: Empty
+|= empty
+
+|= G
+G |= A : TYPE
+x notin dom G
+--------------------- :: ConsTm
+|= G, x : A
+
+|= G
+G |= phi ok
+c notin dom G
+-------------------- :: ConsCo
+|= G, c: phi
+
+defns
+
+Jsig :: '' ::=
+
+defn
+|= S ::    :: Sig :: 'Sig_'
+{{ com signature wellformedness }}
+by
+
+------------ :: Empty
+|= emptyS
+
+|= S
+DataTy A TYPE
+empty |= A : TYPE
+T notin dom S
+-------------- :: ConsCs
+|= S , T : A
+
+|= S
+empty |= A : TYPE
+empty |= a : A
+F notin dom S
+---------------- :: ConsAx
+|= S, F ~ a : A
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Annotated language semantics
+%
+
+defns
+Jann :: '' ::=
+
+defn
+G |- phi ok ::   :: AnnPropWff :: 'An_'
+{{ com prop wellformedness }}
+by
+
+G |- a : A
+G |- b : B
+|A| = |B|
+------------------------- :: Wff
+G |- a ~ b : A  ok
+
+defn
+G |- a : A ::  :: AnnTyping :: 'An_'
+{{ com typing }}
+by
+
+|- G
+------------  :: Star
+G |- TYPE : TYPE
+
+|- G
+x : A in G
+----------- :: Var
+G |- x : A
+
+G, x:A |- B : TYPE
+[ G |- A : TYPE ]
+------------------------------------ :: Pi
+G |- all rho x:A -> B : TYPE
+
+[ G |- A : TYPE ]
+G, x:A |- a : B
+rho => check x in | a |
+---------------------------------- :: Abs
+G |- \ rho x : A. a : all rho x:A -> B
+
+G |- b : all rho x:A -> B
+G |- a : A
+------------------------------------- :: App
+G |- b rho a : B { a / x }
+
+G |- a : A
+G ; dom G |- g : A ~ B
+G |- B : TYPE
+----------------------------- :: Conv
+G |- a |> g : B
+
+[ G |- phi ok ]
+G, c : phi |- B : TYPE
+-------------------------------- :: CPi
+G |- all c:phi. B : TYPE
+
+[ G |- phi ok ]
+G, c:phi |- a : B
+------------------------------------------------- :: CAbs
+G |- /\ c: phi. a : all c:phi. B
+
+G |- a1 : all c : a ~ b : A1. B
+G ; dom G |- g : a ~ b
+------------------------------------- :: CApp
+G |- a1 [ g ] : B { g / c }
+
+|- G
+T : A in an_toplevel
+[ empty |- A : TYPE ]
+----------------------- :: Const
+G |- T : A
+
+|- G
+F ~ a : A in an_toplevel
+[ empty |- A : TYPE ]
+----------------------- :: Fam
+G |- F : A
+
+defn
+G ; D |- g : phi1 == phi2 ::  :: AnnIso :: 'An_'
+{{ tex [[G]];[[D]][[|-]] [[g]] : [[phi1]] \sim [[phi2]] }}
+{{ com coercion between props }}
+by
+
+G ; D |- g1 : A1 ~ A2
+G ; D |- g2 : B1 ~ B2
+G |- A1 ~ B1 : A ok
+G |- A2 ~ B2 : A ok
+---------------------------------------------------------- :: PropCong
+G ; D |- (g1 ~A g2) : (A1 ~ B1 : A) == (A2 ~ B2 : A)
+
+G ; D |- g : all c:phi1. A2 ~ all c:phi2. B2
+--------------------------------------- :: CPiFst
+G ; D |- cpiFst g : phi1 == phi2
+
+G ; D |- g : phi1 == phi2
+---------------------------- :: IsoSym
+G ; D |- sym g : phi2 == phi1
+
+G; D |- g : A ~ B
+G |- a1 ~ a2 : A ok
+G |- a1' ~ a2' : B ok
+|a1| = |a1'|
+|a2| = |a2'|
+-------------------------------------- :: IsoConv
+G ; D |- conv (a1 ~ a2 : A) (a1' ~ a2' : B) g : (a1 ~ a2 : A) == (a1' ~ a2' : B)
+
+
+defn
+G ; D |- g : A ~ B ::  :: AnnDefEq :: 'An_'
+{{ com coercion between types }}
+by
+
+|- G
+c: a ~ b : A in G
+c in D
+------------------- :: Assn
+G ; D |- c : a ~ b
+
+G |- a : A
+----------------------------- :: Refl
+G ; D |- refl a : a ~ a
+
+G |- a : A
+G |- b : B
+|a| = |b|
+G ; dom G |- g : A ~ B
+----------------------------- :: EraseEq
+G ; D |- refl2 a b g : a ~ b
+
+
+G |- b : B
+G |- a : A
+[ G ; dom G |- g1 : B ~ A ]
+G ; D |- g : b ~ a
+-------------------------- :: Sym
+G ; D |- sym g : a ~ b
+
+G ; D |- g1 : a ~ a1
+G ; D |- g2 : a1 ~ b
+[ G |- a : A ]
+[ G |- a1 : A1 ]
+[ G ; dom G |- g3 : A ~ A1 ]
+------------------------------------- :: Trans
+G ; D |- (g1 ; g2) : a ~ b
+
+G |- a1 : B0
+G |- a2 : B1
+|B0| = |B1|
+|= |a1| > |a2|
+--------------------------------  :: Beta
+G ; D |- red a1 a2 : a1 ~ a2
+
+
+%% Note: need to include {x/x} to emphasize that x is free in B2 for
+%% the locally nameless backend.
+G ; D |- g1 : A1 ~ A2
+G, x : A1 ; D |- g2 : B1 ~ (# B2 {{{ x / x }}} #)
+B3 = B2 { x |> sym g1 / x }
+G |- all rho x:A1 -> B1 : TYPE
+G |- all rho x:A2 -> B3 : TYPE
+G |- (all rho x:A1 -> B2) : TYPE
+---------------------------------------------------------- :: PiCong
+G ; D |- all rho x:g1 -> g2 : (all rho x:A1 -> B1) ~ (all rho x:A2 -> B3)
+
+G ; D |- g1 : A1 ~ A2
+G, x : A1 ; D |- g2 : b1 ~ (# b2 {{{x / x}}} #)
+b3 = b2 { x |> sym g1 / x }
+[ G |- A1 : TYPE ]
+G |- A2 : TYPE
+rho => check x in | b1 |
+rho => check x in | b3 |
+[G |- (\ rho x:A1. b2) : B]
+------------------------------------------------------------------ :: AbsCong
+G ; D |- (\rho x:g1. g2) : (\ rho x:A1. b1) ~ (\ rho x :A2. b3)
+
+% really want heterogenous equality here.
+%% NOTE: we know that G |- g3 : A ~ B  must hold (b/c reg), but adding it as
+%% an extra assumption for the erasure proof.
+G ; D |- g1 : a1 ~ b1
+G ; D |- g2 : a2 ~ b2
+G |- a1 rho a2 : A
+G |- b1 rho b2 : B
+[ G ; dom G |- g3 : A ~ B ]
+-------------------------------------- :: AppCong
+G ; D |- g1 rho g2 : a1 rho a2 ~ b1 rho b2
+
+
+G ; D |- g : all rho x:A1 -> B1 ~ all rho x:A2 -> B2
+--------------------------------------- :: PiFst
+G ; D |- piFst g : A1 ~ A2
+
+G ; D |- g1 : all rho x:A1 -> B1  ~ all rho x:A2 -> B2
+G ; D |- g2 : a1 ~ a2
+G |- a1 : A1
+G |- a2 : A2
+--------------------------------------- :: PiSnd
+G ; D |- g1 @ g2 : (# B1 {a1 /x} #) ~ (# B2 {a2/x} #)
+
+
+G ; D |- g1 : phi1 == phi2
+G, c:phi1 ; D |- g3 : B1 ~ (# B2 {{{c/c}}} #)
+B3 = B2 { c |> sym g1 / c }
+G |- all c:phi1 . B1 : TYPE
+[G |- all c:phi2 . B3 : TYPE]
+G |- all c:phi1 . B2 : TYPE
+----------------------------------------------------- :: CPiCong
+G ; D |- (all c: g1. g3) : (all c:phi1. B1) ~ (all c:phi2. B3)
+
+
+G ; D |- g1 : phi1 == phi2
+G, c:phi1 ; D |- g3 : a1 ~ (# a2{{{c/c}}} #)
+a3 = a2 { c |> sym g1 / c }
+%% To know that the two types are equal, we need to know
+%% that the range types can be shown identical without using
+%% the assumption c:phi1. This is a stronger property than
+%% regularity implies.
+G |- (/\ c:phi1. a1) : all c:phi1. B1
+G |- (/\ c:phi2. a3) : all c:phi2. B2
+G |- (/\ c:phi1. a2) : B
+G ; dom G |- g4 : all c:phi1. B1 ~ all c:phi2. B2
+---------------------------------------------------------------- :: CAbsCong
+G ; D |- (\ c: g1. g3 @ g4) : (/\ c:phi1. a1) ~ (/\ c:phi2. a3)
+
+
+G ; D |- g1 : a1 ~ b1
+G ; dom G |- g2 : a2 ~ b2
+G ; dom G |- g3 : a3 ~ b3
+G |- a1 [g2] : A
+G |- b1 [g3] : B
+[ G ; dom G |- g4 : A ~ B ]
+-------------------------------------- :: CAppCong
+G ; D |- g1 (g2, g3) : a1 [ g2 ]  ~ b1 [ g3 ]
+
+
+G ; D |- g1 : (all c1:a~a':A. B1) ~ (all c2:b~b':B. B2)
+G ; dom G |- g2 : a~a'
+G ; dom G |- g3 : b~b'
+-------------------------------------------------- :: CPiSnd
+G ; D |- g1 @ (g2, g3) : B1 { g2 / c1 } ~ B2 { g3 / c2 }
+
+
+G ; D |- g1 : a~a'
+G ; D |- g2 : a~a' :A == b~b' : B
+--------------------------------------- :: Cast
+G ; D |- g1 |> g2 : b~b'
+
+
+G ; D |- g : (a~a' : A) == (b~b' : B)
+---------------------------------- :: IsoSnd
+G ; D |- isoSnd g : A ~ B
+
+
+G |- b : all rho x:A -> B
+a = b rho x
+--------------------------------------------------- :: Eta
+G ; D |- eta b : (\rho x:A. a) ~ b
+
+
+G |- b : all c:phi. B
+a = b [c]
+--------------------------------------------------- :: EtaC
+G ; D |- eta b : (/\ c:phi. a) ~ b
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% The admissible hyps are to give a strong enough ih for
+% the erasure lemma.
+
+% We also need g2 to maintain the typing invariant.
+% Perhaps we can eventually show g2, i.e. that
+% if we have two paths (a & a'), then their types must
+% be coercible.
+
+% Path T a
+% Path T a'
+% G |- a  : all rho x:A -> B
+% G |- a' : all rho x:A'-> B'
+% [G |- b  : A ]
+% [G |- b' : A']
+% G ; D |- g1 : a rho b ~ a' rho b'
+% G ; dom G |- g2 : (all rho x:A -> B) ~ (all rho x:A' -> B')
+% [G ; dom G |- g3 : B { b / x } ~ B' { b' / x } ]
+% ------------------------------------------------------------ :: Left
+% G ; D |- left g1 g2 : a ~ a'
+
+
+% Path T a
+% Path T a'
+% G |- a : all + x :A -> B
+% G |- a' : all + x :A' -> B'
+% [G |- b : A]
+% [G |- b' : A']
+% G ; D |- g1 : a + b ~ a' + b'
+% G ; dom G |- g2 : (all + x :A -> B) ~ (all + x : A' -> B')
+% [G ; dom G |- g3 : B { b / x } ~ B' { b' / x } ]
+% ------------------------------------------------------- :: Right
+% G ; D |- right g1 g2 : b ~ b'
+
+
+% Path T a
+% Path T a'
+% G |- a : all c:a1 ~ a2:A0. B
+% G |- a' : all c:a1' ~ a2':A0'. B'
+% [ G ; dom G |- g : a1 ~ a2 ]
+% [ G ; dom G |- g' : a1' ~ a2' ]
+% G ; D |- g1 : a [g] ~ a' [g']
+% G ; dom G |- g2 : all c:a1 ~ a2:A0. B ~ all c:a1' ~ a2':A0'. B'
+% [ G ; dom G |- g3 : B { g / c } ~ B' { g' / c } ]
+% ----------------------------------------------- :: CLeft
+% G ; D |- left g1 g2 : a ~ a'
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+defn
+|- G ::      :: AnnCtx :: 'An_'
+{{ com context wellformedness }}
+by
+
+
+---------- :: Empty
+|- empty
+
+|- G
+G |- A : TYPE
+x notin dom G
+--------------------- :: ConsTm
+|- G, x : A
+
+|- G
+G |- phi ok
+c notin dom G
+-------------------- :: ConsCo
+|- G, c:phi
+
+defn
+|- S ::    :: AnnSig :: 'An_Sig_'
+{{ com signature wellformedness }}
+by
+
+------------ :: Empty
+|- emptyS
+
+|- S
+empty |- A : TYPE
+DataTy A TYPE
+T notin dom S
+-------------- :: ConsCs
+|- S , T : A
+
+|- S
+empty |- A : TYPE
+empty |- a : A
+F notin dom S
+---------------- :: ConsAx
+|- S, F ~ a  : A
+
+
+defns
+  Jred :: '' ::=
+
+defn
+G |- a ~>h b ::   :: head_reduction :: 'An_'
+{{ com single-step, weak head reduction to values for annotated language }}
+% NOTE: this reduction needs a context for the the
+% two push rules. We need to read the coercion proofs
+% to know what type annotations to use after the push.
+by
+
+G |- a ~>h a'
+-------------------------  :: AppLeft
+G |- a rho b ~>h a' rho b
+
+Value (\rho x:A.w)
+-----------------------------------------  :: AppAbs
+G |- (\rho x:A.w) rho a ~>h w { a / x}
+
+
+G |- a  ~>h a'
+-----------------------------   :: CAppLeft
+G |- a [g]  ~>h a' [g]
+
+
+------------------------------------  :: CAppCAbs
+G |- (/\c:phi.b) [g] ~>h b { g / c}
+
+G |- A : TYPE
+G, x : A |- b ~>h b'
+------------------------------------------- :: AbsTerm
+G |- (\- x:A. b) ~>h (\- x:A. b')
+
+
+F ~ a : A in an_toplevel
+------------------------- :: Axiom
+G |- F ~>h a
+
+
+G |- a ~>h a'
+---------------------------- :: ConvTerm
+ G |- a |> g ~>h a' |> g
+
+
+Value v
+------------------------------------- :: Combine
+G |- (v |> g1) |> g2 ~>h v |> (g1 ; g2)
+
+% Not used (or needed)
+
+%   G ; dom G |- g : all rho x1:A1 -> B1 ~ all rho x2:A2 -> B2
+%   a1 = a { x2 |> sym (piFst g) / x1 }
+%   g2 = g @ refl2 (# x2 |> sym (piFst g) #) x2 (# piFst g #)
+% ------------------------------------------------------------------------- :: Push
+%   G |- ( (\rho x1:A1.a) |> g ) rho b ~>h (\rho x2:A2. (a1 |> g2)) rho b
+
+%   G ; dom G |- g : all c1:phi1. A1 ~ all c2:phi2. A2
+%   a1 = a { c2 |> sym (cpiFst g)  / c1 }
+%   g2 = g @ (c2 |> sym (cpiFst g), c2)
+% ------------------------------------------------------------------ :: CPush
+%   G |- ( (/\c1:phi1.a) |> g ) [g1] ~>h (/\c2:phi2. (a1 |> g2)) [g1]
+
+
+
+Value v
+G ; dom G |- g : all rho x1: A1 -> B1 ~ all rho x2: A2 -> B2
+b' = b |> sym (piFst g)
+g' = g @ refl2 b' b (piFst g)
+---------------------------------------------------------- :: Push
+G |- (v |> g) rho b ~>h (v rho b') |> g'
+
+
+Value v
+G ; dom G |- g : all c1:phi1. A1 ~ all c2:phi2. A2
+g1' = g1 |> sym (cpiFst g)
+g' = g @ ( g1' , g1 )
+-------------------------------------------------------- :: CPush
+G |- (v |> g) [g1] ~>h (v [g1']) |> g'

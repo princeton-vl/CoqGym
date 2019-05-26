@@ -1,0 +1,7 @@
+set terminal pdf
+set title "Space Usage For Trees Using Cheerios and Marshal"
+set xlabel "Tree Height"
+set ylabel "Space (bytes)"
+set yrange [0:80000000]
+plot "test/tree_bench.dat" using 1:2 title "Cheerios" with linespoints , \
+     "test/tree_bench.dat" using 1:3 title "Marshal" with linespoints

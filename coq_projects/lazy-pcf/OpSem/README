@@ -1,0 +1,30 @@
+Contribution
+------------
+This directory contains: An Operational Semantics of Lazy Evaluation of PCF
+Author & Date          : Jill Seaman
+                         AT&T Bell Labs
+                         November 1993
+
+This implementation of Lazy PCF is used in a proof of subject
+reduction for the semantics, which is contained in a separate
+directory (SubjRed).
+
+Type make to install
+--------------------
+The definition of the semantics and some related properties can
+be loaded into Coq with the following commands:
+
+Load paths.
+Require OSrules.
+
+Comments
+--------
+This contribution was originally developped for CoqV5.8, and has been
+updated for CoqV5.10 by the Coq Workgroup (ENS-CNRS INRIA-Rocquencourt) in
+January 1995.
+
+
+
+
+
+

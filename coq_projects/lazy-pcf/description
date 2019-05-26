@@ -1,0 +1,11 @@
+Name: lazyPCF
+Title: Subject Reduction for Lazy-PCF
+Author: Amy Felty
+Author: Jill Seaman
+Institution: Bell Labs
+Description: An Operational Semantics of Lazy Evaluation and a Proof
+  of Subject Reduction
+Url: http://www.cs.bell-labs.com/~felty/abstracts/ppcoq.html
+Keywords: functional programming, lazy evaluation,
+  operational semantics, type soundness, normal forms
+Category: Computer Science/Lambda Calculi

@@ -1,0 +1,11 @@
+Name: TraversableFincontainer
+Title: Traversable Functors are Finitary Containers
+Url: https://github.com/oconnorr/traversable-fincontainer
+Description: A Coq proof that all Traversable functors are isomorphic to finitary containers.
+Keywords: finitary container, traversable functor
+Category: Computer Science/Data Types and Data Structures
+Author: Russell O'Connor
+Email: oconnorr@google.com
+Institution: Google Canada
+Require: 
+License: ASL

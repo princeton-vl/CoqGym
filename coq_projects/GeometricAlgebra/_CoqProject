@@ -1,0 +1,12 @@
+-R . GeometricAlgebra
+-arg -w -arg -notation-overridden
+-arg -w -arg -redundant-canonical-projection
+
+Aux.v
+Field.v
+Grassmann.v
+Kn.v
+VectorSpace.v
+G3.v
+Tuple3.v
+Clifford.v

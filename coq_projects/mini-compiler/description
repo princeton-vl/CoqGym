@@ -1,0 +1,11 @@
+Name: MiniCompiler
+Title: Correctness of a tiny compiler for arithmetic expressions
+Author: Jean-Christophe Filliâtre
+Institution: LRI, Universite Paris Sud
+Date: 2003
+Description: Tutorial correctness proof of a tiny compiler from
+  simple arithmetic expressions (constants, variables and additions) to
+  simple assembly-like code (one accumulator, infinitly many registers and 
+  addition)
+Keywords: compilation, correctness, arithmetic
+Category: Computer Science/Semantics and Compilation/Compilation

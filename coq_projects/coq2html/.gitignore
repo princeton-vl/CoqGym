@@ -1,0 +1,6 @@
+*.cm?
+*.o
+coq2html
+resources.ml
+*~
+#*#

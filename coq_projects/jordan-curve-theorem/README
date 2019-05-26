@@ -1,0 +1,36 @@
+This library is developed at the University of Strasbourg. Firstly, it constructively formalizes in a new way the combinatorial hypermaps and their properties. It gives the proofs of the Genus Theorem and of the Euler Formula for the polyhedra which are modeled by hypermaps, as well as a constructive characterization of the planarity. Secondly, the library formalizes the notion of ring of faces and of hypermap breaking along a ring. Finally, it states and proves a discrete version of the Jordan curve theorem.
+
+Mathematically speaking, a hypermap is a set (of darts) equipped with two permutations. This notion helps to model the combinatorial topology of oriented closed surface subdivisions - or polyhedra - in vertices, edges and faces, thanks to the notion of orbit. 
+
+Let s, e, f, c be the numbers of vertices, edges, faces, components of a closed oriented surface subdivision. The Genus Theorem says that the genus g = c - (s - e + f)/2 of the surface is a non negative integer. When g = 0, the corresponding polyhedra is said to be planar and satisfies the Euler Formula: s - e + f = 2. We show that it is possible to completely characterize in a constructive way the planarity. 
+
+Finally, in a hypermap, a face ring is a circular list of faces two by two adjacent by an edge. When the hypermap is planar and is broken at these edges, the number of its connected components increases by one, which is a discrete version of the famous Jordan curve theorem.
+
+The formalization in Coq is based on inductive types constrained by invariants. The free maps are inductively defined with three constructors. The hypermaps form a subtype of the free maps. Their orbits are incomplete, but operations of closure allow to fit with the mathematical hypermap definition. Operations of hypermap disassembling are also defined. They allow to describe the break along a face and their properties to prove the Jordan curve theorem.
+
+Operations are mostly defined by pattern matching and proofs are mostly driven by induction on the type fmap of the free maps. Signatures, modules and functors helps to unify the description of orbits and their properties. 
+
+CONTENTS:
+
+- Jordan1.v contains the basic specifications of the free maps - with 3 constructors, V I, and L -, of hypermaps and of their operations and gives the proofs of their properties.
+Operation B is the inverse of L to break links.
+
+- Jordan2.v contains the definition of a functor parameterized by a permutation f on a hypermap. It defines par iteration the f-orbits and their properties, as period (or degree) and traversal thanks to a path notion. The proofs use a noetherian induction on finite sets. Then, the functor is instantiated to obtain the properties of edges, vertices and faces.
+
+- Jordan3.v defines the equivalence in hypermaps, the numbering and the characteristics of hypermaps. It proves the Genus Theorem and the Euler Formula. The file ends with the proof of a necessary and sufficient constructive condition of planarity.
+
+- Jordan4.v contains the properties of operation B with respect to basic operations and to the equivalence.
+
+- Jordan5.v mostly describes the effect of operation L at dimension 0 on the face traversal in hypermaps.
+
+- Jordan6.v  describes the effect of operation L at dimension 1 on the face traversal in hypermaps and gives some properties of the face degrees. 
+
+- Jordan7.v  describes the effect of B on the face traversal. Then it proves that the number of faces is preserved by permutation of two successive L at dimension 0.
+
+- Jordan8.v  and Jordan 9.v prove that the number of faces is preserved by permutation of two successive L, the one at dimension 0 and the other at dimension 1. Then Jordan9 ends with some properties of B on the faces.
+
+- Jordan10.v formalizes the notion of ring of faces and of hypermap breaking along a ring. Finally, it states and proves a discrete Jordan theorem on the hypermaps.
+
+For further informations, the reader can refer to the paper 
+"An intuitionistic proof of a discrete form of the Jordan Curve Theorem formalized in Coq with combinatorial hypermaps", Journal of Automated Reasoning 43 (2009) 43-51, Springer.
+or send a mail at: jean-francois.dufourd@lsiit-cnrs.unistra.fr

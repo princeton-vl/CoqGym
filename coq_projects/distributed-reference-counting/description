@@ -1,0 +1,9 @@
+Name: DistributedReferenceCounting
+Title: A Construction of Distributed Reference Counting
+Author: Luc Moreau, Jean Duprat
+Institution: LIP, Ecole Normale Supérieure de Lyon
+Description: This library contains the constructive proof of correctness of
+	several variants of a distributed reference counting algorithm.
+Keywords: garbage collection, distributed algorithms
+Category: Computer Science/Semantics and Compilation/Compilation
+Category: Computer Science/Concurrent Systems and Protocols/Correctness of specific protocols

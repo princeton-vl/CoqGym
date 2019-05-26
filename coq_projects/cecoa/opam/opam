@@ -1,0 +1,32 @@
+opam-version: "1.2"
+name: "coq-cecoa"
+version: "dev"
+maintainer: "David Nowak <david.nowak@univ-lille.fr>"
+authors: [
+  "Hugo Férée"
+  "Samuel Hym"
+  "Micaela Mayero"
+  "Jean-Yves Moyen"
+  "David Nowak"
+]
+homepage: "https://github.com/davidnowak/cecoa"
+dev-repo: "https://github.com/davidnowak/cecoa.git"
+bug-reports: "https://github.com/davidnowak/cecoa/issues"
+license: "CeCILL-A"
+build: [make]
+build-doc: [make "html"]
+install: [make "install"]
+remove: [make "uninstall"]
+depends: [
+  "coq" {>= "8.6.0" & < "8.9.0~"}
+  "coq-bellantonicook"
+]
+tags: [
+  "category:CS/Algo/Complexity"
+  "keyword:implicit complexity"
+  "keyword:polynomial time"
+  "keyword:rewriting"
+  "logpath:Cecoa"
+  "date:2018-09-10"
+]
+

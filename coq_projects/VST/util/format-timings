@@ -1,0 +1,3 @@
+#!/bin/sh
+# NOTE: on cygwin, user time doesn't seem to to work, so using elapsed time
+awk 'BEGIN{print "  LINES   SECONDS  Sec/Lin  Name"}/v$/{printf "%6d %9.2f %8.4f %s\n", $7, $1, $1/$7, $10;}' TIMINGS >timings.txt

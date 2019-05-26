@@ -1,0 +1,90 @@
+sudo: required
+language: ocaml
+cache:
+  apt: true
+  directories:
+  - $HOME/.opam
+  - $HOME/Library/Caches/Homebrew
+  timeout: 1000
+env:
+  global:
+  - NJOBS=2
+  - OPAMVERBOSE=1
+  - OPAMYES=true
+  matrix:
+  - OCAML_VERSION=4.04
+  - OCAML_VERSION=4.07
+matrix:
+  fast_finish: true
+  allow_failures:
+    - os: osx
+os:
+    - linux
+    - osx
+
+before_install:
+    curl -L https://raw.githubusercontent.com/ocaml/ocaml-ci-scripts/master/.travis-ocaml.sh | sh
+
+install:
+- eval $(opam config env)
+- opam config var root
+- opam repo add coq-released https://coq.inria.fr/opam/released || true
+- opam repo add coq-extra-dev https://coq.inria.fr/opam/extra-dev || true
+- opam update
+- opam pin coq 8.9.0
+- opam upgrade
+- opam list
+- ocamlc -v
+
+script:
+- set -e
+- echo 'Building QuickChick...';
+  echo -en 'travis_fold:start:QuickChick.build';
+  opam install .;
+  echo -en 'travis_fold:end:QuickChick.build'
+- echo 'Unit testing...';
+  echo -en 'travis_fold:start:QuickChick.test.unit';
+  make -C test;
+  echo -en 'travis_fold:end:QuickChick.test.unit'
+- echo 'Testing IFC...';
+  echo -en 'travis_fold:start:QuickChick.test.ifc-basic';
+  make -C examples/ifc-basic;
+  echo -en 'travis_fold:end:QuickChick.test.ifc-basic'
+- echo 'Testing Red-black tree...';
+  echo -en 'travis_fold:start:QuickChick.test.RedBlack';
+  make -C examples/RedBlack;
+  echo -en 'travis_fold:end:QuickChick.test.RedBlack'
+- echo 'Testing STLC...';
+  echo -en 'travis_fold:start:QuickChick.test.stlc';
+  make -C examples/stlc;
+  echo -en 'travis_fold:end:QuickChick.test.stlc'
+- echo 'Testing Multifile Mutation...';
+  echo -en 'travis_fold:start:QuickChick.test.multifile-mutation';
+  make -C examples/multifile-mutation test;
+  echo -en 'travis_fold:end:QuickChick.test.multifile-mutation'
+- echo 'Testing C Mutation...';
+  echo -en 'travis_fold:start:QuickChick.test.c-mutation';
+  make -C examples/c-mutation test;
+  echo -en 'travis_fold:end:QuickChick.test.c-mutation'
+- echo 'Testing -N option...';
+  echo -en 'travis_fold:start:QuickChick.test.less';
+  make -C examples/c-mutation lesstest;
+  echo -en 'travis_fold:end:QuickChick.test.less'
+- echo 'Testing Python I/O...';
+  echo -en 'travis_fold:start:QuickChick.test.python-io';
+  make -C examples/python-io lesstest;
+  echo -en 'travis_fold:end:QuickChick.test.python-io'
+- echo 'Removing QuickChick...';
+  echo -en 'travis_fold:start:QuickChick.remove';
+  opam remove .;
+  echo -en 'travis_fold:end:QuickChick.remove'
+
+before_cache:
+- if [ $TRAVIS_OS_NAME = osx ]; then brew cleanup; fi
+- rm -rf $HOME/.opam/log
+
+notifications:
+  slack:
+    rooms:
+      secure: Sk34Z1q5T/Zz0zfe4KcIVF2qhI3UkkE7Uo6bs9jcB7+KVynzt9Dqe9ie1oNtbtl5UOjxb8KsdN+dbu6T6keRin8BpCvMS6tXTjjGEWP81JYXVoJQO1T5iuV5v67/6G092qijHVG6MBtJPchgdxTq9IYVW1lr0bqNQrf5ceJ94X3XLbSX0olwqguGkmmdw+duy0UkLDc+IzGR2Cfpljb/esfcwsrJNZck7j+lai4/DTITTN/Q8MMjpuiXPftcXx0iXUllXNxdctd4c1IvKM5iy6ecp8AP4SOB2Re++rDqcIY75ShDHDAEMcYUC7XcSuxfAWHqTUiuUHoVFBV9pKbFo3fQFGIebtDba2y7c7Bf1guOyoJ839I9752jKx82OOGmxqOZDXNUYuBI6Kr1Kg/V1MJE/ITTzl7qVC5T6LGyEGImExR5R/JLAQOJETPPZ4m986GroiVdUPwSl8LOxKmW8rAKScQWxLJi5JxQCqMXgswcbWlBaRHa5klklEvSSGqvRMbhDIXOtfSDJVSrk/JJztb7wb1wGGV2d/3bpQ7E4xxmrKDunSguxNoVmLGoXK9k3hvDx7+HCLpjPXrUNgk6g1WnP5cVaEA2HKyfzw40/2uPaGKxu3//OCE3CXDRlENKkxSMgEEo3XLraA12gY2mT5WSMyqweenHOsvdzUnGQZQ=
+    on_success: :change

@@ -1,0 +1,5 @@
+gauss_int.v
+fermat2.v
+
+-I .
+-R . mathcomp.contrib.sum_of_two_square

@@ -1,0 +1,34 @@
+Name: Ramsey
+Title: Ramsey Theory
+Author: Marc Bezem
+Institution: Utrecht University 
+Description:
+For dimension one, the Infinite Ramsey Theorem states that, for any
+subset A of the natural numbers nat, either A or nat\A is
+infinite. This special case of the Pigeon Hole Principle is
+classically equivalent to: if A and B are both co-finite, then so is
+their intersection. None of these principles is constructively
+valid. In [VB] the notion of an almost full set is introduced,
+classically equivalent to co-finiteness, for which closure under
+finite intersection can be proved constructively. A is almost full if
+for every (strictly) increasing sequence f: nat -> nat there exists an
+x in nat such that f(x) in A. The notion of almost full and its
+closure under finite intersection are generalized to all finite
+dimensions, yielding constructive Ramsey Theorems. The proofs for
+dimension two and higher essentially use Brouwer's Bar Theorem.
+                                                                       
+In the proof development below we strengthen the notion of almost full
+for dimension one in the following sense. A: nat -> Prop is called
+Y-full if for every (strictly) increasing sequence f: nat -> nat we
+have (A (f (Y f))). Here of course Y : (nat -> nat) -> nat. Given
+YA-full A and YB-full B we construct X from YA and YB such that the
+intersection of A and B is X-full. This is essentially [VB, Th. 5.4],
+but now it can be done without using axioms, using only inductive
+types. The generalization to higher dimensions will be much more
+difficult and is not pursued here.  
+
+Keywords: dimension one Ramsey theorem, constructive mathematics,
+almost full sets
+Category: Mathematics/Logic/See also
+Category: Mathematics/Combinatorics and Graph Theory
+Category: Miscellaneous/Extracted Programs/Combinatorics

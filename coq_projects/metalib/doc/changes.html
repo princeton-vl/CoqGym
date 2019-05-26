@@ -1,0 +1,227 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+
+<meta http-equiv="imagetoolbar" content="no" />
+<meta name="MSSmartTagsPreventParsing" content="TRUE" />
+<meta name="googlebot" content="noodp" />
+
+<title>Change log for the metatheory library</title>
+
+<style type="text/css" media="all">
+@import "css/_defaults.css";
+@import "css/mediumLayout.css";
+@import "css/nosideLayout.css";
+</style>
+<!--[if IE]>
+<link rel="stylesheet" type="text/css" href="css/ie.css" media="all" />
+<![endif]-->
+<link rel="stylesheet" type="text/css" href="css/mediumPrint.css" media="print" />
+</head>
+
+<!--
+<body class="three-column">
+-->
+<body>
+
+<div id="container">
+
+<div id="header" class="clearfix">
+
+<!-- change image to school or deptartment logo-->
+<div class="navigation-logo">
+<a href="http://www.upenn.edu/" title="University of Pennsylvania homepage"><img
+  src="logo.gif"
+  width="175"
+  height="55"
+  alt="University of Pennsylvania logo" /></a>
+</div> <!-- End class="navigation-logo" -->
+<div class="top-navigation">
+  <!-- These are the links at the top of the page -->
+  <ul class="clearfix">
+    <li class="first"><a href="http://www.seas.upenn.edu/"
+    title="School of Engineering and Applied Science">SEAS</a></li>
+    <li><a href="http://www.cis.upenn.edu/" title="Department of
+    Computer and Information Science">CIS</a></li>
+    <li><a href="http://www.cis.upenn.edu/~plclub/" title="Programming
+    Languages Research at Penn">PLClub</a></li>
+  </ul>
+  <!-- Replace the image with an image of the department name -->
+  <!--
+  <div class="department-logo">
+    <a href="#" title="Department Name"><img src="../../images/dept_title_blue_back.jpg" alt="Department Name"/></a>
+  </div>
+  -->
+</div> <!-- End class="top-navigation" -->
+</div> <!-- End id="header" -->
+
+<div id="wrapper">
+<div id="content">
+
+<div id="mainContent" class="clearfix">
+
+<h1>Change log for the metatheory library</h1>
+
+<p>
+  This log does not attempt to be exhaustive list of every single change.
+  Rather, it highlights the high-level changes that occurred between
+  releases.  The releases are listed in reverse chronological order.
+</p>
+
+<h2>coq8.6</h2>
+
+<ul><li>Compatibility changes with Coq 8.6</li>
+    <li>Moved examples to separate directories </li>
+</ul>
+
+<h2>coq8.5</h2>
+
+<ul><li>Compatibility changes with Coq 8.5</li></ul>
+
+<h2>coq8.4</h2>
+
+<ul><li>Moved repository to github</li></ul>
+
+<h2>20090714</h2>
+
+<ul>
+  <li>
+    This version should work
+    with <a href="http://www.cl.cam.ac.uk/~pes20/ott/">Ott</a> version
+    0.10.16
+    and <a href="http://www.cis.upenn.edu/~baydemir/papers/lngen/">LNgen</a>
+    version 0.2.
+  </li>
+  <li>
+    <p>
+      The main tactics are now
+      <code>fsetdec</code>,
+      <code>solve_notin</code>,
+      <code>solve_uniq</code>,
+      <code>analyze_binds</code>, and
+      <code>analyze_binds_uniq</code>.
+      Auxiliary ones include
+      <code>destruct_notin</code> and
+      <code>destruct_uniq</code>.
+    </p>
+    <p>
+      The new versions introduce hypotheses with more distinctive
+      names (BindsTac, NotInTac, UniqTac, ...).  This should make how
+      they're munging the context more obvious.  This should also make
+      it less likely that their generated names will change, since
+      they're the only tactics that generate hypotheses using these
+      particular names.
+    </p>
+    <p>
+      The new implementations are a bit cleaner.  The design
+      philosophy was to do simple, easy things, but still be generally
+      useful.  Gone are random calls
+      to <code>congruence</code>, <code>intuition</code>,
+      <code>simpl_env in *</code>, and whatnot.  Goals are munged to a
+      minimum now.  For "clean-up", the tactics rely mainly
+      on <code>auto</code> (taking advantage of hint declarations)
+      and <code>try tauto</code>.
+    </p>
+  </li>
+  <li>
+    MetatheoryEnv is no longer present.  The parameter inlining
+    feature of Coq's module system makes it possible to use the
+    AssocList library directly.
+  </li>
+  <li>
+    Many lemmas in AssocList were renamed, for the sake of a
+    consistent naming scheme.  Metatheory declares aliases for these
+    lemmas that are more intuitive.  As a partial guide to how things
+    were renamed:
+    <ul>
+      <li>Facts of the form [A &lt;-&gt; B] &rarr; lemma name ends in _iff</li>
+      <li>binds_app_1 &rarr; binds_app_l</li>
+      <li>binds_app_2 &rarr; binds_app_r</li>
+      <li>binds_one_1 &rarr; binds_one</li>
+      <li>binds_app &rarr; binds_app_iff</li>
+    </ul>
+  </li>
+</ul>
+
+<h2>20090321</h2>
+
+<ul>
+  <li>
+    This is the first version to support Coq 8.2.  Due to changes in Coq's
+    FSets library, previous versions of Coq are no longer supported.
+  </li>
+  <li>
+    The AtomSet library reflects changes to Coq's FSets library.  The
+    tactics defined here (e.g., <code>atomsetdec</code>) have been renamed
+    in an attempt to more consistently name things.
+  </li>
+  <li>
+    The FSetWeakNotin library now supports the <code>remove</code>
+    operation.
+  </li>
+  <li>
+    The ListFacts library has been simplified by removing apparently
+    unneeded lemmas.
+  </li>
+  <li>
+    The levels for some notations have changed.
+  </li>
+</ul>
+
+<h2>oregon08-tutorial</h2>
+
+<ul>
+  <li>
+    Finite sets are now implemented directly using Coq's FSets library.  We
+    no longer wrap the FSets library with an additional axiom about
+    extensional equality.  In practice, it seems that the lemma is
+    unnecessary.  Setoid rewriting seems to be sufficient.
+  </li>
+  <li>
+    The library for environments is now implemented as a generic library
+    about association lists (AssocList).  A separate signature specialized
+    to atoms is provided (AtomEnv).
+  </li>
+</ul>
+
+<h2>popl08-tutorial</h2>
+
+<ul>
+  <li>
+    Code was substantially tweaked and reorganized for pedagogical reasons.
+  </li>
+  <li>
+    The only examples included now are STLC (simply typed lambda calculus)
+    and Fsub (System F with subtyping).
+  </li>
+  <li>
+    The distribution now includes an introduction to using Coq.
+  </li>
+</ul>
+
+<h2>popl08-paper</h2>
+
+<ul>
+  <li>The initial release of the library.</li>
+</ul>
+
+</div> <!-- End id="mainContent" -->
+
+<div id="footer">
+
+<p>
+Page last changed on: $Date: 2008-07-17 12:43:38 -0400 (Thu, 17 Jul 2008) $.<br />
+<a href="http://validator.w3.org/check?uri=referer">Valid XHTML 1.0</a>
+and
+<a href="http://jigsaw.w3.org/css-validator/check/referer">Valid CSS</a>.
+</p>
+
+</div>
+
+</div> <!-- End id="content" -->
+</div> <!-- End id="wrapper" -->
+</div> <!-- End id="container" -->
+
+</body>
+</html>

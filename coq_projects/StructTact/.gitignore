@@ -1,0 +1,12 @@
+*.vo
+*.glob
+*.v.d
+Makefile.coq
+Makefile.coq.bak
+Makefile.coq.conf
+*~
+.coq-native/
+*.aux
+*.vio
+_CoqProject
+.coqdeps.d

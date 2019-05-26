@@ -1,0 +1,12 @@
+Name: Schroeder
+Title: The Theorem of Schroeder-Bernstein
+Author: Hugo herbelin
+Institution: INRIA Rocquencourt
+Description: 
+   Fraenkel's proof of Schroeder-Bernstein theorem on decidable sets 
+   is formalized in a constructive variant of set theory based on 
+   stratified universes (the one defined in the Ensemble library).
+   The informal proof can be found for instance in "Axiomatic Set Theory"
+   from P. Suppes.
+Keywords: Schroeder-Bernstein, Set Theory
+Category: Mathematics/Logic/Set theory

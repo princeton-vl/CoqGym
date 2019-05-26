@@ -1,0 +1,122 @@
+Lesson 3 (Relations_1.v, Relations_1.facts.v)
+
+The package Relations_1 provides elementary definitions regarding relations.
+To make these definition available, execute Require Relations_1.
+Check what happens if you execute that command again.
+
+The definitions are included in a Section.  There are variables,
+Definitions and Inductive definitions. Is U available outside the
+section? To test this, Check U. What about R? Relation? Symmetric? 
+Preorder?
+
+In the section, it seems that the type of Reflexive is Prop.
+This is natural because U and R are given. What is the type
+of Reflexive outside the section?
+
+The equality relation on Type is called eqT. Check its type.
+Can you state the theorem that eqT is reflexive? If yes, then
+prove it. What is the type of contains? Can you state 
+the theorem that contains is transitive? Prove it.
+
+Once you have a definition, such as the definition of  Symmetric,
+the only tool you have to carry out proofs that use that  notion is
+the ability to unfold this definition. They are the commands Red and
+Unfold, as well as Red in H and Unfold in H. The fact that you have
+used these commands will vanish from the proof objects. Try
+Info Symmetric.
+
+Try now Info Preorder. You see that three objects are
+defined. Preorder, defined using the fixpoint operator Ind;
+Definition_of_preorder, a theorem that states that if
+a relation is reflexive and transitive it is a preorder;
+and Preorder_ind, a higher-order theorem which you implicitly
+use when you Elim Preorder. 
+
+You can still use Unfold or Red,
+but it makes Ind visible, and I know of no good use for that.
+
+You may wonder why Symmetric has a definition and Preorder an Inductive
+Definition. This is a matter of taste, at this time. It is perfectly
+possible to give a Definition for Preorder. Try it.
+
+Try Info and. In Coq, ``and' is defined inductively. So is ``or'': try Info
+or. You see that there may be several introduction theorems (here
+or_intro and or_intror), but there is only one elimination principle
+for and and or.
+
+In the Inductive Definitions, there is a  strange fact. Normally
+you would have liked to write, and it works well:
+
+Definition_of_Order:  Reflexive /\ Transitive -> Preorder.
+
+What is written uses more arrows than you are familiar with. The style
+favored by Coq is the so-called ``Currified'' style where
+A ->B -> C is preferred to A /\B ->C. You should be a little 
+careful though. If your fact is A -> (B/\C), you can't remove the
+``and''in this way.
+
+After the section, there are some hints for Auto. Note that I have Hint Unfold
+for each definition, and a simple Hint for all introduction theorems. We will
+see the use of Hint Unfold later.
+ 
+
+
+Now that we have understood all these definitions, we will prove facts about
+them. But first, one more exercize: can you define Complement, which gives the
+complement of a relation, outside the section? Don't look right away at the 
+solution.
+
+Example Rsym_imp_notRsym
+Ater unfolding the definitions of Symmetric and Complement, we are back 
+to one of our games of Lesson 1. We remember the trick for going
+from
+
+not A                 to   B
+-------                    ----------
+:                          H1: A
+:			   :
+H: not B                   :
+:			   :
+:
+
+Red; Intro H1; Apply H
+
+Another strategy consists in Unfolding not at the same time as 
+Symmetric and Complement. A neat one-liner but not a very transparent
+reasoning.
+
+Example Equiv_from_preorder
+
+This a first bit of trivial mathematics: a preorder allows defining
+an equivalence relation.
+
+Exploit the definition of Preorder by Elim, then 
+Apply the definition of an equivalence relation.
+
+The proof of the reflexive case exhibits two facts about Auto.
+First, if the conclusion's top operator is defined and in the Hint list
+(via Hint Unfold), Auto will try Red on it. On the other hand,
+unfortunately, it does not Unfold the definition of Reflexivity
+in Hypothesis H'0, so that it fails, unless you have reduced H'0
+first. This is odd, because Apply H'0 does unfold Reflexive.
+This oddity will disappear in a future version of Coq.
+
+Solving Symmetry is easier and you can do it right away if you wish.
+For transitivity, one cannot use Auto very much, because Auto does 
+not invent intermediate values. 
+
+This proof is a first serious example of what is coming. There is
+absolutely no difficulty, the computer keeps track of all cases.
+Definitions must be used carefully, only when needed. Many goals may appear
+during the proof, and this is not a sign of difficulty.
+
+The theorem is added to the Hint list, in particular
+to facilitate the next proof. The fact that Definition_of_preorder was
+also added to the Hint list allows for an easy proof
+of  Equiv_from_order.  The next facts, 
+contains_is_preorder and same_relation_is_equivalence, are trivial,
+and should give you the feeling that Auto does indeed do good work for you.
+At the same time, you can see that the theorems can be presented at the
+right level of abstraction, without making the proofs more difficult.
+ 
+

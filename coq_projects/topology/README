@@ -1,0 +1,86 @@
+This library develops some of the basic concepts and results of general
+topology.
+
+The library depends on my ZornsLemma contribution.  The provided
+makefile expects compiled files to be present in ../ZornsLemma; if you
+have them somewhere else, first run
+  coq_makefile -R /path/to/ZornsLemma ZornsLemma -R . Topology *.v > makefile
+before running make.
+
+Contents, roughly grouped in related categories:
+
+Basic definitions:
+
+TopologicalSpaces.v
+InteriorsClosures.v
+Neighborhoods.v
+OpenBases.v
+NeighborhoodBases.v
+Subbases.v
+Continuity.v
+Homeomorphisms.v
+
+Filters and nets:
+
+Filters.v
+FilterLimits.v
+DirectedSets.v
+Nets.v
+FiltersAndNets.v - various transformations between filters and nets
+
+Properties:
+
+Compactness.v
+Connectedness.v
+CountabilityAxioms.v - first countable, second countable, separable, Lindelof
+SeparatednessAxioms.v - T0, T1, Hausdorff, etc.
+
+General constructions of topologies:
+
+OrderTopology.v
+StrongTopology.v - strong topology induced by a family of maps from
+                   topological spaces
+WeakTopology.v - weak topology induced by a family of maps to
+                 topological spaces
+ProductTopology.v
+SubspaceTopology.v
+ContinuousFactorization.v - a continuous map factors through its image
+
+Metric spaces:
+
+MetricSpaces.v
+Completeness.v
+Completion.v
+UniformTopology.v - the topology of uniform convergence
+
+Real analysis:
+
+SupInf.v
+RationalsInReals.v
+RTopology.v - definition and properties of topology on R
+RFuncContinuity.v - reproof of continuity of basic functions on R
+
+"First nontrivial results of topology":
+
+UrysohnsLemma.v
+TietzeExtension.v
+
+Author: Daniel Schepler
+
+Copyright:
+Topology Coq contribution
+Copyright (C) 2011  Daniel Schepler
+
+This library is free software; you can redistribute it and/or
+modify it under the terms of the GNU Lesser General Public
+License as published by the Free Software Foundation; either
+version 2.1 of the License, or (at your option) any later version.
+
+This library is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+Lesser General Public License for more details.
+
+You should have received a copy of the GNU Lesser General Public
+License along with this library; if not, write to the Free Software
+Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA

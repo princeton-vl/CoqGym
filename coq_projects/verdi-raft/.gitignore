@@ -1,0 +1,16 @@
+*.vo
+*.glob
+*.v.d
+*.buildtime
+_CoqProject
+Makefile.coq
+Makefile.coq.bak
+Makefile.coq.conf
+.coqdeps.d
+log
+*~
+.coq-native/
+*.aux
+*.vio
+*.pyc
+.vagrant

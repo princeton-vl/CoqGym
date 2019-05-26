@@ -1,0 +1,20 @@
+Name: PTS
+Title: A formalisation of Pure Type Systems
+Author: Bruno Barras
+Institution: LIX - INRIA Futurs
+Description:
+  This contrib is a formalization of Pure Type Systems. It includes most
+  of the basic metatheoretical properties: weakening, substitution,
+  subject-reduction, decidability of type-checking (for strongly normalizing
+  PTSs). Strengtheningis not proven here.
+
+  The kernel of a very simple proof checker is automatically generated from
+  the proofs. A small interface allows interacting with this kernel, making
+  up a standalone proof system. 
+
+  The Makefile has a special target "html" that produces html files from the
+  sources and main.html that gives a short overview.
+ 
+Keywords: calculus of constructions, coq, PTS, pure type systems, metatheory
+Category: Computer Science/Lambda Calculi
+Date: 2007-03

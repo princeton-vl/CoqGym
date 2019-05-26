@@ -1,0 +1,46 @@
+-R . Hardware
+
+./Libraries/Lib_Boolean/Lib_Bool.v
+./Libraries/Lib_Boolean/Lib_Zerob.v
+./Libraries/Lib_Prop.v
+./Libraries/Lib_Set_Products.v
+./Libraries/Lib_Lists/Dependent_lists.v
+./Libraries/Lib_Lists/Lists_of_lists.v
+./Libraries/Lib_Arithmetic/Lib_Div_Even_Odd.v
+./Libraries/Lib_Arithmetic/Lib_Pred.v
+./Libraries/Lib_Arithmetic/Lib_Plus.v
+./Libraries/Lib_Arithmetic/Lib_Square.v
+./Libraries/Lib_Arithmetic/Lib_Arith.v
+./Libraries/Lib_Arithmetic/Lib_Fact.v
+./Libraries/Lib_Arithmetic/Lib_Eq_Le_Lt.v
+./Libraries/Lib_Arithmetic/Lib_Exp.v
+./Libraries/Lib_Arithmetic/Lib_Mult.v
+./Libraries/Lib_Arithmetic/Lib_Dec.v
+./Libraries/Lib_Arithmetic/Lib_Minus.v
+./Factorization/Factorization_Prog.v
+./Factorization/Lib_Numerals/Compare_Num.v
+./Factorization/Lib_Numerals/Compare_Nat.v
+./Factorization/Lib_Numerals/Numerals.v
+./Factorization/Lib_Numerals/Lists_of_Numerals.v
+./Factorization/Factorization_Synth.v
+./Factorization/Factorization_Verif.v
+./Factorization/Factorization.v
+./Factorization/Linear_Structures.v
+./Factorization/Comparator/Comparator_Relation.v
+./Factorization/Comparator/extract.v
+./Factorization/Comparator/Comp_Simpl.v
+./Factorization/Comparator/Comp_Synth.v
+./Factorization/Comparator/Comp_Verif.v
+./Factorization/Comparator/Comp_Prog.v
+
+-extra Factorization/Comparator/comp.ml Factorization/Comparator/Comp_Synth.vo
+       "$(COQBIN)coqtop $(COQFLAGS) -silent -batch -load-vernac-source Factorization/Comparator/extract.v"
+-extra Factorization/Comparator/comp.mli Factorization/Comparator/comp.ml ""
+-extra Factorization/Comparator/comp "Factorization/Comparator/comp.ml Factorization/Comparator/comp.cmi"
+       "$(CAMLBIN)ocamlopt -I Factorization/Comparator -o Factorization/Comparator/comp Factorization/Comparator/comp.ml Factorization/Comparator/comp.mli Factorization/Comparator/main.ml"
+-extra Factorization/Comparator/comp.cmi Factorization/Comparator/comp.mli
+       "$(CAMLBIN)ocamlc Factorization/Comparator/comp.mli"
+-extra test Factorization/Comparator/comp
+       "@echo '******* test: comparing two numbers *******'
+	./Factorization/Comparator/comp 12365876 646848674
+	@echo '************** End of test ****************'"

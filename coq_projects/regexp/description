@@ -1,0 +1,11 @@
+Name: RegExp
+Title: Regular Expression
+Description: The Library RegExp is a Coq library for regular expression. The implementation is based on the Janusz Brzozowski's algorithm ("Derivatives of Regular Expressions", Journal of the ACM 1964).
+The RegExp library satisfies the axioms of Kleene Algebra.  The proofs are shown in the library. 
+Keywords: Regular Expression, Kleene Algebra
+Category: Computer Science/Formal Languages Theory and Automata
+Author: Takashi Miyamoto
+Email: tmiya@bu.iij4u.or.jp
+Homepage: http://study-func-prog.blogspot.com/
+Require: 
+License: LGPL

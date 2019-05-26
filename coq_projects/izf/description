@@ -1,0 +1,17 @@
+Name: IZF
+Title: Intuitionistic Zermelo-Fraenkel Set Theory in Coq
+Author: Alexandre Miquel
+Email: Alexandre.Miquel@pps.jussieu.fr
+Homepage: http://www.pps.jussieu.fr/~miquel
+Institution: INRIA - Université Paris-Sud
+Date: 2003-02
+Description: This development contains the set-as-pointed-graph
+  interpretation of Intuitionistic Zermelo Frankel set theory in system
+  F_omega.2++ (F_omega + one extra universe + intuitionistic choice
+  operator), which is described in chapter 9 of the author's PhD
+  thesis (for IZ) and in the author's CSL'03 paper (for the extension
+  IZ -> IZF).
+Keywords: Intuitionistic set theory, pointed graphs, type theory,
+  intuitionistic choice operator, set theory, Zermelo-Fraenkel
+Require:
+Category: Mathematics/Logic/Set theory

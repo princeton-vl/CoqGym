@@ -1,0 +1,6293 @@
+(* This program is free software; you can redistribute it and/or      *)
+(* modify it under the terms of the GNU Lesser General Public License *)
+(* as published by the Free Software Foundation; either version 2.1   *)
+(* of the License, or (at your option) any later version.             *)
+(*                                                                    *)
+(* This program is distributed in the hope that it will be useful,    *)
+(* but WITHOUT ANY WARRANTY; without even the implied warranty of     *)
+(* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the      *)
+(* GNU General Public License for more details.                       *)
+(*                                                                    *)
+(* You should have received a copy of the GNU Lesser General Public   *)
+(* License along with this program; if not, write to the Free         *)
+(* Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA *)
+(* 02110-1301 USA                                                     *)
+
+
+(**********************************************************
+
+               Functions in classical ZFC 
+
+		Carlos Simpson
+		carlos@math.unice.fr
+		CNRS, Laboratoire J.A. Dieudonne
+		Universite de Nice-Sophia Antipolis
+
+***********************************************************
+
+We start from an axiomatization of set theory which is close
+to what Benjamin Werner constructed. I suppose that if  you
+replace our parameter Ens by the Ens which he constructed, then
+one should be able to prove the things which we suppose as axioms, 
+relatively easily from his paper. However, we don't treat that here,
+rather we just start with some reasonable-sounding axioms.
+
+Then we proceed with the standard development of ZFC set theory.
+Our definition of pair is slightly different from the standard
+one, designed to make the proofs of the main lemmas about pairs
+a little easier and more transparent. 
+
+Our goal is to introduce functions and prove some basic properties.
+We also introduce the set Naturals and prove some basic properties. 
+See below for a summary of parameters, axioms, definitions and theorems
+(only after this summary does the actual Coq file start).
+
+Most of what we do was already done by Guillaume Alexandre in his Coq
+contribution ``An axiomatisation of intuitionistic Zermelo-Fraenkel 
+set theory'' (zf, 1995), indeed we start with the same parameters and similar 
+axioms. We use classical logic (which is easier) though: our parameter 
+Ens is in Type. It is also worth noting that everything we do here is
+also already known in the context of the MIZAR system.
+
+The main difference between the present work and Alexandre's file
+is in the writing style: we don't use the Coq proof engine but rather 
+construct explicitly the proof terms, depending often on the Section 
+mechanism. The file compiles in about 6 seconds using 
+the native code version 6.2.3 on our Linux server.
+
+This style of proof development can be thought of as an attempt to
+implement some of the ideas discussed in the TPHOLs '99 volume (for example
+the article by Markus Wenzel about Isar).
+
+Our functions CHOICE and REPLACEMENT are defined on all properties 
+P: Ens ->Prop; however they satisfy the required properties CHOICE_pr and 
+REPLACEMENT_pr1, REPLACEMENT_pr2, only when P holds for one element
+(in the case of CHOICE) or when P is bounded (in the case of 
+REPLACEMENT).  Since all other constructions are based on these
+(plus a few everywhere-defined constructions in the parameters)
+we gain the beneficial situation that all of our constructions are
+defined as Ens->Ens; no constructions depend on proofs. 
+This can be contrasted with the ``setoid'' approach. Our
+constructions have the required properties only when the arguments
+have the required properties. Thus for example we have a construction
+(EV f x) defined for all sets f and x: however, it represents what one
+might call the evaluation of the function f on the element x, only when
+(IN x (Domain f)). 
+
+The system of axioms which we assume was just invented on the spur of the
+moment; it is basically ZFC but there are probably several redundancies.
+Also there is a certain interaction between this ZFC and the ambient
+type-theoretic language of Coq, which seems to mean that we are probably
+implicitly assuming the existence of one or maybe two inaccessible cardinals.
+See Werner's paper ``Sets in Types, Types in Sets'' for the discussion that
+underlies our justification for doing what we are doing.
+A possible perspective of the present work is that one could envision 
+coding this first half of Werner's paper, giving a construction Type -> Ens 
+with the properties he describes. This might be useful.  
+
+
+
+
+
+
+*************************************************************************
+
+                                SUMMARY 
+here is a listing of all the parameters, axioms, definitions and theorems
+(generated by a c program)
+
+*************************************************************************
+
+
+Parameter Ens : Type . 
+
+Parameter IN : Ens -> Ens -> Prop . 
+
+Definition SUB := 
+   [A, B : Ens]
+   (C : Ens)
+   ((IN C A) -> (IN C B)).
+
+Record EQ [A : Ens ; B : Ens] : Prop := {
+   EQ_forwards : (SUB A B);
+   EQ_backwards : (SUB B A)
+}.
+
+Axiom excluded_middle : 
+   (P : Prop) 
+   (not (not P)) 
+   -> 
+   P . 
+
+Theorem false_implies_everything : 
+   (P : Prop) 
+   (False -> P) . 
+
+Definition DOESNT_EXIST := 
+   [P : Ens -> Prop]
+   ((A : Ens) (not (P A))).
+
+Definition EXISTS := 
+   [P : Ens -> Prop]
+   (not (DOESNT_EXIST P)).
+
+Parameter CHOICE : (P : Ens -> Prop) Ens . 
+
+Axiom CHOICE_pr : 
+   (P : Ens -> Prop) 
+   (h : (EXISTS P)) 
+   (P (CHOICE P)) . 
+
+Parameter EmptySet : Ens . 
+
+Axiom EmptySet_pr : 
+   (DOESNT_EXIST ([X : Ens] (IN X EmptySet))) . 
+
+Definition Bounded_By := 
+   [A : Ens]
+   [P : Ens -> Prop]
+   (X : Ens)
+   ((P X) -> (IN X A)).
+
+Definition Bounded := 
+   [P : Ens -> Prop]
+   (EXISTS ([A : Ens] (Bounded_By A P))).
+
+Parameter union : (A, B : Ens) Ens . 
+
+Axiom union_pr1 : 
+   (A, B : Ens) 
+   (SUB A (union A B)) . 
+
+Axiom union_pr2 : 
+   (A, B : Ens) 
+   (SUB B (union A B)) . 
+
+Axiom union_pr3 : 
+   (A, B, C : Ens) 
+   (h : (SUB A C)) 
+   (k : (SUB B C)) 
+   (SUB (union A B) C) . 
+
+Record nested_IN [A, B, C : Ens] : Prop := {
+   nested_IN_ab : (IN A B);
+   nested_IN_bc : (IN B C)
+}.
+
+Definition b_in_Union_a := 
+   [A, B : Ens]
+   (EXISTS ([C : Ens] (nested_IN B C A))).
+
+Axiom Union_bounded : 
+   (F : Ens) 
+   (Bounded (b_in_Union_a F)) . 
+
+Parameter Singleton : Ens -> Ens . 
+
+Axiom Singleton_pr1 : 
+   (X : Ens) 
+   (IN X (Singleton X)) . 
+
+Axiom Singleton_pr2 : 
+   (X : Ens) 
+   (Y : Ens) 
+   (h : (IN Y (Singleton X))) 
+   (EQ X Y) . 
+
+Axiom Extensionality : 
+   (X, Y, Z : Ens) 
+   (h : (EQ X Y)) 
+   (k : (IN Y Z)) 
+   (IN X Z) . 
+
+Axiom Powerset_bounded : 
+   (X : Ens) 
+   (Bounded ([Y : Ens] (SUB Y X))) . 
+
+Parameter REPLACEMENT : (P : Ens -> Prop) Ens . 
+
+Axiom REPLACEMENT_pr1 : 
+   (P : Ens -> Prop) 
+   (b : (Bounded P)) 
+   (X : Ens) 
+   ((P X) -> (IN X (REPLACEMENT P))) . 
+
+Axiom REPLACEMENT_pr2 : 
+   (P : Ens -> Prop) 
+   (b : (Bounded P)) 
+   (X : Ens) 
+   ((IN X (REPLACEMENT P)) -> (P X)) . 
+
+Definition Zero := 
+   EmptySet.
+
+Definition Next : Ens -> Ens := 
+   [X : Ens]
+   (union X (Singleton X)).
+
+Record Contains_NN [X : Ens] : Prop := {
+   Contains_NN_zero : (IN Zero X);
+   Contains_NN_nexts : (A : Ens)(h : (IN A X))(IN (Next A) X)
+}.
+
+Axiom Infinity_exists : 
+   (EXISTS Contains_NN) . 
+
+Theorem EXISTS_th1 : 
+   (P : Ens -> Prop) 
+   (X : Ens) 
+   (p : (P X)) 
+   (EXISTS P) . 
+
+Theorem SUB_refl : 
+   (A : Ens) 
+   (SUB A A) . 
+
+Theorem EQ_refl : 
+   (A : Ens) 
+   (EQ A A) . 
+
+Theorem EQ_symm : 
+   (A, B : Ens) 
+   (EQ A B) 
+   -> 
+   (EQ B A) . 
+
+Definition NEQ := 
+   [A, B : Ens]
+   (not (EQ A B)).
+
+Theorem NEQ_symm : 
+   (A, B : Ens) 
+   (k : (NEQ A B)) 
+   (NEQ B A) . 
+
+Theorem SUB_trans : 
+   (A, B, C : Ens) 
+   (h : (SUB A B)) 
+   (k : (SUB B C)) 
+   (SUB A C) . 
+
+Theorem EQ_trans : 
+   (A, B, C : Ens) 
+   (h : (EQ A B)) 
+   (k : (EQ B C)) 
+   (EQ A C) . 
+
+Record StrictSUB [A, B : Ens] : Prop := {
+   StrictSUB_sub : (SUB A B);
+   StrictSUB_neq : (not (EQ A B))
+}.
+
+Theorem StrictSUB_trans1 : 
+   (A, B, C : Ens) 
+   (h : (StrictSUB A B)) 
+   (k : (SUB B C)) 
+   (StrictSUB A C) . 
+
+Theorem EmptySet_th1 : 
+   (X : Ens) 
+   (h : (IN X EmptySet)) 
+   False . 
+
+Theorem EmptySet_th2 : 
+   (A : Ens) 
+   (SUB EmptySet A) . 
+
+Definition Its_empty := 
+   [A : Ens]
+   (X : Ens)
+   (not (IN X A)).
+
+Theorem its_empty_implies_equals_emptyset : 
+   (A : Ens) 
+   (k : (Its_empty A)) 
+   (EQ A EmptySet) . 
+
+Theorem Its_empty_emptyset : 
+   (Its_empty EmptySet) . 
+
+Definition Its_nonempty := 
+   [A : Ens]
+   (not (Its_empty A)).
+
+Theorem Its_nonempty_th1 : 
+   (X, A : Ens) 
+   (h : (IN X A)) 
+   (Its_nonempty A) . 
+
+Theorem Nothing_strictsub_Zero : 
+   (X : Ens) 
+   (not (StrictSUB X Zero)) . 
+
+Theorem Bounded_th1 : 
+   (P : Ens -> Prop) 
+   (A : Ens) 
+   (h : (X : Ens) ((P X) -> (IN X A))) 
+   (Bounded P) . 
+
+Theorem Bounded_th2 : 
+   (P : Ens -> Prop) 
+   (A : Ens) 
+   (h : (Bounded_By A P)) 
+   (Bounded P) . 
+
+Definition Bounded_CHOICE := 
+   [P : Ens -> Prop]
+   (REPLACEMENT P).
+
+Theorem Bounded_CHOICE_pr : 
+   (P : Ens -> Prop) 
+   (b : (Bounded P)) 
+   (Bounded_By (Bounded_CHOICE P) P) . 
+
+Definition SUBPROP := 
+   [P : Ens -> Prop]
+   [Q : Ens -> Prop]
+   (X : Ens)
+   (P X)
+   ->
+   (Q X).
+
+Theorem Bounded_subprops_th1 : 
+   (P, Q : Ens -> Prop) 
+   (s : (SUBPROP P Q)) 
+   (A : Ens) 
+   (h : (Bounded_By A Q)) 
+   (Bounded_By A P) . 
+
+Theorem Bounded_subprops_th2 : 
+   (P, Q : Ens -> Prop) 
+   (s : (SUBPROP P Q)) 
+   (b : (Bounded Q)) 
+   (Bounded P) . 
+
+Record Restriction [P : Ens -> Prop ; A : Ens ; X : Ens] : Prop := {
+   remaining_property : (P X);
+   the_restriction : (IN X A)
+}.
+
+Theorem Restriction_bounded : 
+   (P : Ens -> Prop) 
+   (A : Ens) 
+   (Bounded (Restriction P A)) . 
+
+Definition Set_Of := 
+   [A : Ens]
+   [P : Ens -> Prop]
+   (REPLACEMENT (Restriction P A)).
+
+Theorem Set_Of_pr1 : 
+   (A : Ens) 
+   (P : Ens -> Prop) 
+   (X : Ens) 
+   (Restriction P A X) 
+   -> 
+   (IN X (Set_Of A P)) . 
+
+Theorem Set_Of_pr2 : 
+   (A : Ens) 
+   (P : Ens -> Prop) 
+   (X : Ens) 
+   (IN X (Set_Of A P)) 
+   -> 
+   (Restriction P A X) . 
+
+Theorem Set_Of_th1 : 
+   (A : Ens) 
+   (P : Ens -> Prop) 
+   (X : Ens) 
+   (h : (IN X A)) 
+   (k : (P X)) 
+   (IN X (Set_Of A P)) . 
+
+Theorem Set_Of_th2 : 
+   (A : Ens) 
+   (P : Ens -> Prop) 
+   (X : Ens) 
+   (h : (IN X (Set_Of A P))) 
+   (P X) . 
+
+Theorem Set_Of_th3 : 
+   (A : Ens) 
+   (P : Ens -> Prop) 
+   (X : Ens) 
+   (h : (IN X (Set_Of A P))) 
+   (IN X A) . 
+
+Theorem Set_Of_th4 : 
+   (A : Ens) 
+   (P : Ens -> Prop) 
+   (SUB (Set_Of A P) A) . 
+
+Definition intersection := 
+   [A, B : Ens]
+   (Set_Of A ([X : Ens] (IN X B))).
+
+Theorem intersection_th1 : 
+   (A, B : Ens) 
+   (SUB (intersection A B) A) . 
+
+Theorem intersection_th2 : 
+   (A, B : Ens) 
+   (SUB (intersection A B) B) . 
+
+Theorem intersection_th3 : 
+   (A, B, X : Ens) 
+   (i : (IN X A)) 
+   (j : (IN X B)) 
+   (IN X (intersection A B)) . 
+
+Theorem intersection_th4 : 
+   (A, B, C : Ens) 
+   (s : (SUB C A)) 
+   (t : (SUB C B)) 
+   (SUB C (intersection A B)) . 
+
+Definition IntersectionProp := 
+   [F : Ens -> Ens]
+   [X : Ens]
+   (Y : Ens)
+   (IN X (F Y)).
+
+Definition Intersection : (F : Ens -> Ens) Ens := 
+   [F : Ens -> Ens]
+   (REPLACEMENT (IntersectionProp F)).
+
+Theorem Intersection_pr1 : 
+   (F : Ens -> Ens) 
+   (X : Ens) 
+   (IntersectionProp F X) 
+   -> 
+   (IN X (Intersection F)) . 
+
+Theorem Intersection_pr2 : 
+   (F : Ens -> Ens) 
+   (X : Ens) 
+   (IN X (Intersection F)) 
+   -> 
+   (IntersectionProp F X) . 
+
+Theorem Intersection_th1 : 
+   (F : Ens -> Ens) 
+   (X : Ens) 
+   (h : ((Y : Ens) (IN X (F Y)))) 
+   (IN X (Intersection F)) . 
+
+Theorem Intersection_th2 : 
+   (F : Ens -> Ens) 
+   (X : Ens) 
+   (Y : Ens) 
+   (i : (IN X (Intersection F))) 
+   (IN X (F Y)) . 
+
+Theorem Singleton_th1 : 
+   (X, A : Ens) 
+   (h : (IN X A)) 
+   (SUB (Singleton X) A) . 
+
+Theorem Singleton_th2 : 
+   (X : Ens) 
+   (Its_nonempty (Singleton X)) . 
+
+Theorem union_th1 : 
+   (A, B : Ens) 
+   (X : Ens) 
+   (h : (IN X A)) 
+   (IN X (union A B)) . 
+
+Theorem union_th2 : 
+   (A, B : Ens) 
+   (X : Ens) 
+   (h : (IN X B)) 
+   (IN X (union A B)) . 
+
+Theorem union_th3 : 
+   (A, B : Ens) 
+   (X : Ens) 
+   (h : (not (IN X A))) 
+   (k : (not (IN X B))) 
+   (not (IN X (union A B))) . 
+
+Theorem union_th4 : 
+   (P : Prop) 
+   (A, B, X : Ens) 
+   (i : (IN X (union A B))) 
+   (a : ((IN X A) -> P)) 
+   (b : ((IN X B) -> P)) 
+   P . 
+
+Theorem union_refl : 
+   (A : Ens) 
+   (EQ A (union A A)) . 
+
+Theorem union_symm : 
+   (A, B : Ens) 
+   (EQ (union A B) (union B A)) . 
+
+Definition Union : (F : Ens) Ens := 
+   [F : Ens]
+   (REPLACEMENT (b_in_Union_a F)).
+
+Theorem Union_pr1 : 
+   (F, X : Ens) 
+   (h : (EXISTS ([U : Ens] (nested_IN X U F)))) 
+   (IN X (Union F)) . 
+
+Theorem Union_pr2 : 
+   (F, X : Ens) 
+   (i : (IN X (Union F))) 
+   (EXISTS ([U : Ens] (nested_IN X U F))) . 
+
+Definition Union_intermediate : (F, X : Ens) (i : (IN X (Union F))) Ens := 
+   [F, X : Ens]
+   [i : (IN X (Union F))]
+   (CHOICE ([U : Ens] (nested_IN X U F))).
+
+Theorem Union_intermediate_pr : 
+   (F, X : Ens) 
+   (i : (IN X (Union F))) 
+   (nested_IN X (Union_intermediate F X i) F) . 
+
+Theorem Union_intermediate_th1 : 
+   (F, X : Ens) 
+   (i : (IN X (Union F))) 
+   (IN X (Union_intermediate F X i)) . 
+
+Theorem Union_intermediate_th2 : 
+   (F, X : Ens) 
+   (i : (IN X (Union F))) 
+   (IN (Union_intermediate F X i) F) . 
+
+Theorem Union_th1 : 
+   (F, X, U : Ens) 
+   (h : (IN X U)) 
+   (k : (IN U F)) 
+   (IN X (Union F)) . 
+
+Definition has_leq_0_elements := 
+   Its_empty.
+
+Theorem zero_has_leq_0_elements : 
+   (has_leq_0_elements Zero) . 
+
+Definition has_geq_1_elements := 
+   [A : Ens]
+   (not (has_leq_0_elements A)).
+
+Definition Choose_an_element : (A : Ens) (k : (has_geq_1_elements A)) Ens := 
+   [A : Ens]
+   [k : (has_geq_1_elements A)]
+   (CHOICE ([X : Ens] (IN X A))).
+
+Theorem Choose_an_element_pr : 
+   (A : Ens) 
+   (k : (has_geq_1_elements A)) 
+   (IN (Choose_an_element A k) A) . 
+
+Theorem has_geq_1_elements_th1 : 
+   (A : Ens) 
+   (X : Ens) 
+   (k : (IN X A)) 
+   (has_geq_1_elements A) . 
+
+Theorem Singletons_have_geq_1_elements : 
+   (X : Ens) 
+   (has_geq_1_elements (Singleton X)) . 
+
+Definition has_leq_1_elements := 
+   [A : Ens]
+   (X, Y : Ens)
+   (k : (IN X A))
+   (l : (IN Y A))
+   (EQ X Y).
+
+Theorem has_leq_0_elements_implies_leq_1 : 
+   (A : Ens) 
+   (q : (has_leq_0_elements A)) 
+   (has_leq_1_elements A) . 
+
+Theorem Singletons_have_leq_1_elements : 
+   (A : Ens) 
+   (has_leq_1_elements (Singleton A)) . 
+
+Definition has_geq_2_elements := 
+   [A : Ens]
+   (not (has_leq_1_elements A)).
+
+Theorem has_geq_2_elements_th1 : 
+   (A : Ens) 
+   (X, Y : Ens) 
+   (k : (IN X A)) 
+   (l : (IN Y A)) 
+   (m : (not (EQ X Y))) 
+   (has_geq_2_elements A) . 
+
+Definition Doubleton := 
+   [X : Ens]
+   [Y : Ens]
+   (union (Singleton X) (Singleton Y)).
+
+Theorem Doubleton_th1 : 
+   (X, Y : Ens) 
+   (IN X (Doubleton X Y)) . 
+
+Theorem Doubleton_th2 : 
+   (X, Y : Ens) 
+   (IN Y (Doubleton X Y)) . 
+
+Theorem Doubleton_th3 : 
+   (X, Y : Ens) 
+   (A : Ens) 
+   (iXA : (IN X A)) 
+   (iYA : (IN Y A)) 
+   (SUB (Doubleton X Y) A) . 
+
+Theorem Doubleton_th4 : 
+   (X, Y : Ens) 
+   (Z : Ens) 
+   (k : (IN Z (Doubleton X Y))) 
+   (m : (not (EQ Z X))) 
+   (n : (not (EQ Z Y))) 
+   False . 
+
+Theorem Doubleton_th4_a : 
+   (X, Y : Ens) 
+   (Z : Ens) 
+   (k : (IN Z (Doubleton X Y))) 
+   (m : (not (EQ Z X))) 
+   (EQ Z Y) . 
+
+Theorem Doubleton_th4_b : 
+   (X, Y : Ens) 
+   (Z : Ens) 
+   (k : (IN Z (Doubleton X Y))) 
+   (n : (not (EQ Z Y))) 
+   (EQ Z X) . 
+
+Theorem distinct_Doubletons_have_geq_2_elements : 
+   (X, Y : Ens) 
+   (n : (not (EQ X Y))) 
+   (has_geq_2_elements (Doubleton X Y)) . 
+
+Theorem Big_Extensionality : 
+   (P : Ens -> Prop) 
+   (X, Y : Ens) 
+   (p : (P X)) 
+   (e : (EQ X Y)) 
+   (P Y) . 
+
+Theorem Substitute : 
+   (X, Y : Ens) 
+   (P : Ens -> Prop) 
+   (e : (EQ X Y)) 
+   (p : (P Y)) 
+   (P X) . 
+
+Theorem counting_lem1 : 
+   (X, Y : Ens) 
+   (m : (has_leq_0_elements X)) 
+   (n : (has_geq_1_elements Y)) 
+   (not (EQ X Y)) . 
+
+Theorem counting_lem2 : 
+   (X, Y : Ens) 
+   (m : (has_leq_1_elements X)) 
+   (n : (has_geq_2_elements Y)) 
+   (not (EQ X Y)) . 
+
+Definition First : Ens -> Ens := 
+   [X : Ens]
+   (Singleton X).
+
+Definition Second : Ens -> Ens := 
+   [X : Ens]
+   (Doubleton Zero (Singleton X)).
+
+Definition PAIR : Ens -> Ens -> Ens := 
+   [X, Y : Ens]
+   (Doubleton (First X) (Second Y)).
+
+Theorem First_uniqueness : 
+   (A, B : Ens) 
+   (m : (EQ (First A) (First B))) 
+   (EQ A B) . 
+
+Theorem Singleton_uniqueness : 
+   (A, B : Ens) 
+   (m : (EQ (Singleton A) (Singleton B))) 
+   (EQ A B) . 
+
+Record pairwise_EQ [A, B, C, D : Ens] : Prop := {
+   pairwise_EQ_ac : (EQ A C);
+   pairwise_EQ_bd : (EQ B D)
+}.
+
+Theorem Doubleton_uniqueness : 
+   (P : Ens -> Prop) 
+   (A, B, C, D : Ens) 
+   (pA : (P A)) 
+   (nB : (not (P B))) 
+   (pC : (P C)) 
+   (nD : (not (P D))) 
+   (e : (EQ (Doubleton A B) (Doubleton C D))) 
+   (pairwise_EQ A B C D) . 
+
+Theorem Second_has_geq_2_elements : 
+   (A : Ens) 
+   (has_geq_2_elements (Second A)) . 
+
+Theorem Second_uniqueness : 
+   (A, B : Ens) 
+   (k : (EQ (Second A) (Second B))) 
+   (EQ A B) . 
+
+Theorem PAIR_uniqueness : 
+   (A, B, C, D : Ens) 
+   (e : (EQ (PAIR A B) (PAIR C D))) 
+   (pairwise_EQ A B C D) . 
+
+Theorem PAIR_uni_ac : 
+   (A, B, C, D : Ens) 
+   (e : (EQ (PAIR A B) (PAIR C D))) 
+   (EQ A C) . 
+
+Theorem PAIR_uni_bd : 
+   (A, B, C, D : Ens) 
+   (e : (EQ (PAIR A B) (PAIR C D))) 
+   (EQ B D) . 
+
+Definition is_a_pair := 
+   [M : Ens]
+   (EXISTS ([A : Ens] (EXISTS ([B : Ens] (EQ M (PAIR A B)))))).
+
+Theorem a_pair_is_a_pair : 
+   (A, B : Ens) 
+   (is_a_pair (PAIR A B)) . 
+
+Theorem a_pair_is_a_pair_th2 : 
+   (A, B, U : Ens) 
+   (i : (EQ (PAIR A B) U)) 
+   (is_a_pair U) . 
+
+Definition PR1 := 
+   [M : Ens]
+   (CHOICE ([A : Ens] (EXISTS ([B : Ens] (EQ M (PAIR A B)))))).
+
+Theorem PAIR_proj1_pr1 : 
+   (M : Ens) 
+   (p : (is_a_pair M)) 
+   (EXISTS ([B : Ens] (EQ M (PAIR (PR1 M) B)))) . 
+
+Definition PR2 := 
+   [M : Ens]
+   (CHOICE ([B : Ens] (EQ M (PAIR (PR1 M) B)))).
+
+Theorem PAIR_proj_th1 : 
+   (M : Ens) 
+   (p : (is_a_pair M)) 
+   (EQ M (PAIR (PR1 M) (PR2 M))) . 
+
+Theorem PAIR_proj_th2 : 
+   (X, Y : Ens) 
+   (pairwise_EQ X Y (PR1 (PAIR X Y)) (PR2 (PAIR X Y))) . 
+
+Theorem PAIR_proj_th3 : 
+   (X, Y : Ens) 
+   (EQ X (PR1 (PAIR X Y))) . 
+
+Theorem PAIR_proj_th4 : 
+   (X, Y : Ens) 
+   (EQ Y (PR2 (PAIR X Y))) . 
+
+Theorem PAIR_proj_uni : 
+   (M : Ens) 
+   (m : (is_a_pair M)) 
+   (N : Ens) 
+   (n : (is_a_pair N)) 
+   (e : (EQ (PR1 M) (PR1 N))) 
+   (f : (EQ (PR2 M) (PR2 N))) 
+   (EQ M N) . 
+
+Definition Powerset := 
+   [X : Ens]
+   (REPLACEMENT ([Y : Ens] (SUB Y X))).
+
+Theorem Powerset_pr1 : 
+   (X, Y : Ens) 
+   (h : (SUB Y X)) 
+   (IN Y (Powerset X)) . 
+
+Theorem Powerset_pr2 : 
+   (X, Y : Ens) 
+   (i : (IN Y (Powerset X))) 
+   (SUB Y X) . 
+
+Theorem Powerset_th1 : 
+   (A : Ens) 
+   (IN Zero (Powerset A)) . 
+
+Theorem Powerset_th2 : 
+   (A, X, Y : Ens) 
+   (x : (IN X (Powerset A))) 
+   (y : (IN Y (Powerset A))) 
+   (IN (union X Y) (Powerset A)) . 
+
+Theorem Powerset_th3 : 
+   (A, X, Y : Ens) 
+   (x : (IN X (Powerset A))) 
+   (y : (IN Y (Powerset A))) 
+   (IN (intersection X Y) (Powerset A)) . 
+
+Theorem Powerset_th4 : 
+   (A, X : Ens) 
+   (x : (IN X A)) 
+   (IN (Singleton X) (Powerset A)) . 
+
+Theorem Powerset_th5 : 
+   (A, X, Y : Ens) 
+   (x : (IN X A)) 
+   (y : (IN Y A)) 
+   (IN (Doubleton X Y) (Powerset A)) . 
+
+Theorem Powerset_th6 : 
+   (A, X : Ens) 
+   (x : (IN X A)) 
+   (IN (Second X) (Powerset (Powerset A))) . 
+
+Theorem Powerset_th7 : 
+   (A, B : Ens) 
+   (a : (SUB A B)) 
+   (SUB (Powerset A) (Powerset B)) . 
+
+Definition Element_of_NN := 
+   [Y : Ens]
+   (X : Ens)
+   (k : (Contains_NN X))
+   (IN Y X).
+
+Theorem Zero_element_of_NN : 
+   (Element_of_NN Zero) . 
+
+Theorem Nexts_element_of_NN : 
+   (A : Ens) 
+   (h : (Element_of_NN A)) 
+   (Element_of_NN (Next A)) . 
+
+Definition Set_containing_NN := 
+   (CHOICE Contains_NN).
+
+Theorem Set_containing_NN_pr : 
+   (Contains_NN Set_containing_NN) . 
+
+Theorem Bounded_NN_pre : 
+   (EXISTS ([A : Ens] (Bounded_By A Element_of_NN))) . 
+
+Theorem Bounded_NN : 
+   (Bounded Element_of_NN) . 
+
+Definition Naturals := 
+   (REPLACEMENT Element_of_NN).
+
+Theorem Naturals_pr1 : 
+   (X : Ens) 
+   (Element_of_NN X) 
+   -> 
+   (IN X Naturals) . 
+
+Theorem Naturals_pr2 : 
+   (X : Ens) 
+   (IN X Naturals) 
+   -> 
+   (Element_of_NN X) . 
+
+Theorem Zero_in_Naturals : 
+   (IN Zero Naturals) . 
+
+Theorem Nexts_in_Naturals : 
+   (A : Ens) 
+   (h : (IN A Naturals)) 
+   (IN (Next A) Naturals) . 
+
+Theorem Contains_NN_Naturals : 
+   (Contains_NN Naturals) . 
+
+Theorem Naturals_th1 : 
+   (X : Ens) 
+   (h : (Contains_NN X)) 
+   (SUB Naturals X) . 
+
+Theorem anything_sub_next_of_itself : 
+   (A : Ens) 
+   (SUB A (Next A)) . 
+
+Theorem anything_in_next_of_itself : 
+   (A : Ens) 
+   (IN A (Next A)) . 
+
+Definition naturals_induction_nexts := 
+   [P : Ens -> Prop]
+   (A : Ens)
+   (h : (IN A Naturals))
+   (k : (P A))
+   (P (Next A)).
+
+Theorem naturals_inductionA : 
+   (P : Ens -> Prop) 
+   (IH_zero : (P Zero)) 
+   (IH_nexts : (naturals_induction_nexts P)) 
+   (B : Ens) 
+   (p : (IN B Naturals)) 
+   (P B) . 
+
+Definition in_then_strictsub := 
+   [N : Ens]
+   (X : Ens)
+   (IN X N)
+   ->
+   (StrictSUB X N).
+
+Definition not_in_itself := 
+   [X : Ens]
+   (not (IN X X)).
+
+Record naturals_main_ind_hyp [N : Ens] : Prop := {
+   naturals_main_ind1 : (in_then_strictsub N);
+   naturals_main_ind2 : (not_in_itself N)
+}.
+
+Theorem some_things_strictsub_their_nexts : 
+   (A : Ens) 
+   (h : (not_in_itself A)) 
+   (StrictSUB A (Next A)) . 
+
+Theorem in_then_strictsub_Zero : 
+   (X : Ens) 
+   (IN X Zero) 
+   -> 
+   (StrictSUB X Zero) . 
+
+Theorem zero_not_in_itself : 
+   (not_in_itself Zero) . 
+
+Theorem naturals_main_ind_for_Zero : 
+   (naturals_main_ind_hyp Zero) . 
+
+Theorem naturals_main_induction_next : 
+   (A : Ens) 
+   (h : (naturals_main_ind_hyp A)) 
+   (naturals_main_ind_hyp (Next A)) . 
+
+Theorem naturals_main_induction_next_1 : 
+   (naturals_induction_nexts naturals_main_ind_hyp) . 
+
+Theorem naturals_main_th1 : 
+   (B : Ens) 
+   (i : (IN B Naturals)) 
+   (naturals_main_ind_hyp B) . 
+
+Theorem naturals_main_th2 : 
+   (B : Ens) 
+   (i : (IN B Naturals)) 
+   (in_then_strictsub B) . 
+
+Theorem naturals_main_th2_rewrite : 
+   (B : Ens) 
+   (i : (IN B Naturals)) 
+   (A : Ens) 
+   (j : (IN A B)) 
+   (StrictSUB A B) . 
+
+Theorem naturals_main_th3 : 
+   (B : Ens) 
+   (i : (IN B Naturals)) 
+   (not_in_itself B) . 
+
+Theorem naturals_main_th3_rewrite : 
+   (B : Ens) 
+   (i : (IN B Naturals)) 
+   (not (IN B B)) . 
+
+Definition UnionPlus := 
+   [F : Ens]
+   (union F (Union F)).
+
+Definition Total := 
+   [R : Ens]
+   (UnionPlus (UnionPlus (UnionPlus R))).
+
+Theorem UnionPlus_th1 : 
+   (X, F : Ens) 
+   (i : (IN X F)) 
+   (IN X (UnionPlus F)) . 
+
+Theorem UnionPlus_th2 : 
+   (X, U, F : Ens) 
+   (i : (IN X U)) 
+   (j : (IN U F)) 
+   (IN X (UnionPlus F)) . 
+
+Theorem Total_th1 : 
+   (X, F : Ens) 
+   (i : (IN X F)) 
+   (IN X (Total F)) . 
+
+Theorem Total_th2 : 
+   (X, Y, F : Ens) 
+   (i : (IN X Y)) 
+   (j : (IN Y F)) 
+   (IN X (Total F)) . 
+
+Theorem Total_th3 : 
+   (X, Y, Z, F : Ens) 
+   (i : (IN X Y)) 
+   (j : (IN Y Z)) 
+   (k : (IN Z F)) 
+   (IN X (Total F)) . 
+
+Theorem Total_th4 : 
+   (X, Y, Z, W, F : Ens) 
+   (i : (IN X Y)) 
+   (j : (IN Y Z)) 
+   (k : (IN Z W)) 
+   (l : (IN W F)) 
+   (IN X (Total F)) . 
+
+Theorem Relation_Total_th1 : 
+   (R : Ens) 
+   (A, B : Ens) 
+   (i : (IN (PAIR A B) R)) 
+   (IN A (Total R)) . 
+
+Theorem Relation_Total_th2 : 
+   (R : Ens) 
+   (A, B : Ens) 
+   (i : (IN (PAIR A B) R)) 
+   (IN B (Total R)) . 
+
+Definition Domain_prop := 
+   [R : Ens]
+   [X : Ens]
+   (EXISTS ([Y : Ens] (IN (PAIR X Y) R))).
+
+Definition Range_prop := 
+   [R : Ens]
+   [Y : Ens]
+   (EXISTS ([X : Ens] (IN (PAIR X Y) R))).
+
+Definition EV := 
+   [R : Ens]
+   [X : Ens]
+   (CHOICE ([Y : Ens] (IN (PAIR X Y) R))).
+
+Theorem EV_pr : 
+   (R : Ens) 
+   (X : Ens) 
+   (p : (Domain_prop R X)) 
+   (IN (PAIR X (EV R X)) R) . 
+
+Definition inverse_EV := 
+   [R : Ens]
+   [Y : Ens]
+   (CHOICE ([X : Ens] (IN (PAIR X Y) R))).
+
+Theorem inverse_EV_pr : 
+   (R : Ens) 
+   (Y : Ens) 
+   (p : (Range_prop R Y)) 
+   (IN (PAIR (inverse_EV R Y) Y) R) . 
+
+Theorem Domain_prop_bounded : 
+   (R : Ens) 
+   (Bounded (Domain_prop R)) . 
+
+Theorem Range_prop_bounded : 
+   (R : Ens) 
+   (Bounded (Range_prop R)) . 
+
+Definition Domain := 
+   [R : Ens]
+   (REPLACEMENT (Domain_prop R)).
+
+Theorem Domain_pr1 : 
+   (R : Ens) 
+   (X : Ens) 
+   (p : (Domain_prop R X)) 
+   (IN X (Domain R)) . 
+
+Theorem Domain_pr2 : 
+   (R : Ens) 
+   (X : Ens) 
+   (i : (IN X (Domain R))) 
+   (Domain_prop R X) . 
+
+Theorem EV_th1 : 
+   (R : Ens) 
+   (X : Ens) 
+   (i : (IN X (Domain R))) 
+   (IN (PAIR X (EV R X)) R) . 
+
+Theorem Domain_th1 : 
+   (R : Ens) 
+   (X, Y : Ens) 
+   (i : (IN (PAIR X Y) R)) 
+   (IN X (Domain R)) . 
+
+Definition Range := 
+   [R : Ens]
+   (REPLACEMENT (Range_prop R)).
+
+Theorem Range_pr1 : 
+   (R : Ens) 
+   (X : Ens) 
+   (p : (Range_prop R X)) 
+   (IN X (Range R)) . 
+
+Theorem Range_pr2 : 
+   (R : Ens) 
+   (X : Ens) 
+   (i : (IN X (Range R))) 
+   (Range_prop R X) . 
+
+Theorem inverse_EV_th1 : 
+   (R : Ens) 
+   (Y : Ens) 
+   (i : (IN Y (Range R))) 
+   (IN (PAIR (inverse_EV R Y) Y) R) . 
+
+Theorem Range_th1 : 
+   (R : Ens) 
+   (X, Y : Ens) 
+   (i : (IN (PAIR X Y) R)) 
+   (IN Y (Range R)) . 
+
+Theorem EV_in_range : 
+   (R, X : Ens) 
+   (i : (IN X (Domain R))) 
+   (IN (EV R X) (Range R)) . 
+
+Theorem inverse_EV_in_domain : 
+   (R, Y : Ens) 
+   (i : (IN Y (Range R))) 
+   (IN (inverse_EV R Y) (Domain R)) . 
+
+Definition is_a_relation := 
+   [R : Ens]
+   (X : Ens)
+   (i : (IN X R))
+   (is_a_pair X).
+
+Theorem relation_sub : 
+   (R : Ens) 
+   (r : (is_a_relation R)) 
+   (S : Ens) 
+   (SUB S R) 
+   -> 
+   (is_a_relation S) . 
+
+Definition well_definedness := 
+   [F : Ens]
+   (X, Y, Z : Ens)
+   (i : (IN (PAIR X Y) F))
+   (j : (IN (PAIR X Z) F))
+   (EQ Y Z).
+
+Theorem well_definedness_sub : 
+   (F : Ens) 
+   (w : (well_definedness F)) 
+   (R : Ens) 
+   (h : (SUB R F)) 
+   (well_definedness R) . 
+
+Record is_a_function [F : Ens] : Prop := {
+   function_is_a_relation : (is_a_relation F);
+   function_well_definedness : (well_definedness F)
+}.
+
+Theorem function_sub : 
+   (F : Ens) 
+   (f : (is_a_function F)) 
+   (G : Ens) 
+   (s : (SUB G F)) 
+   (is_a_function G) . 
+
+Record is_a_function_on [D, F : Ens] : Prop := {
+   function_on_fn : (is_a_function F);
+   function_on_dom : (EQ D (Domain F))
+}.
+
+Theorem function_is_a_function_on : 
+   (F : Ens) 
+   (f : (is_a_function F)) 
+   (is_a_function_on (Domain F) F) . 
+
+Theorem function_th1 : 
+   (F : Ens) 
+   (f : (is_a_function F)) 
+   (X, Y : Ens) 
+   (i : (IN (PAIR X Y) F)) 
+   (EQ Y (EV F X)) . 
+
+Definition Extensionally_equivalent := 
+   [F, G : Ens]
+   (X : Ens)
+   (i : (IN X (Domain F)))
+   (j : (IN X (Domain G)))
+   (EQ (EV F X) (EV G X)).
+
+Theorem ex_eq_symm : 
+   (F, G : Ens) 
+   (Extensionally_equivalent F G) 
+   -> 
+   (Extensionally_equivalent G F) . 
+
+Theorem ex_eq_sub : 
+   (F, G : Ens) 
+   (f : (is_a_function F)) 
+   (s : (SUB (Domain F) (Domain G))) 
+   (e : (Extensionally_equivalent F G)) 
+   (SUB F G) . 
+
+Theorem Extensionality_for_functions : 
+   (F, G : Ens) 
+   (f : (is_a_function F)) 
+   (g : (is_a_function G)) 
+   (d : (EQ (Domain F) (Domain G))) 
+   (e : (Extensionally_equivalent F G)) 
+   (EQ F G) . 
+
+Theorem function_evaluation : 
+   (F, X, Y : Ens) 
+   (f : (is_a_function F)) 
+   (i : (IN (PAIR X Y) F)) 
+   (EQ Y (EV F X)) . 
+
+Definition restricted_to := 
+   [A, F : Ens]
+   (Set_Of F ([M : Ens] (IN (PR1 M) A))).
+
+Theorem restricted_to_th1 : 
+   (A, F : Ens) 
+   (U : Ens) 
+   (i : (IN U F)) 
+   (j : (IN (PR1 U) A)) 
+   (IN U (restricted_to A F)) . 
+
+Theorem restricted_to_th2 : 
+   (A, F : Ens) 
+   (U : Ens) 
+   (i : (IN U (restricted_to A F))) 
+   (IN (PR1 U) A) . 
+
+Theorem restricted_to_th3 : 
+   (A, F : Ens) 
+   (U : Ens) 
+   (i : (IN U (restricted_to A F))) 
+   (IN U F) . 
+
+Theorem restricted_to_th4 : 
+   (A, F : Ens) 
+   (SUB (restricted_to A F) F) . 
+
+Theorem restricted_to_th5 : 
+   (A, F : Ens) 
+   (EQ (intersection A (Domain F)) (Domain (restricted_to A F))) . 
+
+Theorem restricted_to_th6 : 
+   (A, F : Ens) 
+   (f : (is_a_function F)) 
+   (s : (SUB (Domain F) A)) 
+   (SUB F (restricted_to A F)) . 
+
+Theorem restricted_to_th7 : 
+   (A, F : Ens) 
+   (f : (is_a_function F)) 
+   (s : (SUB (Domain F) A)) 
+   (EQ F (restricted_to A F)) . 
+
+Theorem restricted_to_th8 : 
+   (A, F : Ens) 
+   (f : (is_a_function F)) 
+   (X : Ens) 
+   (i : (IN X (intersection A (Domain F)))) 
+   (EQ (EV F X) (EV (restricted_to A F) X)) . 
+
+Theorem restricted_to_th9 : 
+   (A, F : Ens) 
+   (f : (is_a_function F)) 
+   (X : Ens) 
+   (i : (IN X A)) 
+   (j : (IN X (Domain F))) 
+   (EQ (EV F X) (EV (restricted_to A F) X)) . 
+
+Theorem empty_function_relation : 
+   (is_a_relation Zero) . 
+
+Theorem empty_function_well_definedness : 
+   (well_definedness Zero) . 
+
+Theorem empty_function_function : 
+   (is_a_function Zero) . 
+
+Theorem empty_function_domain_empty : 
+   (Its_empty (Domain Zero)) . 
+
+Theorem empty_function_domain : 
+   (EQ Zero (Domain Zero)) . 
+
+Definition PowerPlus := 
+   [A : Ens]
+   (union A (Powerset A)).
+
+Theorem PowerPlus_th1 : 
+   (A : Ens) 
+   (SUB A (PowerPlus A)) . 
+
+Theorem PowerPlus_th2 : 
+   (A : Ens) 
+   (SUB (Powerset A) (PowerPlus A)) . 
+
+Definition PowerTotal := 
+   [A : Ens]
+   (Powerset (PowerPlus (PowerPlus A))).
+
+Theorem PowerTotal_th1 : 
+   (A, X, Y : Ens) 
+   (x : (IN X A)) 
+   (y : (IN Y A)) 
+   (IN (PAIR X Y) (PowerTotal A)) . 
+
+Theorem PowerTotal_th2 : 
+   (A, B, X, Y : Ens) 
+   (x : (IN X A)) 
+   (y : (IN Y B)) 
+   (IN (PAIR X Y) (PowerTotal (union A B))) . 
+
+Record in_cartesian [A, B, P : Ens] : Prop := {
+   in_cartesian_pair : (is_a_pair P);
+   in_cartesian_pr1 : (IN (PR1 P) A);
+   in_cartesian_pr2 : (IN (PR2 P) B)
+}.
+
+Theorem in_cartesian_bounded : 
+   (A, B : Ens) 
+   (Bounded (in_cartesian A B)) . 
+
+Definition Cartesian := 
+   [A, B : Ens]
+   (REPLACEMENT (in_cartesian A B)).
+
+Theorem Cartesian_pr1 : 
+   (A, B : Ens) 
+   (M : Ens) 
+   (h : (in_cartesian A B M)) 
+   (IN M (Cartesian A B)) . 
+
+Theorem Cartesian_pr2 : 
+   (A, B : Ens) 
+   (M : Ens) 
+   (i : (IN M (Cartesian A B))) 
+   (in_cartesian A B M) . 
+
+Theorem Cartesian_construction : 
+   (A, B : Ens) 
+   (X, Y : Ens) 
+   (i : (IN X A)) 
+   (j : (IN Y B)) 
+   (IN (PAIR X Y) (Cartesian A B)) . 
+
+Theorem Cartesian_th1 : 
+   (A, B : Ens) 
+   (U : Ens) 
+   (i : (IN U (Cartesian A B))) 
+   (is_a_pair U) . 
+
+Theorem Cartesian_proj1_th : 
+   (A, B, U : Ens) 
+   (i : (IN U (Cartesian A B))) 
+   (IN (PR1 U) A) . 
+
+Theorem Cartesian_proj2_th : 
+   (A, B, U : Ens) 
+   (i : (IN U (Cartesian A B))) 
+   (IN (PR2 U) B) . 
+
+Theorem Cartesian_pair_th1 : 
+   (A, B, X, Y : Ens) 
+   (i : (IN (PAIR X Y) (Cartesian A B))) 
+   (IN X A) . 
+
+Theorem Cartesian_pair_th2 : 
+   (A, B, X, Y : Ens) 
+   (i : (IN (PAIR X Y) (Cartesian A B))) 
+   (IN Y B) . 
+
+Theorem relations_in_cartesian : 
+   (R : Ens) 
+   (r : (is_a_relation R)) 
+   (SUB R (Cartesian (Domain R) (Range R))) . 
+
+Theorem cartesian_is_relation : 
+   (A, B : Ens) 
+   (is_a_relation (Cartesian A B)) . 
+
+Theorem cartesian_subs_are_relations : 
+   (A, B : Ens) 
+   (R : Ens) 
+   (s : (SUB R (Cartesian A B))) 
+   (is_a_relation R) . 
+
+Theorem covering_th1 : 
+   (A, B, F, G : Ens) 
+   (f : (is_a_function F)) 
+   (g : (is_a_function G)) 
+   (u : (EQ (Domain F) (union A B))) 
+   (i : (EQ (restricted_to A F) (restricted_to A G))) 
+   (j : (EQ (restricted_to B F) (restricted_to B G))) 
+   (Extensionally_equivalent F G) . 
+
+Theorem covering_th2 : 
+   (A, B, F, G : Ens) 
+   (f : (is_a_function F)) 
+   (g : (is_a_function G)) 
+   (u : (EQ (Domain F) (union A B))) 
+   (v : (EQ (Domain G) (union A B))) 
+   (i : (EQ (restricted_to A F) (restricted_to A G))) 
+   (j : (EQ (restricted_to B F) (restricted_to B G))) 
+   (EQ F G) . 
+
+Theorem glueing_th1 : 
+   (F, G : Ens) 
+   (f : (is_a_relation F)) 
+   (g : (is_a_relation G)) 
+   (is_a_relation (union F G)) . 
+
+Theorem glueing_th2 : 
+   (F, G : Ens) 
+   (SUB (Domain (union F G)) (union (Domain F) (Domain G))) . 
+
+Theorem glueing_th3 : 
+   (F, G : Ens) 
+   (SUB (union (Domain F) (Domain G)) (Domain (union F G))) . 
+
+Theorem glueing_th4 : 
+   (F, G : Ens) 
+   (EQ (Domain (union F G)) (union (Domain F) (Domain G))) . 
+
+Theorem glueing_th5 : 
+   (F, G : Ens) 
+   (f : (is_a_function F)) 
+   (g : (is_a_function G)) 
+   (e : (Extensionally_equivalent F G)) 
+   (is_a_function (union F G)) . 
+
+Record Comp_inter [F, G, X, Y, Z : Ens] : Prop := {
+   Comp_inter_xy : (IN (PAIR X Y) F);
+   Comp_inter_yz : (IN (PAIR Y Z) G)
+}.
+
+Record Comp_prop [F, G, X : Ens] : Prop := {
+   Comp_pair : (is_a_pair X);
+   Comp_intern : (EXISTS ([Y : Ens] (Comp_inter F G (PR1 X) Y (PR2 X))))
+}.
+
+Definition Comp_INTER := 
+   [F, G, X : Ens]
+   (CHOICE ([Y : Ens] (Comp_inter F G (PR1 X) Y (PR2 X)))).
+
+Theorem Comp_INTER_pr1 : 
+   (F, G, X : Ens) 
+   (c : (Comp_prop F G X)) 
+   (Comp_inter F G (PR1 X) (Comp_INTER F G X) (PR2 X)) . 
+
+Theorem Comp_INTER_th1 : 
+   (F, G, X : Ens) 
+   (c : (Comp_prop F G X)) 
+   (IN (PAIR (PR1 X) (Comp_INTER F G X)) F) . 
+
+Theorem Comp_INTER_th2 : 
+   (F, G, X : Ens) 
+   (c : (Comp_prop F G X)) 
+   (IN (PAIR (Comp_INTER F G X) (PR2 X)) G) . 
+
+Theorem Comp_prop_th1 : 
+   (F, G, X : Ens) 
+   (c : (Comp_prop F G X)) 
+   (IN (PR1 X) (Domain F)) . 
+
+Theorem Comp_prop_th2 : 
+   (F, G, X : Ens) 
+   (c : (Comp_prop F G X)) 
+   (IN (PR2 X) (Range G)) . 
+
+Theorem Comp_prop_th3 : 
+   (F, G, X : Ens) 
+   (c : (Comp_prop F G X)) 
+   (IN X (Cartesian (Domain F) (Range G))) . 
+
+Theorem composition_bounded_by : 
+   (F, G : Ens) 
+   (Bounded_By (Cartesian (Domain F) (Range G)) (Comp_prop F G)) . 
+
+Theorem composition_bounded : 
+   (F, G : Ens) 
+   (Bounded (Comp_prop F G)) . 
+
+Definition COMP := 
+   [F, G : Ens]
+   (REPLACEMENT (Comp_prop F G)).
+
+Theorem COMP_pr1 : 
+   (F, G, X : Ens) 
+   (Comp_prop F G X) 
+   -> 
+   (IN X (COMP F G)) . 
+
+Theorem COMP_pr2 : 
+   (F, G, X : Ens) 
+   (IN X (COMP F G)) 
+   -> 
+   (Comp_prop F G X) . 
+
+Theorem COMP_th1 : 
+   (F, G : Ens) 
+   (is_a_relation (COMP F G)) . 
+
+Theorem COMP_th2 : 
+   (F, G : Ens) 
+   (SUB (COMP F G) (Cartesian (Domain F) (Range G))) . 
+
+Theorem COMP_th3 : 
+   (F, G, X : Ens) 
+   (i : (IN X (COMP F G))) 
+   (IN (PAIR (PR1 X) (Comp_INTER F G X)) F) . 
+
+Theorem COMP_th4 : 
+   (F, G, X : Ens) 
+   (i : (IN X (COMP F G))) 
+   (IN (PAIR (Comp_INTER F G X) (PR2 X)) G) . 
+
+Definition Comp_INTERp := 
+   [F, G, X, Y : Ens]
+   (Comp_INTER F G (PAIR X Y)).
+
+Theorem COMP_th3p : 
+   (F, G, X, Y : Ens) 
+   (i : (IN (PAIR X Y) (COMP F G))) 
+   (IN (PAIR X (Comp_INTERp F G X Y)) F) . 
+
+Theorem COMP_th4p : 
+   (F, G, X, Y : Ens) 
+   (i : (IN (PAIR X Y) (COMP F G))) 
+   (IN (PAIR (Comp_INTERp F G X Y) Y) G) . 
+
+Theorem composition_well_definedness : 
+   (F, G : Ens) 
+   (f : (well_definedness F)) 
+   (g : (well_definedness G)) 
+   (well_definedness (COMP F G)) . 
+
+Theorem composition_th1 : 
+   (F, G : Ens) 
+   (f : (well_definedness F)) 
+   (g : (well_definedness G)) 
+   (is_a_function (COMP F G)) . 
+
+Theorem composition_th2 : 
+   (F, G : Ens) 
+   (f : (is_a_function F)) 
+   (g : (is_a_function G)) 
+   (is_a_function (COMP F G)) . 
+
+Theorem COMP_th5 : 
+   (F, G, X, Y, Z : Ens) 
+   (i : (IN (PAIR X Y) F)) 
+   (j : (IN (PAIR Y Z) G)) 
+   (IN (PAIR X Z) (COMP F G)) . 
+
+Theorem composition_th3 : 
+   (F, G, X : Ens) 
+   (i : (IN X (Domain F))) 
+   (j : (IN (EV F X) (Domain G))) 
+   (IN (PAIR X (EV G (EV F X))) (COMP F G)) . 
+
+Theorem composition_th4 : 
+   (F, G, X : Ens) 
+   (f : (is_a_function F)) 
+   (g : (is_a_function G)) 
+   (i : (IN X (Domain F))) 
+   (j : (IN (EV F X) (Domain G))) 
+   (EQ (EV (COMP F G) X) (EV G (EV F X))) . 
+
+Theorem COMP_assoc_th1 : 
+   (F, G, H : Ens) 
+   (SUB (COMP F (COMP G H)) (COMP (COMP F G) H)) . 
+
+Theorem COMP_assoc_th2 : 
+   (F, G, H : Ens) 
+   (SUB (COMP (COMP F G) H) (COMP F (COMP G H))) . 
+
+Theorem COMP_assoc : 
+   (F, G, H : Ens) 
+   (EQ (COMP F (COMP G H)) (COMP (COMP F G) H)) . 
+
+
+
+************************************************)
+
+
+
+
+(********* the actual Coq file starts here ******)
+
+(************************************************)
+(********** parameters and axioms ***************)
+(************************************************)
+
+
+
+
+Parameter Ens : Type. 
+(*** that was the only time we refer to Type, thus we avoid ``typical ambiguity'' ***)
+
+Parameter IN : Ens -> Ens -> Prop.
+
+Definition SUB (A B : Ens) := forall C : Ens, IN C A -> IN C B.
+
+Record EQ (A B : Ens) : Prop := 
+  {EQ_forwards : SUB A B; EQ_backwards : SUB B A}.
+
+Axiom excluded_middle : forall P : Prop, ~ ~ P -> P.
+
+Theorem false_implies_everything : forall P : Prop, False -> P.
+Proof False_ind.
+
+(********* existence definitions **********************)
+
+Definition DOESNT_EXIST (P : Ens -> Prop) := forall A : Ens, ~ P A.
+
+Definition EXISTS (P : Ens -> Prop) := ~ DOESNT_EXIST P.
+
+(********* the axiom of choice, applied to the whole Ens *******)
+
+Parameter CHOICE : forall P : Ens -> Prop, Ens.
+Axiom CHOICE_pr : forall (P : Ens -> Prop) (h : EXISTS P), P (CHOICE P).
+
+(**** we need to assume that something exists, for simplicity assume the
+emptyset  *****)
+
+Parameter EmptySet : Ens.
+Axiom EmptySet_pr : DOESNT_EXIST (fun X : Ens => IN X EmptySet).
+
+(********* we have to define Bounded *********************)
+
+Definition Bounded_By (A : Ens) (P : Ens -> Prop) :=
+  forall X : Ens, P X -> IN X A.
+
+Definition Bounded (P : Ens -> Prop) :=
+  EXISTS (fun A : Ens => Bounded_By A P).
+
+(********** unions of two sets, then big Unions ************)
+
+Parameter union : forall A B : Ens, Ens.
+Axiom union_pr1 : forall A B : Ens, SUB A (union A B).
+Axiom union_pr2 : forall A B : Ens, SUB B (union A B).
+
+Axiom
+  union_pr3 :
+    forall (A B C : Ens) (h : SUB A C) (k : SUB B C), SUB (union A B) C. 
+
+Record nested_IN (A B C : Ens) : Prop := 
+  {nested_IN_ab : IN A B; nested_IN_bc : IN B C}.
+
+Definition b_in_Union_a (A B : Ens) :=
+  EXISTS (fun C : Ens => nested_IN B C A).
+
+Axiom Union_bounded : forall F : Ens, Bounded (b_in_Union_a F).
+
+(******** singletons ****************)
+
+Parameter Singleton : Ens -> Ens.
+Axiom Singleton_pr1 : forall X : Ens, IN X (Singleton X).
+Axiom Singleton_pr2 : forall (X Y : Ens) (h : IN Y (Singleton X)), EQ X Y. 
+
+(********* extensionality ******************)
+
+Axiom Extensionality : forall (X Y Z : Ens) (h : EQ X Y) (k : IN Y Z), IN X Z.
+
+(********* powerset ******************)
+
+Axiom Powerset_bounded : forall X : Ens, Bounded (fun Y : Ens => SUB Y X).
+
+(********* replacement axioms *********)
+
+
+
+Parameter REPLACEMENT : forall P : Ens -> Prop, Ens. 
+
+Axiom
+  REPLACEMENT_pr1 :
+    forall (P : Ens -> Prop) (b : Bounded P) (X : Ens),
+    P X -> IN X (REPLACEMENT P).
+
+Axiom
+  REPLACEMENT_pr2 :
+    forall (P : Ens -> Prop) (b : Bounded P) (X : Ens),
+    IN X (REPLACEMENT P) -> P X.
+
+(*********** for the natural numbers ***********)
+
+Definition Zero := EmptySet.
+
+Definition Next (X : Ens) : Ens := union X (Singleton X).
+
+
+Record Contains_NN (X : Ens) : Prop := 
+  {Contains_NN_zero : IN Zero X;
+   Contains_NN_nexts : forall (A : Ens) (h : IN A X), IN (Next A) X}.
+
+Axiom Infinity_exists : EXISTS Contains_NN.
+
+
+
+(****************************************************************)
+(************** beyond this point the words Axiom, Parameter, ***)
+(**************   Declare don't occur  **************************)
+(****************************************************************)
+      
+(********************************************)
+(************* Existence  *******************)
+(********************************************)
+            
+Section EXISTS_th1_proof.
+Variable P : Ens -> Prop.
+Variable X : Ens.
+Hypothesis p : P X.
+Hypothesis h : DOESNT_EXIST P.
+
+Let step1 : ~ P X.
+Proof h X.
+
+Lemma EXISTS_th1_proof_Out : False.
+Proof step1 p.
+
+End EXISTS_th1_proof.
+
+Theorem EXISTS_th1 : forall (P : Ens -> Prop) (X : Ens) (p : P X), EXISTS P.
+Proof EXISTS_th1_proof_Out.
+
+(*****************************************)
+(********* subset and equality ***********)
+(*****************************************)
+
+
+Section subset_reflexive.
+Variable A : Ens.
+Variable B : Ens.
+Hypothesis h : IN B A.
+
+Lemma subset_reflexive_Out : IN B A.
+Proof h.
+
+End subset_reflexive.
+
+Theorem SUB_refl : forall A : Ens, SUB A A.
+Proof subset_reflexive_Out.
+
+
+Section equality_reflexive.
+Variable A : Ens.
+
+Let step1_1 : SUB A A.
+Proof SUB_refl A.
+
+Lemma equality_reflexive_Out : EQ A A.
+Proof Build_EQ A A step1_1 step1_1.
+
+End equality_reflexive.
+
+Theorem EQ_refl : forall A : Ens, EQ A A.
+Proof equality_reflexive_Out.
+
+Section equality_symmetric.
+Variable A : Ens.
+Variable B : Ens.
+Hypothesis h : EQ A B.
+
+Let stepfor : SUB A B. 
+Proof EQ_forwards A B h.
+
+Let stepback : SUB B A.
+Proof EQ_backwards A B h.
+
+Lemma equality_symmetric_Out : EQ B A.
+Proof Build_EQ B A stepback stepfor.
+
+End equality_symmetric.
+
+Theorem EQ_symm : forall A B : Ens, EQ A B -> EQ B A.
+Proof equality_symmetric_Out.
+
+
+(**** NEQ_symm  *****)
+
+Definition NEQ (A B : Ens) := ~ EQ A B.
+
+Section neq_symm_proof.
+Variable A : Ens.
+Variable B : Ens.
+Hypothesis k : NEQ A B.
+Hypothesis m : EQ B A.
+
+Let step1 : EQ A B.
+Proof EQ_symm B A m.
+
+Lemma neq_symm_Out : False.
+Proof k step1.
+
+End neq_symm_proof.
+
+Theorem NEQ_symm : forall (A B : Ens) (k : NEQ A B), NEQ B A.
+Proof neq_symm_Out.
+
+(******** transitivity **********)
+
+Section SUB_trans_proof.
+Variable A : Ens.
+Variable B : Ens.
+Variable C : Ens.
+Hypothesis h : SUB A B.
+Hypothesis k : SUB B C.
+
+Variable X : Ens.
+Hypothesis m : IN X A.
+
+Let step1 : IN X B.
+Proof h X m.
+
+Lemma SUB_trans_proof_Out : IN X C.
+Proof k X step1.
+
+End SUB_trans_proof.
+
+Theorem SUB_trans : forall (A B C : Ens) (h : SUB A B) (k : SUB B C), SUB A C.
+Proof SUB_trans_proof_Out.
+
+Section EQ_trans_proof.
+Variable A : Ens.
+Variable B : Ens.
+Variable C : Ens.
+Hypothesis h : EQ A B.
+Hypothesis k : EQ B C.
+
+Let step1 : SUB A B.
+Proof EQ_forwards A B h.
+
+Let step2 : SUB B A.
+Proof EQ_backwards A B h.
+
+Let step3 : SUB B C.
+Proof EQ_forwards B C k.
+
+Let step4 : SUB C B.
+Proof EQ_backwards B C k.
+
+Let step5 : SUB A C.
+Proof SUB_trans A B C step1 step3.
+
+Let step6 : SUB C A.
+Proof SUB_trans C B A step4 step2.
+ 
+
+Lemma EQ_trans_proof_Out : EQ A C.
+Proof Build_EQ A C step5 step6.
+
+End EQ_trans_proof.
+
+Theorem EQ_trans : forall (A B C : Ens) (h : EQ A B) (k : EQ B C), EQ A C.
+Proof EQ_trans_proof_Out.
+
+
+
+(*****  StrictSUB *****)
+
+
+Record StrictSUB (A B : Ens) : Prop := 
+  {StrictSUB_sub : SUB A B; StrictSUB_neq : ~ EQ A B}.
+
+Section strictsub_trans1_proof.
+Variable A : Ens.
+Variable B : Ens.
+Variable C : Ens.
+Hypothesis h : StrictSUB A B.
+Hypothesis k : SUB B C.
+
+Let h1 : SUB A B.
+Proof StrictSUB_sub A B h.
+
+Let h2 : ~ EQ A B.
+Proof StrictSUB_neq A B h.
+
+Let step1 : SUB A C.
+Proof SUB_trans A B C h1 k.
+
+Section strictsub_trans1a.
+Hypothesis m : EQ A C.
+Let step2 : SUB C A. Proof EQ_backwards A C m.
+Let step3 : SUB B A. Proof SUB_trans B C A k step2.
+
+Let step4 : EQ A B. Proof Build_EQ A B h1 step3.
+
+Lemma strictsub_trans1a_Out : False.
+Proof h2 step4.
+
+End strictsub_trans1a.
+
+Let step5 : ~ EQ A C. Proof strictsub_trans1a_Out.
+
+Lemma strictsub_trans1_Out : StrictSUB A C.
+Proof Build_StrictSUB A C step1 step5.
+
+End strictsub_trans1_proof.
+
+Theorem StrictSUB_trans1 :
+ forall (A B C : Ens) (h : StrictSUB A B) (k : SUB B C), StrictSUB A C.
+Proof strictsub_trans1_Out.
+
+(***** we should also do StrictSUB_trans2 using assumption StrictSUB B C ***)
+(*** ??? ***)
+
+(***********************************)
+(********* the empty set ***********)
+(***********************************)
+
+Section emptyset_empty.
+
+Variable X : Ens.
+Hypothesis h : IN X EmptySet.
+
+Lemma emptyset_empty_Out : False.
+Proof EmptySet_pr X h.
+
+End emptyset_empty.
+
+Theorem EmptySet_th1 : forall (X : Ens) (h : IN X EmptySet), False.
+Proof emptyset_empty_Out.
+
+
+Section emptyset_subset_everything.
+Variable A : Ens.
+Section emptyset_subset_everything_2.
+Variable B : Ens.
+Hypothesis h : IN B EmptySet. 
+Let step1 : False. Proof EmptySet_th1 B h.
+Lemma emptyset_subset_everything_2_Out : IN B A.
+Proof false_implies_everything (IN B A) step1.
+End emptyset_subset_everything_2.
+Let step2 : forall (B : Ens) (h : IN B EmptySet), IN B A.
+Proof emptyset_subset_everything_2_Out. 
+Lemma emptyset_subset_everything_Out : SUB EmptySet A.
+Proof step2.
+End emptyset_subset_everything.
+
+Theorem EmptySet_th2 : forall A : Ens, SUB EmptySet A.
+Proof emptyset_subset_everything_Out.
+
+Definition Its_empty (A : Ens) := forall X : Ens, ~ IN X A. 
+
+Section its_empty_implies_equals_emptyset_proof.
+Variable A : Ens.
+Hypothesis k : Its_empty A.
+
+Section ieieep1.
+Variable X : Ens.
+Hypothesis i : IN X A.
+
+Let step1_1 : False.
+Proof k X i.
+
+Lemma ieieep1_Out : IN X EmptySet.
+Proof false_implies_everything (IN X EmptySet) step1_1.
+
+End ieieep1.
+
+Let step1 : SUB A EmptySet.
+Proof ieieep1_Out.
+
+Section ieieep2.
+Variable X : Ens.
+Hypothesis i : IN X EmptySet.
+
+Let step2_1 : False.
+Proof EmptySet_th1 X i.
+
+Lemma ieieep2_Out : IN X A.
+Proof false_implies_everything (IN X A) step2_1.
+
+End ieieep2.
+
+Let step2 : SUB EmptySet A.
+Proof ieieep2_Out.
+
+Lemma ieieep_Out : EQ A EmptySet.
+Proof Build_EQ A EmptySet step1 step2.
+
+End its_empty_implies_equals_emptyset_proof.
+
+Theorem its_empty_implies_equals_emptyset :
+ forall (A : Ens) (k : Its_empty A), EQ A EmptySet.
+Proof ieieep_Out.
+
+Theorem Its_empty_emptyset : Its_empty EmptySet.
+Proof EmptySet_th1.
+
+Definition Its_nonempty (A : Ens) := ~ Its_empty A.
+
+Section Its_nonempty_proof.
+Variable X : Ens.
+Variable A : Ens.
+Hypothesis h : IN X A.
+Hypothesis h2 : Its_empty A. 
+Definition Its_nonempty_proof_Out : False := h2 X h.
+
+End Its_nonempty_proof.
+
+Theorem Its_nonempty_th1 : forall (X A : Ens) (h : IN X A), Its_nonempty A.
+
+Proof Its_nonempty_proof_Out.
+
+(*** nothing StrictSUB Zero  ***)
+
+Section nothing_strictsub_Zero.
+Variable X : Ens.
+Hypothesis h : StrictSUB X Zero.
+Let step1 : SUB X Zero.
+Proof StrictSUB_sub X Zero h.
+Let step2 : Its_empty X.
+Proof fun (Y : Ens) (m : IN Y X) => EmptySet_th1 Y (step1 Y m).
+
+Let step3 : EQ X Zero.
+Proof its_empty_implies_equals_emptyset X step2.
+
+Definition nothing_strictsub_Zero_Out : False := StrictSUB_neq X Zero h step3.
+
+
+
+End nothing_strictsub_Zero. 
+
+Theorem Nothing_strictsub_Zero : forall X : Ens, ~ StrictSUB X Zero.
+Proof nothing_strictsub_Zero_Out.
+
+
+(***********************************)
+(********* Bounded *****************)
+(***********************************)
+
+
+
+
+Section Bounded_th1_proof.
+Variable P : Ens -> Prop.
+Variable A : Ens.
+Hypothesis h : forall X : Ens, P X -> IN X A.
+Let step1 : Bounded_By A P. Proof h.
+Definition Bounded_th1_proof_Out : EXISTS (fun A : Ens => Bounded_By A P) :=
+  EXISTS_th1 (fun B : Ens => Bounded_By B P) A step1.
+
+End Bounded_th1_proof.
+
+Theorem Bounded_th1 :
+ forall (P : Ens -> Prop) (A : Ens) (h : forall X : Ens, P X -> IN X A),
+ Bounded P.
+Proof Bounded_th1_proof_Out.
+
+
+
+Theorem Bounded_th2 :
+ forall (P : Ens -> Prop) (A : Ens) (h : Bounded_By A P), Bounded P.
+Proof
+  fun (P : Ens -> Prop) (A : Ens) (h : Bounded_By A P) => Bounded_th1 P A h.
+
+
+
+
+
+
+
+
+Definition Bounded_CHOICE (P : Ens -> Prop) := REPLACEMENT P.
+
+Theorem Bounded_CHOICE_pr :
+ forall (P : Ens -> Prop) (b : Bounded P), Bounded_By (Bounded_CHOICE P) P.
+Proof fun (P : Ens -> Prop) (b : Bounded P) => REPLACEMENT_pr1 P b. 
+
+
+
+Definition SUBPROP (P Q : Ens -> Prop) := forall X : Ens, P X -> Q X.
+
+Section Bounded_subprops1.
+Variable P : Ens -> Prop.
+Variable Q : Ens -> Prop.
+Hypothesis s : SUBPROP P Q.
+Variable A : Ens.
+Hypothesis h : Bounded_By A Q.
+
+
+
+Section boundedsubprops1.
+Variable X : Ens.
+Hypothesis k : P X.
+Let step1 : Q X. Proof s X k.
+Definition boundedsubprops1_Out : IN X A := h X step1.
+End boundedsubprops1.
+Definition Bounded_subprops1_Out : Bounded_By A P := boundedsubprops1_Out.
+
+
+End Bounded_subprops1.
+
+Theorem Bounded_subprops_th1 :
+ forall (P Q : Ens -> Prop) (s : SUBPROP P Q) (A : Ens) (h : Bounded_By A Q),
+ Bounded_By A P.
+Proof Bounded_subprops1_Out.
+
+Section Bounded_subprops2.
+Variable P : Ens -> Prop.
+Variable Q : Ens -> Prop.
+Hypothesis s : SUBPROP P Q.
+Hypothesis b : Bounded Q.
+
+Let A : Ens := Bounded_CHOICE Q.
+Let h : Bounded_By A Q. Proof Bounded_CHOICE_pr Q b.
+
+Let step1 : Bounded_By A P.
+Proof Bounded_subprops_th1 P Q s A h.
+Lemma Bounded_sub2_Out : Bounded P.
+Proof Bounded_th2 P A step1.
+
+End Bounded_subprops2.
+
+Theorem Bounded_subprops_th2 :
+ forall (P Q : Ens -> Prop) (s : SUBPROP P Q) (b : Bounded Q), Bounded P.
+Proof Bounded_sub2_Out.
+
+(************************************************)
+(************ Restriction ***********************)
+(***** a more practical form of replacement *****)
+(************************************************)
+
+Record Restriction (P : Ens -> Prop) (A X : Ens) : Prop := 
+  {remaining_property : P X; the_restriction : IN X A}.
+
+
+Section restriction_bounded_proof.
+Variable P : Ens -> Prop.
+Variable A : Ens.
+
+Let R := Restriction P A.
+
+Let t : Bounded_By A R. Proof fun (X : Ens) (h : R X) => the_restriction P A X h.
+
+Definition restriction_bounded_Out : Bounded R :=
+  EXISTS_th1 (fun Y : Ens => Bounded_By Y R) A t.
+
+End restriction_bounded_proof.
+
+Theorem Restriction_bounded :
+ forall (P : Ens -> Prop) (A : Ens), Bounded (Restriction P A).
+Proof restriction_bounded_Out.
+
+Definition Set_Of (A : Ens) (P : Ens -> Prop) :=
+  REPLACEMENT (Restriction P A).
+
+Theorem Set_Of_pr1 :
+ forall (A : Ens) (P : Ens -> Prop) (X : Ens),
+ Restriction P A X -> IN X (Set_Of A P).
+Proof
+  fun (A : Ens) (P : Ens -> Prop) =>
+  REPLACEMENT_pr1 (Restriction P A) (Restriction_bounded P A).
+
+Theorem Set_Of_pr2 :
+ forall (A : Ens) (P : Ens -> Prop) (X : Ens),
+ IN X (Set_Of A P) -> Restriction P A X.
+Proof
+  fun (A : Ens) (P : Ens -> Prop) =>
+  REPLACEMENT_pr2 (Restriction P A) (Restriction_bounded P A).
+
+Theorem Set_Of_th1 :
+ forall (A : Ens) (P : Ens -> Prop) (X : Ens) (h : IN X A) (k : P X),
+ IN X (Set_Of A P).
+Proof
+  fun (A : Ens) (P : Ens -> Prop) (X : Ens) (h : IN X A) (k : P X) =>
+  Set_Of_pr1 A P X (Build_Restriction P A X k h).
+
+
+Theorem Set_Of_th2 :
+ forall (A : Ens) (P : Ens -> Prop) (X : Ens) (h : IN X (Set_Of A P)), P X.
+Proof
+  fun (A : Ens) (P : Ens -> Prop) (X : Ens) (h : IN X (Set_Of A P)) =>
+  remaining_property P A X (Set_Of_pr2 A P X h).
+
+Theorem Set_Of_th3 :
+ forall (A : Ens) (P : Ens -> Prop) (X : Ens) (h : IN X (Set_Of A P)), IN X A.
+Proof
+  fun (A : Ens) (P : Ens -> Prop) (X : Ens) (h : IN X (Set_Of A P)) =>
+  the_restriction P A X (Set_Of_pr2 A P X h).
+
+Theorem Set_Of_th4 : forall (A : Ens) (P : Ens -> Prop), SUB (Set_Of A P) A.
+Proof Set_Of_th3.
+
+
+
+(***********************************)
+(********* Intersection  ***********)
+(***********************************)
+
+(******** little intersection *******)
+
+Definition intersection (A B : Ens) := Set_Of A (fun X : Ens => IN X B).
+
+Theorem intersection_th1 : forall A B : Ens, SUB (intersection A B) A.
+Proof
+  fun (A B U : Ens) (i : IN U (intersection A B)) =>
+  Set_Of_th3 A (fun X : Ens => IN X B) U i.
+
+Theorem intersection_th2 : forall A B : Ens, SUB (intersection A B) B.
+Proof
+  fun (A B U : Ens) (i : IN U (intersection A B)) =>
+  Set_Of_th2 A (fun X : Ens => IN X B) U i.
+
+Theorem intersection_th3 :
+ forall (A B X : Ens) (i : IN X A) (j : IN X B), IN X (intersection A B).
+Proof
+  fun (A B X : Ens) (i : IN X A) (j : IN X B) =>
+  Set_Of_th1 A (fun U : Ens => IN U B) X i j.
+
+Section intersection4.
+Variable A B C : Ens.
+Hypothesis s : SUB C A.
+Hypothesis t : SUB C B.
+
+Variable X : Ens.
+Hypothesis i : IN X C.
+Let step1 : IN X A.
+Proof s X i.
+Let step2 : IN X B.
+Proof t X i.
+
+Lemma intersection4_Out : IN X (intersection A B).
+Proof intersection_th3 A B X step1 step2.
+
+End intersection4.
+
+Theorem intersection_th4 :
+ forall (A B C : Ens) (s : SUB C A) (t : SUB C B), SUB C (intersection A B).
+Proof intersection4_Out.
+
+
+
+(******** big Intersection *********)
+
+Definition IntersectionProp (F : Ens -> Ens) (X : Ens) :=
+  forall Y : Ens, IN X (F Y).
+
+Section Intersection_section1.
+Variable F : Ens -> Ens.
+
+Let A := F EmptySet.
+
+Section Intersection_section1_1.
+Variable Z : Ens.
+Hypothesis h : IntersectionProp F Z.
+
+Definition Intersection_section1_1_Out : IN Z A := h EmptySet. 
+
+End Intersection_section1_1.
+
+Let step1 : forall (Z : Ens) (h : IntersectionProp F Z), IN Z A.
+Proof Intersection_section1_1_Out.
+
+Let step2 : Bounded_By A (IntersectionProp F).
+Proof step1.
+
+Definition Intersection_section1_Out : Bounded (IntersectionProp F) :=
+  Bounded_th2 (IntersectionProp F) A step2.
+
+End Intersection_section1.
+
+Definition Intersection_Bounded :
+  forall F : Ens -> Ens, Bounded (IntersectionProp F) :=
+  Intersection_section1_Out.
+
+Definition Intersection (F : Ens -> Ens) : Ens :=
+  REPLACEMENT (IntersectionProp F).
+
+Theorem Intersection_pr1 :
+ forall (F : Ens -> Ens) (X : Ens),
+ IntersectionProp F X -> IN X (Intersection F).
+Proof
+  fun F : Ens -> Ens =>
+  REPLACEMENT_pr1 (IntersectionProp F) (Intersection_Bounded F).
+
+Theorem Intersection_pr2 :
+ forall (F : Ens -> Ens) (X : Ens),
+ IN X (Intersection F) -> IntersectionProp F X.
+Proof
+  fun F : Ens -> Ens =>
+  REPLACEMENT_pr2 (IntersectionProp F) (Intersection_Bounded F).
+
+
+Theorem Intersection_th1 :
+ forall (F : Ens -> Ens) (X : Ens) (h : forall Y : Ens, IN X (F Y)),
+ IN X (Intersection F).
+Proof Intersection_pr1.
+
+Theorem Intersection_th2 :
+ forall (F : Ens -> Ens) (X Y : Ens) (i : IN X (Intersection F)), IN X (F Y).
+Proof
+  fun (F : Ens -> Ens) (X Y : Ens) (i : IN X (Intersection F)) =>
+  Intersection_pr2 F X i Y.
+
+(********************************)
+(********** Singletons **********)
+(********************************)
+
+Section Singleton_th1_proof.
+Variable X : Ens.
+Variable A : Ens.
+Hypothesis h : IN X A.
+
+Let B := Singleton X.
+(* now prove SUB B A *)
+
+Section Singleton_th1_sub1.
+Variable C : Ens.
+Hypothesis h2 : IN C B.
+
+Let step1 : EQ X C. 
+Proof Singleton_pr2 X C h2.
+
+Let step2 : EQ C X.
+Proof EQ_symm X C step1.  
+
+Definition Singleton_th1_sub1_Out : IN C A := Extensionality C X A step2 h.
+
+
+End Singleton_th1_sub1.
+
+Definition Singleton_th1_proof_Out : SUB B A := Singleton_th1_sub1_Out.
+
+
+End Singleton_th1_proof.
+
+Theorem Singleton_th1 : forall (X A : Ens) (h : IN X A), SUB (Singleton X) A.
+Proof Singleton_th1_sub1_Out.
+
+
+Section Singleton_th2_proof.
+Variable X : Ens.
+Let B := Singleton X.
+Let step1 : IN X B. Proof Singleton_pr1 X.
+
+Hypothesis h : Its_empty B.
+
+Let step2 : IN X B -> False. 
+Proof h X.
+
+Definition Singleton_th2_proof_Out : False := step2 step1.
+
+End Singleton_th2_proof.
+
+Theorem Singleton_th2 : forall X : Ens, Its_nonempty (Singleton X).
+Proof Singleton_th2_proof_Out.
+
+
+(***************************************)
+(********** union and Union ************)
+(***************************************)
+
+
+(********** union **********)
+
+Section union_th1_proof.
+Variable A : Ens.
+Variable B : Ens.
+Let U := union A B.
+Variable X : Ens.
+Hypothesis h : IN X A.
+
+Let step1 : SUB A U.
+Proof union_pr1 A B.
+Definition union_th1_Out : IN X U := step1 X h.
+
+
+End union_th1_proof.
+
+Theorem union_th1 : forall (A B X : Ens) (h : IN X A), IN X (union A B).
+Proof union_th1_Out.
+
+Section union_th2_proof.
+Variable A : Ens.
+Variable B : Ens.
+Let U := union A B.
+Variable X : Ens.
+Hypothesis h : IN X B.
+
+Let step1 : SUB B U.
+Proof union_pr2 A B.
+Definition union_th2_Out : IN X U := step1 X h.
+
+
+End union_th2_proof.
+
+Theorem union_th2 : forall (A B X : Ens) (h : IN X B), IN X (union A B).
+Proof union_th2_Out.
+
+Section union_th3_proof.
+Variable A : Ens.
+Variable B : Ens.
+Let U := union A B.
+Variable X : Ens.
+Hypothesis h : ~ IN X A.
+Hypothesis k : ~ IN X B.
+Hypothesis m : IN X U. 
+
+Record union_th3_property (Y : Ens) : Prop := 
+  {union_th3_property_in_the_union : IN Y U;
+   union_th3_property_not_equal_X : ~ EQ X Y}.
+
+Let step1 : Bounded_By U union_th3_property.
+Proof
+  fun (Y : Ens) (h : union_th3_property Y) =>
+  union_th3_property_in_the_union Y h. 
+
+Let b : Bounded union_th3_property.
+Proof Bounded_th2 union_th3_property U step1.
+
+Let V := REPLACEMENT union_th3_property.
+
+Let V_pr1 : forall X : Ens, union_th3_property X -> IN X V.
+Proof REPLACEMENT_pr1 union_th3_property b.
+
+Let V_pr2 : forall X : Ens, IN X V -> union_th3_property X.
+Proof REPLACEMENT_pr2 union_th3_property b.
+
+Section A_sub_V_proof.
+Variable Z : Ens.
+Hypothesis h2 : IN Z A.
+
+
+
+Section A_sub_V_proof1.
+Hypothesis h3 : EQ X Z.
+
+Let step1_1 : IN X A.
+Proof Extensionality X Z A h3 h2.
+
+Definition A_sub_V_proof1_Out : False := h step1_1.
+
+End A_sub_V_proof1.
+
+Let step2 : ~ EQ X Z. 
+Proof A_sub_V_proof1_Out.
+
+Let step3 : IN Z U. 
+Proof union_th1 A B Z h2.
+
+Let step4 : union_th3_property Z.
+Proof Build_union_th3_property Z step3 step2.
+
+Lemma A_sub_V_proof_Out : IN Z V.
+Proof V_pr1 Z step4.
+
+End A_sub_V_proof.
+
+Let A_sub_V : SUB A V. Proof A_sub_V_proof_Out.
+
+Section B_sub_V_proof.
+Variable Z : Ens.
+Hypothesis h2 : IN Z B.
+
+
+
+Section B_sub_V_proof1.
+Hypothesis h3 : EQ X Z.
+
+Let step1_1 : IN X B.
+Proof Extensionality X Z B h3 h2.
+
+
+Lemma B_sub_V_proof1_Out : False. 
+Proof k step1_1.
+
+End B_sub_V_proof1.
+
+Let step2 : ~ EQ X Z. Proof B_sub_V_proof1_Out.
+
+Let step3 : IN Z U.
+Proof union_th2 A B Z h2.
+
+Let step4 : union_th3_property Z.
+Proof Build_union_th3_property Z step3 step2.
+
+Definition B_sub_V_proof_Out : IN Z V := V_pr1 Z step4.
+
+End B_sub_V_proof.
+
+Let B_sub_V : SUB B V. Proof B_sub_V_proof_Out.
+
+Let U_sub_V : SUB U V.
+Proof union_pr3 A B V A_sub_V B_sub_V.
+
+
+Let X_in_V : IN X V. 
+Proof U_sub_V X m.
+
+Let step5 : union_th3_property X. 
+Proof V_pr2 X X_in_V.
+
+Let step6 : ~ EQ X X.
+Proof union_th3_property_not_equal_X X step5.
+
+Let step7 : EQ X X. Proof EQ_refl X.
+
+Lemma union_th3_proof_Out : False.
+Proof step6 step7.
+
+End union_th3_proof.
+
+Theorem union_th3 :
+ forall (A B X : Ens) (h : ~ IN X A) (k : ~ IN X B), ~ IN X (union A B).
+Proof union_th3_proof_Out.
+
+Section union_th4_proof.
+Variable P : Prop.
+Variable A B X : Ens.
+Hypothesis i : IN X (union A B).
+Hypothesis a : IN X A -> P.
+Hypothesis b : IN X B -> P.
+
+Section ut4contra.
+Hypothesis contra : ~ P.
+
+Section ut4a.
+Hypothesis j : IN X A.
+Let step1 : P.
+Proof a j.
+Lemma  (*Fact*) step2 : False.
+Proof contra step1.
+End ut4a.
+Let step3 : ~ IN X A.
+Proof step2.
+
+Section ut4b.
+Hypothesis k : IN X B.
+Let step4 : P.
+Proof b k.
+Lemma  (*Fact*) step5 : False.
+Proof contra step4.
+End ut4b.
+Let step6 : ~ IN X B.
+Proof step5.
+
+Let step7 : ~ IN X (union A B).
+Proof union_th3 A B X step3 step6.
+Lemma  (*Fact*) step8 : False.
+Proof step7 i.
+
+End ut4contra.
+
+Lemma union_th4_Out : P.
+Proof excluded_middle P step8.
+
+End union_th4_proof.
+
+Theorem union_th4 :
+ forall (P : Prop) (A B X : Ens) (i : IN X (union A B)) 
+   (a : IN X A -> P) (b : IN X B -> P), P.
+Proof union_th4_Out.
+
+
+
+Section union_refl_proof.
+Variable A : Ens.
+
+Let U := union A A.
+
+Let step1 : SUB A U. 
+Proof union_pr1 A A.
+Let step2 : SUB A A. Proof SUB_refl A.
+Let step3 : SUB U A. Proof union_pr3 A A A step2 step2.
+
+Lemma union_refl_proof_Out : EQ A U.
+Proof Build_EQ A U step1 step3.
+
+End union_refl_proof.
+
+Theorem union_refl : forall A : Ens, EQ A (union A A).
+Proof union_refl_proof_Out.
+
+Section union_symm_proof.
+Variable A : Ens.
+Variable B : Ens.
+Let U := union A B.
+Let V := union B A.
+
+Let step1 : SUB A U.
+Proof union_pr1 A B.
+Let step2 : SUB B U.
+Proof union_pr2 A B.
+
+Let step3 : SUB B V.
+Proof union_pr1 B A.
+Let step4 : SUB A V.
+Proof union_pr2 B A.
+
+Let step5 : SUB U V.
+Proof union_pr3 A B V step4 step3.
+Let step6 : SUB V U.
+Proof union_pr3 B A U step2 step1.
+
+Lemma union_symm_proof_Out : EQ U V.
+Proof Build_EQ U V step5 step6.
+
+End union_symm_proof.
+
+Theorem union_symm : forall A B : Ens, EQ (union A B) (union B A).
+Proof union_symm_proof_Out.
+
+
+(********** Union ************)
+
+
+Definition Union (F : Ens) : Ens := REPLACEMENT (b_in_Union_a F).
+
+
+Theorem Union_pr1 :
+ forall (F X : Ens) (h : EXISTS (fun U : Ens => nested_IN X U F)),
+ IN X (Union F).
+Proof
+  fun (F X : Ens) (h : EXISTS (fun U : Ens => nested_IN X U F)) =>
+  REPLACEMENT_pr1 (b_in_Union_a F) (Union_bounded F) X h.
+
+
+Theorem Union_pr2 :
+ forall (F X : Ens) (i : IN X (Union F)),
+ EXISTS (fun U : Ens => nested_IN X U F).
+Proof fun F : Ens => REPLACEMENT_pr2 (b_in_Union_a F) (Union_bounded F).
+
+Definition Union_intermediate (F X : Ens) (i : IN X (Union F)) : Ens :=
+  CHOICE (fun U : Ens => nested_IN X U F).
+
+Theorem Union_intermediate_pr :
+ forall (F X : Ens) (i : IN X (Union F)),
+ nested_IN X (Union_intermediate F X i) F.
+Proof
+  fun (F X : Ens) (i : IN X (Union F)) =>
+  CHOICE_pr (fun U : Ens => nested_IN X U F) (Union_pr2 F X i).
+
+Theorem Union_intermediate_th1 :
+ forall (F X : Ens) (i : IN X (Union F)), IN X (Union_intermediate F X i).
+Proof
+  fun (F X : Ens) (i : IN X (Union F)) =>
+  nested_IN_ab X (Union_intermediate F X i) F (Union_intermediate_pr F X i).
+
+Theorem Union_intermediate_th2 :
+ forall (F X : Ens) (i : IN X (Union F)), IN (Union_intermediate F X i) F.
+Proof
+  fun (F X : Ens) (i : IN X (Union F)) =>
+  nested_IN_bc X (Union_intermediate F X i) F (Union_intermediate_pr F X i).
+
+Section Union_th1_proof.
+Variable F : Ens.
+Variable X : Ens.
+Variable U : Ens.
+Hypothesis h : IN X U.
+Hypothesis k : IN U F.
+
+
+Let step1 : nested_IN X U F.
+Proof Build_nested_IN X U F h k.
+
+Let step2 : EXISTS (fun U1 : Ens => nested_IN X U1 F).
+Proof EXISTS_th1 (fun U1 : Ens => nested_IN X U1 F) U step1.
+
+Lemma union_th1_OutA : IN X (Union F).
+Proof Union_pr1 F X step2.
+
+End Union_th1_proof.
+
+Theorem Union_th1 :
+ forall (F X U : Ens) (h : IN X U) (k : IN U F), IN X (Union F).
+Proof union_th1_OutA.
+
+
+(************************************************)
+(**********     Elementary Counting  ************)
+(************************************************)
+
+Definition has_leq_0_elements := Its_empty. 
+(*** recall that this is equal to 
+[A: Ens] (X: Ens) (not (IN X A)) ***)
+
+Theorem zero_has_leq_0_elements : has_leq_0_elements Zero.
+Proof EmptySet_th1.
+
+Definition has_geq_1_elements (A : Ens) := ~ has_leq_0_elements A.
+
+(**** this is equal to EXISTS ([X: Ens] (IN X A)) ****)
+
+Definition Choose_an_element (A : Ens) (k : has_geq_1_elements A) : Ens :=
+  CHOICE (fun X : Ens => IN X A).
+
+Theorem Choose_an_element_pr :
+ forall (A : Ens) (k : has_geq_1_elements A), IN (Choose_an_element A k) A.
+Proof
+  fun (A : Ens) (k : has_geq_1_elements A) =>
+  CHOICE_pr (fun X : Ens => IN X A) k.
+
+Section given_an_element.
+Variable A : Ens.
+Variable X : Ens.
+Variable k : IN X A.
+Hypothesis m : has_leq_0_elements A.
+
+Definition given_an_element_Out : False := m X k.
+
+End given_an_element.
+
+Theorem has_geq_1_elements_th1 :
+ forall (A X : Ens) (k : IN X A), has_geq_1_elements A.
+Proof given_an_element_Out.
+
+(**** the next statement was already proved above with different 
+notations but we can just redefine it, coq takes care of the 
+change of notations ! *****)
+
+Theorem Singletons_have_geq_1_elements :
+ forall X : Ens, has_geq_1_elements (Singleton X).
+Proof Singleton_th2.
+
+
+Definition has_leq_1_elements (A : Ens) :=
+  forall (X Y : Ens) (k : IN X A) (l : IN Y A), EQ X Y.
+
+Section has_leq_0_implies_leq_1.
+Variable A : Ens.
+Hypothesis q : has_leq_0_elements A.
+Variable X : Ens.
+Variable Y : Ens.
+Hypothesis k : IN X A.
+
+Let step1 : False.
+Proof q X k.
+
+Let step2 : EQ X Y := false_implies_everything (EQ X Y) step1. 
+
+Definition has_leq_0_implies_leq_1_Out (l : IN Y A) : EQ X Y := step2. 
+
+(**** we had to do that above because otherwise the sectioning
+mechanism would have ignored l which we don't actually use ***)
+
+End has_leq_0_implies_leq_1.
+
+Theorem has_leq_0_elements_implies_leq_1 :
+ forall (A : Ens) (q : has_leq_0_elements A), has_leq_1_elements A.
+Proof has_leq_0_implies_leq_1_Out. 
+
+
+
+Section singletons_have_leq_1_elements_proof.
+Variable A : Ens.
+
+Let S := Singleton A.
+
+Variable X : Ens.
+Variable Y : Ens.
+
+Hypothesis iXS : IN X S.
+Hypothesis iYS : IN Y S.
+
+Let step1 : EQ A X := Singleton_pr2 A X iXS.
+
+Let step2 : EQ A Y := Singleton_pr2 A Y iYS.
+
+Let step3 : EQ X A := EQ_symm A X step1.
+
+Definition singletons_have_leq_1_elements_Out : EQ X Y :=
+  EQ_trans X A Y step3 step2.  
+
+End singletons_have_leq_1_elements_proof.
+
+Theorem Singletons_have_leq_1_elements :
+ forall A : Ens, has_leq_1_elements (Singleton A).
+Proof singletons_have_leq_1_elements_Out.
+
+
+Definition has_geq_2_elements (A : Ens) := ~ has_leq_1_elements A.
+
+Section when_given_two_distinct_elements.
+Variable A : Ens.
+Variable X : Ens.
+Variable Y : Ens.
+Hypothesis k : IN X A.
+Hypothesis l : IN Y A.
+Hypothesis m : ~ EQ X Y.
+
+Hypothesis h : has_leq_1_elements A.
+
+Definition when_given_two_distinct_elements_Out : False := m (h X Y k l).
+
+End when_given_two_distinct_elements.
+
+Theorem has_geq_2_elements_th1 :
+ forall (A X Y : Ens) (k : IN X A) (l : IN Y A) (m : ~ EQ X Y),
+ has_geq_2_elements A.
+Proof when_given_two_distinct_elements_Out.
+
+
+
+
+
+(***************************************)
+(**********     Doubletons  ************)
+(***************************************)
+
+Definition Doubleton (X Y : Ens) := union (Singleton X) (Singleton Y).
+
+
+Section doubleton_th1_proof.
+Variable X : Ens.
+Variable Y : Ens.
+
+Let D := Doubleton X Y.
+
+Let iXsX : IN X (Singleton X) := Singleton_pr1 X.
+
+Definition doubleton_th1_Out : IN X D :=
+  union_th1 (Singleton X) (Singleton Y) X iXsX.
+
+End doubleton_th1_proof.
+
+Theorem Doubleton_th1 : forall X Y : Ens, IN X (Doubleton X Y).
+Proof doubleton_th1_Out.
+
+
+Section doubleton_th2_proof.
+Variable X : Ens.
+Variable Y : Ens.
+
+Let D := Doubleton X Y.
+
+Let iYsY : IN Y (Singleton Y) := Singleton_pr1 Y.
+
+Definition doubleton_th2_Out : IN Y D :=
+  union_th2 (Singleton X) (Singleton Y) Y iYsY.
+
+End doubleton_th2_proof.
+
+Theorem Doubleton_th2 : forall X Y : Ens, IN Y (Doubleton X Y).
+Proof doubleton_th2_Out.
+
+Section doubleton_th3_proof.
+Variable X : Ens.
+Variable Y : Ens.
+Variable A : Ens.
+Hypothesis iXA : IN X A.
+Hypothesis iYA : IN Y A.
+
+Let D := Doubleton X Y.
+
+Let sXsubA : SUB (Singleton X) A := Singleton_th1 X A iXA.
+
+Let sYsubA : SUB (Singleton Y) A := Singleton_th1 Y A iYA.
+
+Definition doubleton_th3_Out : SUB D A :=
+  union_pr3 (Singleton X) (Singleton Y) A sXsubA sYsubA.
+
+End doubleton_th3_proof.
+
+Theorem Doubleton_th3 :
+ forall (X Y A : Ens) (iXA : IN X A) (iYA : IN Y A), SUB (Doubleton X Y) A.
+Proof doubleton_th3_Out.
+
+Section doubleton_th4_proof.
+Variable X : Ens.
+Variable Y : Ens.
+Variable Z : Ens.
+Hypothesis k : IN Z (Doubleton X Y).
+Hypothesis m : ~ EQ Z X.
+Hypothesis n : ~ EQ Z Y. 
+
+Let D := Doubleton X Y.
+
+Let sX := Singleton X.
+Let sY := Singleton Y.
+
+Section doubleton_th4_sub1.
+Hypothesis u : IN Z sX.
+
+Let step1_1 : EQ X Z := Singleton_pr2 X Z u.
+
+Let step1_2 : EQ Z X := EQ_symm X Z step1_1.
+
+Definition doubleton_th4_sub1_Out : False := m step1_2.
+
+End doubleton_th4_sub1. 
+
+Let step1 : ~ IN Z sX := doubleton_th4_sub1_Out.
+
+Section doubleton_th4_sub2.
+Hypothesis u : IN Z sY.
+
+Let step2_1 : EQ Y Z := Singleton_pr2 Y Z u.
+
+Let step2_2 : EQ Z Y := EQ_symm Y Z step2_1.
+
+Definition doubleton_th4_sub2_Out : False := n step2_2.
+
+End doubleton_th4_sub2. 
+
+Let step2 : ~ IN Z sY := doubleton_th4_sub2_Out.
+
+Let step3 : ~ IN Z D := union_th3 sX sY Z step1 step2.
+
+Definition doubleton_th4_Out : False := step3 k.
+
+
+End doubleton_th4_proof.
+
+Theorem Doubleton_th4 :
+ forall (X Y Z : Ens) (k : IN Z (Doubleton X Y)) (m : ~ EQ Z X)
+   (n : ~ EQ Z Y), False.
+Proof doubleton_th4_Out.
+
+Section doubleton_th4a_proof.
+Variable X : Ens.
+Variable Y : Ens.
+Variable Z : Ens.
+Hypothesis k : IN Z (Doubleton X Y).
+Hypothesis m : ~ EQ Z X.
+
+Let step1 : ~ ~ EQ Z Y := Doubleton_th4 X Y Z k m.
+
+Definition doubleton_th4a_Out : EQ Z Y := excluded_middle (EQ Z Y) step1.
+
+End doubleton_th4a_proof.
+
+Theorem Doubleton_th4_a :
+ forall (X Y Z : Ens) (k : IN Z (Doubleton X Y)) (m : ~ EQ Z X), EQ Z Y.
+Proof doubleton_th4a_Out.
+
+Section doubleton_th4b_proof.
+Variable X : Ens.
+Variable Y : Ens.
+Variable Z : Ens.
+Hypothesis k : IN Z (Doubleton X Y).
+Hypothesis n : ~ EQ Z Y.
+
+Let step1 : ~ ~ EQ Z X := fun m : ~ EQ Z X => Doubleton_th4 X Y Z k m n.
+
+Definition doubleton_th4b_Out : EQ Z X := excluded_middle (EQ Z X) step1.
+
+End doubleton_th4b_proof.
+
+Theorem Doubleton_th4_b :
+ forall (X Y Z : Ens) (k : IN Z (Doubleton X Y)) (n : ~ EQ Z Y), EQ Z X.
+Proof doubleton_th4b_Out.
+
+
+Section distinct_doubletons_have_geq_2_elements_proof.
+Variable X : Ens.
+Variable Y : Ens.
+Hypothesis n : ~ EQ X Y.
+
+Let D := Doubleton X Y.
+Hypothesis h : has_leq_1_elements D.
+
+Let iXD : IN X D := Doubleton_th1 X Y.
+
+Let iYD : IN Y D := Doubleton_th2 X Y.
+
+Let step1 : EQ X Y := h X Y iXD iYD.
+
+Definition distinct_doubletons_have_geq_2_elements_Out : False := n step1.
+
+
+End distinct_doubletons_have_geq_2_elements_proof.
+
+Theorem distinct_Doubletons_have_geq_2_elements :
+ forall (X Y : Ens) (n : ~ EQ X Y), has_geq_2_elements (Doubleton X Y).
+Proof distinct_doubletons_have_geq_2_elements_Out.
+
+(*******************************************) 
+(************* Big_Extensionality **********) 
+(*******************************************) 
+
+
+Section big_extensionality_proof.
+
+Variable P : Ens -> Prop.
+Variable X : Ens.
+Variable Y : Ens.
+Hypothesis m : P X.
+Hypothesis k : EQ X Y.
+
+
+Let D := Doubleton X Y.
+
+Let iXD : IN X D := Doubleton_th1 X Y.
+Let iYD : IN Y D := Doubleton_th2 X Y.
+
+Let eYX : EQ Y X := EQ_symm X Y k.
+
+Let S := Set_Of D P.
+
+Let iXS : IN X S := Set_Of_th1 D P X iXD m.
+
+Let iYS : IN Y S := Extensionality Y X S eYX iXS.
+
+Definition big_extensionality_Out : P Y := Set_Of_th2 D P Y iYS.
+
+
+
+End big_extensionality_proof.
+
+Theorem Big_Extensionality :
+ forall (P : Ens -> Prop) (X Y : Ens) (p : P X) (e : EQ X Y), P Y.
+Proof big_extensionality_Out.
+
+(******* here is perhaps a useful rewrite *****)
+
+Theorem Substitute :
+ forall (X Y : Ens) (P : Ens -> Prop) (e : EQ X Y) (p : P Y), P X.
+Proof
+  fun (X Y : Ens) (P : Ens -> Prop) (e : EQ X Y) (p : P Y) =>
+  Big_Extensionality P Y X p (EQ_symm X Y e).
+
+
+(*** a few conclusions using Big_Extensionality ***)
+
+Section zero_different_from_one.
+Variable X : Ens.
+Variable Y : Ens.
+Hypothesis m : has_leq_0_elements X.
+Hypothesis n : has_geq_1_elements Y.
+
+Hypothesis h : EQ X Y.
+
+Let step1 : has_leq_0_elements Y :=
+  Big_Extensionality has_leq_0_elements X Y m h.
+
+Definition zero_different_from_one_Out : False := n step1.
+
+End zero_different_from_one.
+
+Theorem counting_lem1 :
+ forall (X Y : Ens) (m : has_leq_0_elements X) (n : has_geq_1_elements Y),
+ ~ EQ X Y.
+Proof zero_different_from_one_Out.
+
+Section one_different_from_two.
+Variable X : Ens.
+Variable Y : Ens.
+Hypothesis m : has_leq_1_elements X.
+Hypothesis n : has_geq_2_elements Y.
+
+Hypothesis h : EQ X Y.
+
+Let step1 : has_leq_1_elements Y :=
+  Big_Extensionality has_leq_1_elements X Y m h.
+
+Definition one_different_from_two_Out : False := n step1.
+
+End one_different_from_two.
+
+
+Theorem counting_lem2 :
+ forall (X Y : Ens) (m : has_leq_1_elements X) (n : has_geq_2_elements Y),
+ ~ EQ X Y.
+Proof one_different_from_two_Out.
+
+
+
+(****************************************)
+(**********     PAIR   ****************)
+(****************************************)
+
+Definition First (X : Ens) : Ens := Singleton X.
+Definition Second (X : Ens) : Ens := Doubleton Zero (Singleton X).
+
+Definition PAIR (X Y : Ens) : Ens := Doubleton (First X) (Second Y).
+
+Section first_uniqueness.
+Variable A : Ens.
+Variable B : Ens.
+Hypothesis m : EQ (First A) (First B).
+
+Let F := First A.
+Let G := First B.
+
+Let FsubG : SUB F G := EQ_forwards F G m.
+
+Let iAF : IN A F := Singleton_pr1 A.
+
+Let iBF : IN A G := FsubG A iAF.
+
+Let step1 : EQ B A := Singleton_pr2 B A iBF.
+
+Definition first_uniqueness_Out : EQ A B := EQ_symm B A step1.
+
+End first_uniqueness.
+
+Theorem First_uniqueness :
+ forall (A B : Ens) (m : EQ (First A) (First B)), EQ A B.
+Proof first_uniqueness_Out.
+
+Theorem Singleton_uniqueness :
+ forall (A B : Ens) (m : EQ (Singleton A) (Singleton B)), EQ A B.
+Proof First_uniqueness.
+
+Record pairwise_EQ (A B C D : Ens) : Prop := 
+  {pairwise_EQ_ac : EQ A C; pairwise_EQ_bd : EQ B D}.
+
+Section doubleton_uniqueness_proof.
+
+Variable P : Ens -> Prop.
+
+Variable A : Ens.
+Variable B : Ens.
+Variable C : Ens.
+Variable D : Ens.
+
+Hypothesis pA : P A.
+Hypothesis nB : ~ P B.
+
+Hypothesis pC : P C.
+Hypothesis nD : ~ P D. 
+
+Hypothesis e : EQ (Doubleton A B) (Doubleton C D).
+
+Let Doub := Doubleton C D.
+
+Let iA : IN A (Doubleton A B) := Doubleton_th1 A B.
+
+Let iB : IN B (Doubleton A B) := Doubleton_th2 A B.
+
+Let step1 : SUB (Doubleton A B) Doub := EQ_forwards (Doubleton A B) Doub e.
+
+Let iAdoub : IN A Doub := step1 A iA.
+
+Let iBdoub : IN B Doub := step1 B iB.
+
+Section doubleton_uniqueness_1.
+Hypothesis k : EQ A D.
+
+
+(* Definition Big_Extensionality:
+(P: Ens-> Prop)
+(X,Y: Ens)
+(p: (P X))
+(e : (EQ X Y))
+(P Y)
+:=  big_extensionality_Out. *)
+
+Let step1_2 : P D := Big_Extensionality P A D pA k.
+
+Definition doubleton_uniqueness_1_Out : False := nD step1_2.
+
+End doubleton_uniqueness_1.
+
+Let step2 : NEQ A D := doubleton_uniqueness_1_Out.
+
+
+Section doubleton_uniqueness_2.
+Hypothesis k : EQ B C.
+
+Let step1_1 : EQ C B := EQ_symm B C k.
+
+(* Definition Big_Extensionality:
+(P: Ens-> Prop)
+(X,Y: Ens)
+(p: (P X))
+(e : (EQ X Y))
+(P Y)
+:=  big_extensionality_Out. *)
+
+Let step1_2 : P B := Big_Extensionality P C B pC step1_1.
+
+Definition doubleton_uniqueness_2_Out : False := nB step1_2.
+
+End doubleton_uniqueness_2.
+
+Let step3 : NEQ B C := doubleton_uniqueness_2_Out.
+
+(*
+Definition Doubleton_th4_b :
+(X,Y: Ens)
+(Z: Ens)
+(k: (IN Z (Doubleton X Y)))
+(n: (not (EQ Z Y)))
+(EQ Z X)
+:= doubleton_th4b_Out.  
+th4a same but with NEQ Z X and conclusion EQ Z Y
+*)
+
+Let conclusionAC : EQ A C := Doubleton_th4_b C D A iAdoub step2.
+
+Let conclusionBD : EQ B D := Doubleton_th4_a C D B iBdoub step3.
+
+Definition doubleton_uniqueness_Out : pairwise_EQ A B C D :=
+  Build_pairwise_EQ A B C D conclusionAC conclusionBD.
+
+
+End doubleton_uniqueness_proof.
+
+
+Theorem Doubleton_uniqueness :
+ forall (P : Ens -> Prop) (A B C D : Ens) (pA : P A) 
+   (nB : ~ P B) (pC : P C) (nD : ~ P D)
+   (e : EQ (Doubleton A B) (Doubleton C D)), pairwise_EQ A B C D.
+Proof doubleton_uniqueness_Out.
+
+Section second_has_geq_2_elements_proof.
+
+Variable A : Ens.
+Hypothesis k : has_leq_1_elements A.
+
+Let sA := Singleton A.
+Let E := Second A.
+
+(* recall zero_has_leq_0_elements : 
+(has_leq_0_elements Zero) *)
+
+Let step1 : has_geq_1_elements sA := Singletons_have_geq_1_elements A.
+
+Section second_geq_2_a.
+Hypothesis m : EQ Zero sA.
+
+Let stepa_1 : has_leq_0_elements sA :=
+  Big_Extensionality has_leq_0_elements Zero sA zero_has_leq_0_elements m.
+
+Definition second_geq_2_a_Out : False := step1 stepa_1.
+
+End second_geq_2_a.
+
+Let step2 : NEQ Zero sA := second_geq_2_a_Out.
+
+Definition second_has_geq_2_elements_Out : has_geq_2_elements E :=
+  distinct_Doubletons_have_geq_2_elements Zero sA step2.
+
+End second_has_geq_2_elements_proof.
+
+Theorem Second_has_geq_2_elements :
+ forall A : Ens, has_geq_2_elements (Second A).
+Proof second_has_geq_2_elements_Out.
+
+
+
+Section second_uniqueness_proof.
+
+Variable A : Ens.
+Variable B : Ens.
+Hypothesis k : EQ (Second A) (Second B).
+
+(*** recall Second A = Doubleton Zero (Singleton A)  ***)
+
+Let sA := Singleton A.
+Let sB := Singleton B.
+
+Let step1 : has_geq_1_elements sA := Singletons_have_geq_1_elements A.
+
+Let step2 : has_geq_1_elements sB := Singletons_have_geq_1_elements B.
+
+Let step3 : pairwise_EQ Zero sA Zero sB :=
+  Doubleton_uniqueness has_leq_0_elements Zero sA Zero sB
+    zero_has_leq_0_elements step1 zero_has_leq_0_elements step2 k.
+
+Definition second_uniqueness_Out : EQ A B :=
+  Singleton_uniqueness A B (pairwise_EQ_bd Zero sA Zero sB step3).
+
+
+
+
+End second_uniqueness_proof.
+
+Theorem Second_uniqueness :
+ forall (A B : Ens) (k : EQ (Second A) (Second B)), EQ A B.
+Proof second_uniqueness_Out.
+
+Section pair_uniqueness_proof.
+Variable A : Ens.
+Variable B : Ens.
+Variable C : Ens.
+Variable D : Ens.
+Hypothesis e : EQ (PAIR A B) (PAIR C D).
+
+Let fA := First A.
+Let fC := First C.
+Let secB := Second B.
+Let secD := Second D.
+
+Let step1 : has_leq_1_elements fA := Singletons_have_leq_1_elements A.
+
+Let step2 : has_leq_1_elements fC := Singletons_have_leq_1_elements C.
+
+Let step3 : has_geq_2_elements secB := Second_has_geq_2_elements B.
+
+Let step4 : has_geq_2_elements secD := Second_has_geq_2_elements D.
+
+Let step5 : pairwise_EQ fA secB fC secD :=
+  Doubleton_uniqueness has_leq_1_elements fA secB fC secD step1 step3 step2
+    step4 e.
+
+Let step6 : EQ fA fC := pairwise_EQ_ac fA secB fC secD step5.
+
+Let step7 : EQ secB secD := pairwise_EQ_bd fA secB fC secD step5.
+
+Let step8 : EQ A C := First_uniqueness A C step6.
+
+Let step9 : EQ B D := Second_uniqueness B D step7.
+
+Definition pair_uniqueness_Out : pairwise_EQ A B C D :=
+  Build_pairwise_EQ A B C D step8 step9.
+
+End pair_uniqueness_proof.
+
+(* ?PAIR *)
+
+Theorem PAIR_uniqueness :
+ forall (A B C D : Ens) (e : EQ (PAIR A B) (PAIR C D)), pairwise_EQ A B C D.
+Proof pair_uniqueness_Out.
+
+
+
+
+Theorem PAIR_uni_ac :
+ forall (A B C D : Ens) (e : EQ (PAIR A B) (PAIR C D)), EQ A C.
+Proof
+  fun (A B C D : Ens) (e : EQ (PAIR A B) (PAIR C D)) =>
+  pairwise_EQ_ac A B C D (PAIR_uniqueness A B C D e).
+
+
+Theorem PAIR_uni_bd :
+ forall (A B C D : Ens) (e : EQ (PAIR A B) (PAIR C D)), EQ B D.
+Proof
+  fun (A B C D : Ens) (e : EQ (PAIR A B) (PAIR C D)) =>
+  pairwise_EQ_bd A B C D (PAIR_uniqueness A B C D e).
+
+Definition is_a_pair (M : Ens) :=
+  EXISTS (fun A : Ens => EXISTS (fun B : Ens => EQ M (PAIR A B))).
+
+Section a_pair_is_a_pair_proof.
+Variable A : Ens.
+Variable B : Ens.
+
+Let M := PAIR A B. 
+
+Let step1 : EQ M (PAIR A B) := EQ_refl M.
+
+Let step2 : EXISTS (fun B1 : Ens => EQ M (PAIR A B1)) :=
+  EXISTS_th1 (fun B1 : Ens => EQ M (PAIR A B1)) B step1.
+
+
+Definition a_pair_is_a_pair_Out : is_a_pair M :=
+  EXISTS_th1 (fun A1 : Ens => EXISTS (fun B1 : Ens => EQ M (PAIR A1 B1))) A
+    step2.
+
+End a_pair_is_a_pair_proof.
+
+Theorem a_pair_is_a_pair : forall A B : Ens, is_a_pair (PAIR A B).
+Proof a_pair_is_a_pair_Out.
+
+Theorem a_pair_is_a_pair_th2 :
+ forall (A B U : Ens) (i : EQ (PAIR A B) U), is_a_pair U.
+Proof
+  fun (A B U : Ens) (i : EQ (PAIR A B) U) =>
+  Big_Extensionality (fun V : Ens => is_a_pair V) (PAIR A B) U
+    (a_pair_is_a_pair A B) i.
+
+(******* projections *******)
+
+
+Definition PR1 (M : Ens) :=
+  CHOICE (fun A : Ens => EXISTS (fun B : Ens => EQ M (PAIR A B))).
+
+
+Theorem PAIR_proj1_pr1 :
+ forall (M : Ens) (p : is_a_pair M),
+ EXISTS (fun B : Ens => EQ M (PAIR (PR1 M) B)).
+ Proof
+   fun (M : Ens) (p : is_a_pair M) =>
+   CHOICE_pr (fun A : Ens => EXISTS (fun B : Ens => EQ M (PAIR A B))) p.
+
+Definition PR2 (M : Ens) := CHOICE (fun B : Ens => EQ M (PAIR (PR1 M) B)).
+
+
+Theorem PAIR_proj_th1 :
+ forall (M : Ens) (p : is_a_pair M), EQ M (PAIR (PR1 M) (PR2 M)).
+Proof
+  fun (M : Ens) (p : is_a_pair M) =>
+  CHOICE_pr (fun B : Ens => EQ M (PAIR (PR1 M) B)) (PAIR_proj1_pr1 M p).
+    
+Section pair_proj2_proof.
+Variable X Y : Ens.
+
+Let M := PAIR X Y.
+
+Let step1 : is_a_pair M.
+Proof a_pair_is_a_pair X Y.
+
+Let step2 : EQ M (PAIR (PR1 M) (PR2 M)).
+Proof PAIR_proj_th1 M step1.
+
+Lemma pair_proj2_Out : pairwise_EQ X Y (PR1 M) (PR2 M).
+Proof PAIR_uniqueness X Y (PR1 M) (PR2 M) step2.
+
+End pair_proj2_proof.
+
+Theorem PAIR_proj_th2 :
+ forall X Y : Ens, pairwise_EQ X Y (PR1 (PAIR X Y)) (PR2 (PAIR X Y)).
+Proof pair_proj2_Out.
+
+Theorem PAIR_proj_th3 : forall X Y : Ens, EQ X (PR1 (PAIR X Y)).
+Proof
+  fun X Y : Ens =>
+  pairwise_EQ_ac X Y (PR1 (PAIR X Y)) (PR2 (PAIR X Y)) (PAIR_proj_th2 X Y).
+
+Theorem PAIR_proj_th4 : forall X Y : Ens, EQ Y (PR2 (PAIR X Y)).
+Proof
+  fun X Y : Ens =>
+  pairwise_EQ_bd X Y (PR1 (PAIR X Y)) (PR2 (PAIR X Y)) (PAIR_proj_th2 X Y).
+
+ 
+Section PAIR_proj_uni_proof.
+Variable M : Ens.
+Hypothesis m : is_a_pair M.
+Variable N : Ens.
+Hypothesis n : is_a_pair N.
+Hypothesis e : EQ (PR1 M) (PR1 N).
+Hypothesis f : EQ (PR2 M) (PR2 N).
+
+Let M1 := PR1 M.
+Let M2 := PR2 M.
+Let N1 := PR1 N.
+Let N2 := PR2 N.
+
+Let M12 := PAIR M1 M2.
+Let N12 := PAIR N1 N2.
+
+Let U := PAIR M1 N2.
+
+Let step1 : EQ M12 M12 := EQ_refl M12.
+
+Let step2 : EQ M12 U :=
+  Big_Extensionality (fun X : Ens => EQ M12 (PAIR M1 X)) M2 N2 step1 f. 
+
+Let step3 : EQ U U := EQ_refl U.
+
+Let step4 : EQ U N12 :=
+  Big_Extensionality (fun X : Ens => EQ U (PAIR X N2)) M1 N1 step3 e.
+
+Let step5 : EQ M12 N12 := EQ_trans M12 U N12 step2 step4.
+
+Let step6 : EQ M M12 := PAIR_proj_th1 M m.
+
+Let step7 : EQ N N12 := PAIR_proj_th1 N n.
+
+Let step8 : EQ N12 N := EQ_symm N N12 step7.
+
+Let step9 : EQ M N12 := EQ_trans M M12 N12 step6 step5.
+
+
+Definition PAIR_proj_uni_Out : EQ M N := EQ_trans M N12 N step9 step8.
+
+End PAIR_proj_uni_proof.
+
+(***** PAIR_proj_uni says that if two pairs have the same projections
+then they are equal   *******)
+
+Theorem PAIR_proj_uni :
+ forall (M : Ens) (m : is_a_pair M) (N : Ens) (n : is_a_pair N)
+   (e : EQ (PR1 M) (PR1 N)) (f : EQ (PR2 M) (PR2 N)), 
+ EQ M N.
+Proof PAIR_proj_uni_Out.
+
+
+(*************************************)
+(************ Powerset  **************)
+(*************************************)
+
+
+
+
+Definition Powerset (X : Ens) := REPLACEMENT (fun Y : Ens => SUB Y X).
+
+Theorem Powerset_pr1 : forall (X Y : Ens) (h : SUB Y X), IN Y (Powerset X).
+Proof
+  fun X : Ens =>
+  REPLACEMENT_pr1 (fun Y : Ens => SUB Y X) (Powerset_bounded X).
+
+Theorem Powerset_pr2 : forall (X Y : Ens) (i : IN Y (Powerset X)), SUB Y X.
+Proof
+  fun X : Ens =>
+  REPLACEMENT_pr2 (fun Y : Ens => SUB Y X) (Powerset_bounded X).
+
+
+Section power0.
+Variable A : Ens.
+
+Let step1 : SUB Zero A.
+Proof EmptySet_th2 A.
+
+Lemma power0_Out : IN Zero (Powerset A).
+Proof Powerset_pr1 A Zero step1.
+End power0.
+
+Theorem Powerset_th1 : forall A : Ens, IN Zero (Powerset A).
+Proof power0_Out.
+
+Section power1.
+Variable A X Y : Ens.
+Hypothesis x : IN X (Powerset A).
+Hypothesis y : IN Y (Powerset A).
+
+Let step1 : SUB X A.
+Proof Powerset_pr2 A X x.
+
+Let step2 : SUB Y A.
+Proof Powerset_pr2 A Y y.
+
+Let step3 : SUB (union X Y) A.
+Proof union_pr3 X Y A step1 step2.
+
+Lemma power1_Out1 : IN (union X Y) (Powerset A).
+Proof Powerset_pr1 A (union X Y) step3.
+
+Let step4 : SUB (intersection X Y) X.
+Proof intersection_th1 X Y.
+
+Let step5 : SUB (intersection X Y) A.
+Proof SUB_trans (intersection X Y) X A step4 step1.
+
+Lemma power1_Out2 : IN (intersection X Y) (Powerset A).
+Proof Powerset_pr1 A (intersection X Y) step5.
+
+End power1.
+
+Theorem Powerset_th2 :
+ forall (A X Y : Ens) (x : IN X (Powerset A)) (y : IN Y (Powerset A)),
+ IN (union X Y) (Powerset A).
+Proof power1_Out1.
+
+Theorem Powerset_th3 :
+ forall (A X Y : Ens) (x : IN X (Powerset A)),
+ (*    (y : (IN Y (Powerset A)))  *)
+ IN (intersection X Y) (Powerset A).
+Proof power1_Out2.
+
+
+
+Section power2.
+Variable A X : Ens.
+Hypothesis i : IN X A.
+
+Let step1 : SUB (Singleton X) A.
+Proof Singleton_th1 X A i.
+
+Lemma power2_Out : IN (Singleton X) (Powerset A).
+Proof Powerset_pr1 A (Singleton X) step1.
+
+End power2.
+
+Theorem Powerset_th4 :
+ forall (A X : Ens) (x : IN X A), IN (Singleton X) (Powerset A).
+Proof power2_Out.
+
+Section power3.
+Variable A X Y : Ens.
+Hypothesis x : IN X A.
+Hypothesis y : IN Y A.
+
+Let step1 : IN (Singleton X) (Powerset A).
+Proof Powerset_th4 A X x.
+Let step2 : IN (Singleton Y) (Powerset A).
+Proof Powerset_th4 A Y y.
+
+Lemma power3_Out : IN (Doubleton X Y) (Powerset A).
+Proof Powerset_th2 A (Singleton X) (Singleton Y) step1 step2.
+
+End power3.
+
+Theorem Powerset_th5 :
+ forall (A X Y : Ens) (x : IN X A) (y : IN Y A),
+ IN (Doubleton X Y) (Powerset A).
+Proof power3_Out.
+
+
+Section power4.
+Variable A X : Ens.
+Hypothesis x : IN X A.
+
+Let sX := Singleton X.
+Let P := Powerset A.
+
+Let step1 : IN Zero P.
+Proof Powerset_th1 A.
+
+Let step2 : IN sX P.
+Proof Powerset_th4 A X x.
+
+
+Lemma power4_Out : IN (Second X) (Powerset P).
+Proof Powerset_th5 P Zero sX step1 step2.
+
+End power4.
+
+Theorem Powerset_th6 :
+ forall (A X : Ens) (x : IN X A), IN (Second X) (Powerset (Powerset A)).
+Proof power4_Out.
+
+Section power5.
+Variable A B : Ens.
+Hypothesis a : SUB A B.
+
+Variable X : Ens.
+Hypothesis x : IN X (Powerset A).
+
+Let step1 : SUB X A.
+Proof Powerset_pr2 A X x.
+
+Let step2 : SUB X B.
+Proof SUB_trans X A B step1 a.
+
+Lemma power5_Out : IN X (Powerset B).
+Proof Powerset_pr1 B X step2.
+
+End power5.
+
+Theorem Powerset_th7 :
+ forall (A B : Ens) (a : SUB A B), SUB (Powerset A) (Powerset B).
+Proof power5_Out.
+
+
+
+
+
+
+(*********************************************)
+(**********     Naturals  part 1  ************)
+(*********************************************)
+
+
+Definition Element_of_NN (Y : Ens) :=
+  forall (X : Ens) (k : Contains_NN X), IN Y X. 
+
+Section Zero_element_of_NN_proof.
+Variable X : Ens.
+Hypothesis k : Contains_NN X. 
+
+Definition Zero_element_of_NN_proof_Out : IN Zero X := Contains_NN_zero X k.
+End Zero_element_of_NN_proof.
+
+Theorem Zero_element_of_NN : Element_of_NN Zero.
+Proof Zero_element_of_NN_proof_Out.
+
+
+Section Nexts_element_of_NN_proof.
+Variable A : Ens.
+Hypothesis h : Element_of_NN A.
+Variable X : Ens.
+Hypothesis k : Contains_NN X.
+
+Let N := Next A.
+
+Let j : IN A X := h X k.
+
+Definition Nexts_element_of_NN_proof_Out : IN N X :=
+  Contains_NN_nexts X k A j.
+
+End Nexts_element_of_NN_proof.
+
+Theorem Nexts_element_of_NN :
+ forall (A : Ens) (h : Element_of_NN A), Element_of_NN (Next A).
+Proof Nexts_element_of_NN_proof_Out.
+
+
+
+
+
+
+Definition Set_containing_NN := CHOICE Contains_NN.
+
+
+Theorem Set_containing_NN_pr : Contains_NN Set_containing_NN.
+Proof CHOICE_pr Contains_NN Infinity_exists.
+
+
+
+
+Section Bounded_NN_proof.
+Hypothesis u : DOESNT_EXIST (fun A : Ens => Bounded_By A Element_of_NN).
+
+Let step1 : forall A : Ens, ~ Bounded_By A Element_of_NN := u.
+
+Let B : Ens := Set_containing_NN.
+Let v : Contains_NN B := Set_containing_NN_pr.
+
+Section Bounded_NN_proof2.
+Variable Z : Ens.
+Hypothesis w : Element_of_NN Z.
+
+Definition Bounded_NN_proof2_Out : IN Z B := w B v.
+
+End Bounded_NN_proof2.
+
+Let step2 : Bounded_By B Element_of_NN := Bounded_NN_proof2_Out.
+
+
+Definition Bounded_NN_proof_Out : False := step1 B step2.
+
+End Bounded_NN_proof.
+
+Theorem Bounded_NN_pre : EXISTS (fun A : Ens => Bounded_By A Element_of_NN).
+Proof Bounded_NN_proof_Out.
+
+Theorem Bounded_NN : Bounded Element_of_NN.
+Proof Bounded_NN_pre.
+
+
+Definition Naturals := REPLACEMENT Element_of_NN.
+
+Theorem Naturals_pr1 : forall X : Ens, Element_of_NN X -> IN X Naturals.
+Proof REPLACEMENT_pr1 Element_of_NN Bounded_NN.
+
+Theorem Naturals_pr2 : forall X : Ens, IN X Naturals -> Element_of_NN X.
+Proof REPLACEMENT_pr2 Element_of_NN Bounded_NN.
+
+(* Now prove Contains_NN Naturals *)
+(* prove the two inductive properties separately *)
+
+Theorem Zero_in_Naturals : IN Zero Naturals.
+Proof Naturals_pr1 Zero Zero_element_of_NN.
+
+Theorem Nexts_in_Naturals :
+ forall (A : Ens) (h : IN A Naturals), IN (Next A) Naturals.
+Proof
+  fun (A : Ens) (h : IN A Naturals) =>
+  Naturals_pr1 (Next A) (Nexts_element_of_NN A (Naturals_pr2 A h)).
+
+Theorem Contains_NN_Naturals : Contains_NN Naturals.
+Proof Build_Contains_NN Naturals Zero_in_Naturals Nexts_in_Naturals.
+
+Section Naturals_th1_proof.
+Variable X : Ens.
+Hypothesis h : Contains_NN X.
+
+Variable B : Ens.
+Hypothesis k : IN B Naturals. 
+
+Let step1 : Element_of_NN B := Naturals_pr2 B k.
+
+Definition Naturals_th1_proof_Out : IN B X := step1 X h.
+
+End Naturals_th1_proof.
+
+Theorem Naturals_th1 : forall (X : Ens) (h : Contains_NN X), SUB Naturals X.
+Proof Naturals_th1_proof_Out.
+
+
+
+
+
+
+Section A_sub_next_A_proof.
+Variable A : Ens.
+Let N := Next A.
+(* = (union A (Singleton A))  *)
+
+Definition A_sub_next_A_Out : SUB A N := union_pr1 A (Singleton A).
+
+End A_sub_next_A_proof.
+
+Theorem anything_sub_next_of_itself : forall A : Ens, SUB A (Next A).
+Proof A_sub_next_A_Out.
+
+Section A_in_next_A_proof.
+Variable A : Ens.
+Let N := Next A.
+
+Let step1 : IN A (Singleton A) := Singleton_pr1 A.
+
+Definition A_in_next_A_Out : IN A N := union_th2 A (Singleton A) A step1.
+
+End A_in_next_A_proof.
+
+Theorem anything_in_next_of_itself : forall A : Ens, IN A (Next A).
+Proof A_in_next_A_Out.
+
+
+
+
+(**** now we do some inductions on naturals ****)
+
+
+Section naturals_inductionA_proof.
+
+Variable P : Ens -> Prop.
+Hypothesis IH_zero : P Zero.
+Hypothesis
+  IH_nexts : forall (A : Ens) (h : IN A Naturals) (k : P A), P (Next A).
+
+Let S := Set_Of Naturals P.
+
+
+
+Let step1 : IN Zero S := Set_Of_th1 Naturals P Zero Zero_in_Naturals IH_zero.
+
+Let step2 : SUB S Naturals := Set_Of_th4 Naturals P.
+
+Let step3 (A : Ens) (h : IN A S) : P A := Set_Of_th2 Naturals P A h.
+
+Let step4 (A : Ens) (h : IN A S) : P (Next A) :=
+  IH_nexts A (step2 A h) (step3 A h).
+
+Let step5 (B : Ens) (h : IN B Naturals) (k : P B) : 
+  IN B S := Set_Of_th1 Naturals P B h k.
+
+Section naturals_inductionA1.
+Variable A : Ens.
+Hypothesis h : IN A S.
+Let N := Next A.
+
+Let step1_1 : P N := step4 A h.
+
+Let step1_2 : IN N Naturals := Nexts_in_Naturals A (step2 A h).
+
+Definition naturals_inductionA1_Out : IN N S := step5 N step1_2 step1_1.
+
+End naturals_inductionA1.
+
+Let step6 : forall (A : Ens) (h : IN A S), IN (Next A) S :=
+  naturals_inductionA1_Out.
+
+Let step7 : Contains_NN S := Build_Contains_NN S step1 step6.
+
+
+Variable B : Ens.
+Hypothesis p : IN B Naturals.
+
+Let step8 : Element_of_NN B := Naturals_pr2 B p.
+
+Let step9 : IN B S := step8 S step7.
+
+Definition naturals_inductionA_Out : P B := step3 B step9.
+
+
+End naturals_inductionA_proof.
+
+Definition naturals_induction_nexts (P : Ens -> Prop) :=
+  forall (A : Ens) (h : IN A Naturals) (k : P A), P (Next A).
+
+Theorem naturals_inductionA :
+ forall (P : Ens -> Prop) (IH_zero : P Zero)
+   (IH_nexts : naturals_induction_nexts P) (B : Ens) 
+   (p : IN B Naturals), P B.
+Proof naturals_inductionA_Out.
+
+
+(* prove some properties of naturals by induction *)
+
+
+
+Definition in_then_strictsub (N : Ens) :=
+  forall X : Ens, IN X N -> StrictSUB X N.
+
+Definition not_in_itself (X : Ens) := ~ IN X X.
+
+Record naturals_main_ind_hyp (N : Ens) : Prop := 
+  {naturals_main_ind1 : in_then_strictsub N;
+   naturals_main_ind2 : not_in_itself N}.
+
+(**** now we prove that if A is not in itself 
+      then A strictsub (Next A)            *******)
+
+Section strictsub_next_proof.
+Variable A : Ens.
+Hypothesis h : not_in_itself A.
+Let N := Next A.
+
+Let step1 : SUB A N := anything_sub_next_of_itself A.
+
+Section strictsub_next1.
+Hypothesis k : EQ A N.
+Let step2 : SUB N A := EQ_backwards A N k.
+Let step3 : IN A N := anything_in_next_of_itself A.
+Let step4 : IN A A := step2 A step3.
+Definition strictsub_next1_Out : False := h step4.
+
+End strictsub_next1.
+
+Let step5 : ~ EQ A N := strictsub_next1_Out.
+
+Definition strictsub_next_Out : StrictSUB A N :=
+  Build_StrictSUB A N step1 step5.
+
+End strictsub_next_proof.
+
+Theorem some_things_strictsub_their_nexts :
+ forall (A : Ens) (h : not_in_itself A), StrictSUB A (Next A).
+Proof strictsub_next_Out.
+
+
+
+
+
+
+(* now we prove by induction the in_then_strictsub property for Naturals *)
+
+
+Section in_then_strictsub_Zero_proof.
+Variable X : Ens.
+Hypothesis h : IN X Zero.
+Let step1 : False := EmptySet_th1 X h.
+Definition in_iff_strictsub_Zero_Out : StrictSUB X Zero :=
+  false_implies_everything (StrictSUB X Zero) step1.
+
+End in_then_strictsub_Zero_proof.
+
+Theorem in_then_strictsub_Zero :
+ forall X : Ens, IN X Zero -> StrictSUB X Zero.
+Proof in_iff_strictsub_Zero_Out.
+
+Section not_in_itself_Zero.
+Hypothesis h : IN Zero Zero.
+Definition not_in_itself_Zero_Out : False := EmptySet_th1 Zero h. 
+
+End not_in_itself_Zero.
+
+Theorem zero_not_in_itself : not_in_itself Zero.
+Proof not_in_itself_Zero_Out.
+
+Theorem naturals_main_ind_for_Zero : naturals_main_ind_hyp Zero.
+Proof
+  Build_naturals_main_ind_hyp Zero in_then_strictsub_Zero zero_not_in_itself.
+
+
+
+Section naturals_main_induction_step.
+Variable A : Ens.
+Hypothesis h : naturals_main_ind_hyp A.
+
+Let h1 : in_then_strictsub A := naturals_main_ind1 A h.
+
+Let h2 : not_in_itself A := naturals_main_ind2 A h.
+
+Let N := Next A. 
+
+Let in_A_N : IN A N := anything_in_next_of_itself A.
+
+Let sub_A_N : SUB A N := anything_sub_next_of_itself A.
+
+Section naturals_main_induction2.
+Hypothesis k : IN N N. 
+
+Section naturals_main_induction2a.
+Hypothesis l : EQ A N.
+Let step2a1 : IN A N := Extensionality A N N l k.
+Let step2a2 : SUB N A := EQ_backwards A N l.
+Let step2a3 : IN A A := step2a2 A step2a1.
+
+Definition naturals_main_induction2a_Out : False := h2 step2a3.
+
+End naturals_main_induction2a.
+
+Let step2_1 : ~ EQ A N := naturals_main_induction2a_Out.
+
+
+
+
+Section naturals_main_induction2b.
+Hypothesis m : IN N (Singleton A).
+Let step2b1 : EQ A N := Singleton_pr2 A N m.
+Definition naturals_main_induction2b_Out : False := step2_1 step2b1.
+
+End naturals_main_induction2b.
+
+Let step2_2 : ~ IN N (Singleton A) := naturals_main_induction2b_Out.
+
+Section naturals_main_induction2c.
+Hypothesis n : IN N A.
+
+Let step2c1 : StrictSUB N A := h1 N n.
+Let step2c2 : SUB N A := StrictSUB_sub N A step2c1.
+Let step2c3 : IN A N := anything_in_next_of_itself A.
+Let step2c4 : IN A A := step2c2 A step2c3.
+
+Definition naturals_main_induction2c_Out : False := h2 step2c4.
+
+End naturals_main_induction2c.
+
+Let step2_3 : ~ IN N A := naturals_main_induction2c_Out.
+
+Let step2_4 : ~ IN N N := union_th3 A (Singleton A) N step2_3 step2_2.
+
+Definition naturals_main_induction2_Out : False := step2_4 k.
+
+
+End naturals_main_induction2.
+
+Let sublemma1 : not_in_itself N := naturals_main_induction2_Out.
+
+
+Section naturals_main_induction3.
+Variable X : Ens.
+Hypothesis p : IN X N.
+
+Section naturals_main_induction3em.
+Hypothesis contra : ~ StrictSUB X N.
+
+Section naturals_main_induction3a.
+Hypothesis q : IN X A. 
+
+Let step3a1 : StrictSUB X A := h1 X q.
+
+Let step3a2 : StrictSUB X N := StrictSUB_trans1 X A N step3a1 sub_A_N.
+
+Definition naturals_main_induction3a_Out : False := contra step3a2.
+
+End naturals_main_induction3a.
+
+Let step3_1 : ~ IN X A := naturals_main_induction3a_Out.
+
+Section naturals_main_induction3b.
+Hypothesis r : IN X (Singleton A).
+
+Let r_bis : EQ A X := Singleton_pr2 A X r.
+
+
+Let subXA : SUB X A := EQ_backwards A X r_bis.
+Let subAX : SUB A X := EQ_forwards A X r_bis.
+
+Let step3b1 : SUB A N := sub_A_N.
+
+Let step3b2 : SUB X N := SUB_trans X A N subXA step3b1.
+
+Section naturals_main_induction3bI.
+Hypothesis s : EQ X N.
+Let step3bI1 : EQ A N := EQ_trans A X N r_bis s.
+Let step3bI2 : SUB N A := EQ_backwards A N step3bI1.
+Let step3bI3 : IN A A := step3bI2 A in_A_N.
+
+Definition naturals_main_induction3bI_Out : False := h2 step3bI3.
+
+End naturals_main_induction3bI.
+
+Let step3b3 : ~ EQ X N := naturals_main_induction3bI_Out.
+
+Let step3b4 : StrictSUB X N := Build_StrictSUB X N step3b2 step3b3. 
+
+Definition naturals_main_induction3b_Out : False := contra step3b4.
+
+End naturals_main_induction3b.
+
+Let step3_2 : ~ IN X (Singleton A) := naturals_main_induction3b_Out.
+
+Let step3_3 : ~ IN X N := union_th3 A (Singleton A) X step3_1 step3_2.
+
+Definition naturals_main_induction3em_Out : False := step3_3 p.
+
+End naturals_main_induction3em.
+
+Let sublemma2 : ~ ~ StrictSUB X N := naturals_main_induction3em_Out.
+
+Definition naturals_main_induction3_Out : StrictSUB X N :=
+  excluded_middle (StrictSUB X N) sublemma2.
+
+
+
+
+End naturals_main_induction3.
+
+Let sublemma3 : in_then_strictsub N := naturals_main_induction3_Out.
+
+Definition naturals_main_induction_step_Out : naturals_main_ind_hyp N :=
+  Build_naturals_main_ind_hyp N sublemma3 sublemma1.
+
+
+End naturals_main_induction_step.
+
+Theorem naturals_main_induction_next :
+ forall (A : Ens) (h : naturals_main_ind_hyp A),
+ naturals_main_ind_hyp (Next A).
+Proof naturals_main_induction_step_Out.
+
+(* we have to redefine this because the inductionA statement includes
+the extra hypothesis (IN A Naturals) which we didn't need above 
+so in the following formula u is forgotten ***)
+
+Theorem naturals_main_induction_next_1 :
+ naturals_induction_nexts naturals_main_ind_hyp.
+Proof
+  fun (A : Ens) (u : IN A Naturals) (h : naturals_main_ind_hyp A) =>
+  naturals_main_induction_next A h. 
+
+Theorem naturals_main_th1 :
+ forall (B : Ens) (i : IN B Naturals), naturals_main_ind_hyp B.
+Proof
+  naturals_inductionA naturals_main_ind_hyp naturals_main_ind_for_Zero
+    naturals_main_induction_next_1. 
+
+Theorem naturals_main_th2 :
+ forall (B : Ens) (i : IN B Naturals), in_then_strictsub B.
+Proof
+  fun (B : Ens) (i : IN B Naturals) =>
+  naturals_main_ind1 B (naturals_main_th1 B i).
+
+Theorem naturals_main_th2_rewrite :
+ forall (B : Ens) (i : IN B Naturals) (A : Ens) (j : IN A B), StrictSUB A B.
+Proof naturals_main_th2.
+
+Theorem naturals_main_th3 :
+ forall (B : Ens) (i : IN B Naturals), not_in_itself B.
+Proof
+  fun (B : Ens) (i : IN B Naturals) =>
+  naturals_main_ind2 B (naturals_main_th1 B i).
+  
+Theorem naturals_main_th3_rewrite :
+ forall (B : Ens) (i : IN B Naturals), ~ IN B B.
+Proof naturals_main_th3.
+
+
+
+(******************************************************)
+(******************************************************)
+(**************   FUNCTIONS         *******************)
+(******************************************************)
+(******************************************************)
+
+
+
+(********** in order to bound Domain and Range we first ********)
+(********** define  Total   ***********)
+
+Definition UnionPlus (F : Ens) := union F (Union F).
+
+Definition Total (R : Ens) := UnionPlus (UnionPlus (UnionPlus R)).
+
+Theorem UnionPlus_th1 : forall (X F : Ens) (i : IN X F), IN X (UnionPlus F).
+Proof fun (X F : Ens) (i : IN X F) => union_th1 F (Union F) X i.
+
+Theorem UnionPlus_th2 :
+ forall (X U F : Ens) (i : IN X U) (j : IN U F), IN X (UnionPlus F).
+Proof
+  fun (X U F : Ens) (i : IN X U) (j : IN U F) =>
+  union_th2 F (Union F) X (Union_th1 F X U i j).
+
+Section total_th1_proof.
+Variable X F : Ens.
+Hypothesis i : IN X F.
+
+Let step1 : IN X (UnionPlus F).
+Proof UnionPlus_th1 X F i.
+
+Let step2 : IN X (UnionPlus (UnionPlus F)).
+Proof UnionPlus_th1 X (UnionPlus F) step1.
+
+Lemma total_th1_Out : IN X (Total F).
+Proof UnionPlus_th1 X (UnionPlus (UnionPlus F)) step2.  
+
+
+End total_th1_proof.
+
+Theorem Total_th1 : forall (X F : Ens) (i : IN X F), IN X (Total F).
+Proof total_th1_Out.
+
+Section total_th2_proof.
+Variable X Y F : Ens.
+Hypothesis i : IN X Y.
+Hypothesis j : IN Y F.
+
+Let step1 : IN X (UnionPlus F).
+Proof UnionPlus_th2 X Y F i j.
+
+Let step2 : IN X (UnionPlus (UnionPlus F)).
+Proof UnionPlus_th1 X (UnionPlus F) step1.
+
+Lemma total_th2_Out : IN X (Total F).
+Proof UnionPlus_th1 X (UnionPlus (UnionPlus F)) step2.  
+
+
+End total_th2_proof.
+
+Theorem Total_th2 :
+ forall (X Y F : Ens) (i : IN X Y) (j : IN Y F), IN X (Total F).
+Proof total_th2_Out.
+
+Section total_th3_proof.
+Variable X Y Z F : Ens.
+Hypothesis i : IN X Y.
+Hypothesis j : IN Y Z.
+Hypothesis k : IN Z F.
+
+Let step1 : IN Y (UnionPlus F).
+Proof UnionPlus_th2 Y Z F j k.
+
+Let step2 : IN X (UnionPlus (UnionPlus F)).
+Proof UnionPlus_th2 X Y (UnionPlus F) i step1.
+
+Lemma total_th3_Out : IN X (Total F).
+Proof UnionPlus_th1 X (UnionPlus (UnionPlus F)) step2.  
+
+
+End total_th3_proof.
+
+Theorem Total_th3 :
+ forall (X Y Z F : Ens) (i : IN X Y) (j : IN Y Z) (k : IN Z F),
+ IN X (Total F).
+Proof total_th3_Out.
+
+Section total_th4_proof.
+Variable X Y Z W F : Ens.
+Hypothesis i : IN X Y.
+Hypothesis j : IN Y Z.
+Hypothesis k : IN Z W.
+Hypothesis l : IN W F.
+
+Let step1 : IN Z (UnionPlus F).
+Proof UnionPlus_th2 Z W F k l.
+
+Let step2 : IN Y (UnionPlus (UnionPlus F)).
+Proof UnionPlus_th2 Y Z (UnionPlus F) j step1.
+
+Lemma total_th4_Out : IN X (Total F).
+Proof UnionPlus_th2 X Y (UnionPlus (UnionPlus F)) i step2.  
+
+
+End total_th4_proof.
+
+Theorem Total_th4 :
+ forall (X Y Z W F : Ens) (i : IN X Y) (j : IN Y Z) (k : IN Z W) (l : IN W F),
+ IN X (Total F).
+Proof total_th4_Out.
+
+Section total_and_pairs_1.
+Variable R : Ens.
+Variable A B : Ens.
+Hypothesis i : IN (PAIR A B) R.
+
+Let step1 : IN A (First A).
+Proof Singleton_pr1 A.
+
+Let step2 : IN B (Singleton B).
+Proof Singleton_pr1 B.
+
+Let step3 : IN (Singleton B) (Second B).
+Proof Doubleton_th2 Zero (Singleton B).
+
+Let step4 : IN (First A) (PAIR A B).
+Proof Doubleton_th1 (First A) (Second B).
+
+Let step5 : IN (Second B) (PAIR A B).
+Proof Doubleton_th2 (First A) (Second B).
+
+Lemma total_and_pairs_1_OutA : IN A (Total R).
+Proof Total_th3 A (First A) (PAIR A B) R step1 step4 i.
+
+Lemma total_and_pairs_1_OutB : IN B (Total R).
+Proof Total_th4 B (Singleton B) (Second B) (PAIR A B) R step2 step3 step5 i.
+
+End total_and_pairs_1.
+
+Theorem Relation_Total_th1 :
+ forall (R A B : Ens) (i : IN (PAIR A B) R), IN A (Total R).
+Proof total_and_pairs_1_OutA.
+
+Theorem Relation_Total_th2 :
+ forall (R A B : Ens) (i : IN (PAIR A B) R), IN B (Total R).
+Proof total_and_pairs_1_OutB.
+
+(******** ??? also prove that if m: M is a pair and M in R then 
+PAIR_proj1 M m in Total R etc *********)
+
+
+
+
+(************ Domain and Range ***************)
+
+
+Definition Domain_prop (R X : Ens) := EXISTS (fun Y : Ens => IN (PAIR X Y) R).
+
+Definition Range_prop (R Y : Ens) := EXISTS (fun X : Ens => IN (PAIR X Y) R).
+
+(******** we use CHOICE to define evaluations ******)
+
+Definition EV (R X : Ens) := CHOICE (fun Y : Ens => IN (PAIR X Y) R).
+
+Theorem EV_pr :
+ forall (R X : Ens) (p : Domain_prop R X), IN (PAIR X (EV R X)) R.
+Proof
+  fun (R X : Ens) (p : Domain_prop R X) =>
+  CHOICE_pr (fun Y : Ens => IN (PAIR X Y) R) p.
+
+Definition inverse_EV (R Y : Ens) := CHOICE (fun X : Ens => IN (PAIR X Y) R).
+
+Theorem inverse_EV_pr :
+ forall (R Y : Ens) (p : Range_prop R Y), IN (PAIR (inverse_EV R Y) Y) R.
+Proof
+  fun (R Y : Ens) (p : Range_prop R Y) =>
+  CHOICE_pr (fun X : Ens => IN (PAIR X Y) R) p.
+
+
+(*********** boundedness for Domain_prop and Range_prop ******)
+
+
+Section Domain_prop_bounded_proof.
+Variable R : Ens.
+
+Let T := Total R. 
+
+Section Domain_prop_bounded_proof_1.
+Variable X : Ens.
+Hypothesis p : Domain_prop R X.
+
+Let Y := EV R X.
+
+Let step1_1 : IN (PAIR X Y) R.
+Proof EV_pr R X p.
+
+Lemma Domain_prop_bounded_proof_1_Out : IN X T.
+Proof Relation_Total_th1 R X Y step1_1.
+
+End Domain_prop_bounded_proof_1.
+
+Let step1 : Bounded_By T (Domain_prop R).
+Proof Domain_prop_bounded_proof_1_Out.
+
+Lemma Domain_prop_bounded_Out : Bounded (Domain_prop R).
+Proof Bounded_th2 (Domain_prop R) T step1.
+
+End Domain_prop_bounded_proof.
+
+Theorem Domain_prop_bounded : forall R : Ens, Bounded (Domain_prop R).
+Proof Domain_prop_bounded_Out.
+
+
+Section Range_prop_bounded_proof.
+Variable R : Ens.
+
+Let T := Total R. 
+
+Section Range_prop_bounded_proof_1.
+Variable Y : Ens.
+Hypothesis p : Range_prop R Y.
+
+Let X := inverse_EV R Y.
+
+Let step1_1 : IN (PAIR X Y) R.
+Proof inverse_EV_pr R Y p.
+
+Lemma Range_prop_bounded_proof_1_Out : IN Y T.
+Proof Relation_Total_th2 R X Y step1_1.
+
+End Range_prop_bounded_proof_1.
+
+Let step1 : Bounded_By T (Range_prop R).
+Proof Range_prop_bounded_proof_1_Out.
+
+Lemma Range_prop_bounded_Out : Bounded (Range_prop R).
+Proof Bounded_th2 (Range_prop R) T step1.
+
+End Range_prop_bounded_proof.
+
+Theorem Range_prop_bounded : forall R : Ens, Bounded (Range_prop R).
+Proof Range_prop_bounded_Out.
+
+(****** now we define domain and EV *****)
+
+Definition Domain (R : Ens) := REPLACEMENT (Domain_prop R).
+
+Theorem Domain_pr1 :
+ forall (R X : Ens) (p : Domain_prop R X), IN X (Domain R).
+Proof fun R : Ens => REPLACEMENT_pr1 (Domain_prop R) (Domain_prop_bounded R).
+
+Theorem Domain_pr2 :
+ forall (R X : Ens) (i : IN X (Domain R)), Domain_prop R X.
+Proof fun R : Ens => REPLACEMENT_pr2 (Domain_prop R) (Domain_prop_bounded R).
+
+Theorem EV_th1 :
+ forall (R X : Ens) (i : IN X (Domain R)), IN (PAIR X (EV R X)) R.
+Proof fun (R X : Ens) (i : IN X (Domain R)) => EV_pr R X (Domain_pr2 R X i).
+
+
+
+Section Domain_th1_proof.
+Variable R : Ens.
+Variable X Y : Ens.
+Hypothesis i : IN (PAIR X Y) R.
+
+Let step1 : Domain_prop R X.
+Proof EXISTS_th1 (fun Y1 : Ens => IN (PAIR X Y1) R) Y i.
+
+Lemma Domain_th1_Out : IN X (Domain R).
+Proof Domain_pr1 R X step1.
+
+
+End Domain_th1_proof.
+
+Theorem Domain_th1 :
+ forall (R X Y : Ens) (i : IN (PAIR X Y) R), IN X (Domain R).
+Proof Domain_th1_Out.
+
+
+(***** same thing for Range *********)
+
+Definition Range (R : Ens) := REPLACEMENT (Range_prop R).
+
+Theorem Range_pr1 : forall (R X : Ens) (p : Range_prop R X), IN X (Range R).
+Proof fun R : Ens => REPLACEMENT_pr1 (Range_prop R) (Range_prop_bounded R).
+
+Theorem Range_pr2 : forall (R X : Ens) (i : IN X (Range R)), Range_prop R X.
+Proof fun R : Ens => REPLACEMENT_pr2 (Range_prop R) (Range_prop_bounded R).
+
+
+
+Theorem inverse_EV_th1 :
+ forall (R Y : Ens) (i : IN Y (Range R)), IN (PAIR (inverse_EV R Y) Y) R.
+Proof
+  fun (R Y : Ens) (i : IN Y (Range R)) => inverse_EV_pr R Y (Range_pr2 R Y i).
+
+
+
+
+Section Range_th1_proof.
+Variable R : Ens.
+Variable X Y : Ens.
+Hypothesis i : IN (PAIR X Y) R.
+
+Let step1 : Range_prop R Y.
+Proof EXISTS_th1 (fun X1 : Ens => IN (PAIR X1 Y) R) X i.
+
+Lemma Range_th1_Out : IN Y (Range R).
+Proof Range_pr1 R Y step1.
+
+
+End Range_th1_proof.
+
+Theorem Range_th1 :
+ forall (R X Y : Ens) (i : IN (PAIR X Y) R), IN Y (Range R).
+Proof Range_th1_Out.
+
+
+(******* now say EV R X is in Range R and inversely ????? *****)
+
+Section eval_in_range_proof.
+
+Variable R X : Ens.
+Hypothesis i : IN X (Domain R).
+
+Let Y := EV R X.
+
+Let step1 : IN (PAIR X Y) R.
+Proof EV_th1 R X i.
+
+Lemma eval_in_range_Out : IN Y (Range R).
+Proof Range_th1 R X Y step1.
+
+End eval_in_range_proof.
+
+Theorem EV_in_range :
+ forall (R X : Ens) (i : IN X (Domain R)), IN (EV R X) (Range R).
+Proof eval_in_range_Out.
+
+(******)
+
+Section inv_eval_in_domain_proof.
+
+Variable R Y : Ens.
+Hypothesis i : IN Y (Range R).
+
+Let X := inverse_EV R Y.
+
+Let step0 : Range_prop R Y.
+Proof Range_pr2 R Y i.
+
+Let step1 : IN (PAIR X Y) R.
+Proof inverse_EV_pr R Y step0.
+
+Lemma inv_eval_in_domain_Out : IN X (Domain R).
+Proof Domain_th1 R X Y step1.
+
+End inv_eval_in_domain_proof.
+
+Theorem inverse_EV_in_domain :
+ forall (R Y : Ens) (i : IN Y (Range R)), IN (inverse_EV R Y) (Domain R).
+Proof inv_eval_in_domain_Out.
+
+
+(******** functions ***********)
+
+
+Definition is_a_relation (R : Ens) :=
+  forall (X : Ens) (i : IN X R), is_a_pair X.
+
+Section relation_1.
+Variable R : Ens.
+Hypothesis r : is_a_relation R.
+Variable S : Ens.
+Hypothesis h : SUB S R.
+
+Variable X : Ens.
+Hypothesis i : IN X S.
+
+Let step1 : IN X R.
+Proof h X i.
+
+Lemma relation_1_Out : is_a_pair X.
+Proof r X step1.
+
+End relation_1.
+
+Theorem relation_sub :
+ forall (R : Ens) (r : is_a_relation R) (S : Ens), SUB S R -> is_a_relation S.
+Proof relation_1_Out.
+
+Definition well_definedness (F : Ens) :=
+  forall (X Y Z : Ens) (i : IN (PAIR X Y) F) (j : IN (PAIR X Z) F), EQ Y Z.
+
+Section well_def_1.
+Variable F : Ens.
+Hypothesis w : well_definedness F.
+Variable R : Ens.
+Hypothesis h : SUB R F.
+
+Variable X Y Z : Ens.
+Hypothesis i : IN (PAIR X Y) R.
+Hypothesis j : IN (PAIR X Z) R.
+
+Let step1 : IN (PAIR X Y) F.
+Proof h (PAIR X Y) i.
+
+Let step2 : IN (PAIR X Z) F.
+Proof h (PAIR X Z) j.
+
+Lemma well_def_1_Out : EQ Y Z.
+Proof w X Y Z step1 step2.
+
+
+End well_def_1.
+
+Theorem well_definedness_sub :
+ forall (F : Ens) (w : well_definedness F) (R : Ens) (h : SUB R F),
+ well_definedness R.
+Proof well_def_1_Out.
+
+Record is_a_function (F : Ens) : Prop := 
+  {function_is_a_relation : is_a_relation F;
+   function_well_definedness : well_definedness F}.
+
+Theorem function_sub :
+ forall (F : Ens) (f : is_a_function F) (G : Ens) (s : SUB G F),
+ is_a_function G.
+Proof
+  fun (F : Ens) (f : is_a_function F) (G : Ens) (s : SUB G F) =>
+  Build_is_a_function G (relation_sub F (function_is_a_relation F f) G s)
+    (well_definedness_sub F (function_well_definedness F f) G s).
+
+Record is_a_function_on (D F : Ens) : Prop := 
+  {function_on_fn : is_a_function F; function_on_dom : EQ D (Domain F)}.
+
+Theorem function_is_a_function_on :
+ forall (F : Ens) (f : is_a_function F), is_a_function_on (Domain F) F.
+Proof
+  fun (F : Ens) (f : is_a_function F) =>
+  Build_is_a_function_on (Domain F) F f (EQ_refl (Domain F)).
+
+
+
+Section function_section_1.
+Variable F : Ens.
+Hypothesis f : is_a_function F.
+Variable X Y : Ens.
+Hypothesis i : IN (PAIR X Y) F.
+
+Let step1 : IN X (Domain F).
+Proof Domain_th1 F X Y i. 
+
+
+Let V := EV F X.
+
+Let step3 : IN (PAIR X V) F.
+Proof EV_th1 F X step1.
+
+
+Let step5 : well_definedness F.
+Proof function_well_definedness F f. 
+
+Lemma function_1_Out_F : EQ Y V.
+Proof step5 X Y V i step3.
+
+
+End function_section_1.
+
+
+Theorem function_th1 :
+ forall (F : Ens) (f : is_a_function F) (X Y : Ens) (i : IN (PAIR X Y) F),
+ EQ Y (EV F X).
+Proof function_1_Out_F.
+
+Definition Extensionally_equivalent (F G : Ens) :=
+  forall (X : Ens) (i : IN X (Domain F)) (j : IN X (Domain G)),
+  EQ (EV F X) (EV G X).
+
+Section ee_symm_proof.
+Variable F G : Ens.
+Hypothesis e : Extensionally_equivalent F G.
+
+Variable X : Ens.
+Hypothesis i : IN X (Domain G).
+Hypothesis j : IN X (Domain F).
+
+Let step1 : EQ (EV F X) (EV G X).
+Proof e X j i.
+
+Lemma ee_symm_Out : EQ (EV G X) (EV F X).
+Proof EQ_symm (EV F X) (EV G X) step1.
+
+
+End ee_symm_proof.
+
+Theorem ex_eq_symm :
+ forall F G : Ens,
+ Extensionally_equivalent F G -> Extensionally_equivalent G F.
+Proof ee_symm_Out.
+
+Section ee_sub_proof.
+Variable F G : Ens.
+Hypothesis f : is_a_function F.
+Hypothesis g : is_a_function G.
+Hypothesis s : SUB (Domain F) (Domain G).
+Hypothesis e : Extensionally_equivalent F G.
+
+Variable M : Ens.
+Hypothesis i : IN M F.
+
+Let step1 : is_a_relation F. 
+Proof function_is_a_relation F f.
+
+Let step2 : is_a_pair M.
+Proof step1 M i.
+
+Let X := PR1 M.
+Let Y := PR2 M.
+
+Let step3 : EQ M (PAIR X Y).
+Proof PAIR_proj_th1 M step2.
+
+Let step4 : EQ (PAIR X Y) M.
+Proof EQ_symm M (PAIR X Y) step3.
+
+Let step5 : IN (PAIR X Y) F.
+Proof Extensionality (PAIR X Y) M F step4 i.
+
+Let V := EV F X.
+
+Let step6 : EQ Y V.
+Proof function_th1 F f X Y step5.
+
+Let step7 : IN X (Domain F).
+Proof Domain_th1 F X Y step5.
+
+Let step8 : IN X (Domain G).
+Proof s X step7.
+
+Let W := EV G X.
+
+Let step9 : EQ V W.
+Proof e X step7 step8.
+
+Let step10 : EQ Y W.
+Proof EQ_trans Y V W step6 step9.
+
+Let step10a : EQ W Y.
+Proof EQ_symm Y W step10.
+
+Let step11 : IN (PAIR X W) G.
+Proof EV_th1 G X step8.
+
+Let step12 : IN (PAIR X Y) G.
+Proof
+  Big_Extensionality (fun Y1 : Ens => IN (PAIR X Y1) G) W Y step11 step10a.
+
+Lemma ee_sub_Out : IN M G.
+Proof Extensionality M (PAIR X Y) G step3 step12.
+
+End ee_sub_proof.
+
+Theorem ex_eq_sub :
+ forall (F G : Ens) (f : is_a_function F) (s : SUB (Domain F) (Domain G))
+   (e : Extensionally_equivalent F G), SUB F G.
+Proof ee_sub_Out.
+
+Section ee_eq_proof.
+Variable F G : Ens.
+Hypothesis f : is_a_function F.
+Hypothesis g : is_a_function G.
+Hypothesis d : EQ (Domain F) (Domain G).
+Hypothesis e : Extensionally_equivalent F G.
+
+Let step1 : SUB (Domain F) (Domain G).
+Proof EQ_forwards (Domain F) (Domain G) d.
+
+Let step2 : SUB (Domain G) (Domain F).
+Proof EQ_backwards (Domain F) (Domain G) d.
+
+Let step3 : Extensionally_equivalent G F.
+Proof ex_eq_symm F G e.
+
+Let step4 : SUB F G.
+Proof ex_eq_sub F G f step1 e.
+
+Let step5 : SUB G F.
+Proof ex_eq_sub G F g step2 step3.
+
+Lemma ee_eq_Out : EQ F G.
+Proof Build_EQ F G step4 step5.
+
+
+
+End ee_eq_proof.
+
+Theorem Extensionality_for_functions :
+ forall (F G : Ens) (f : is_a_function F) (g : is_a_function G)
+   (d : EQ (Domain F) (Domain G)) (e : Extensionally_equivalent F G), 
+ EQ F G.
+Proof ee_eq_Out.
+
+(******* evaluation ********)
+
+Section function_evaluation_proof.
+Variable F X Y : Ens.
+Hypothesis f : is_a_function F.
+Hypothesis i : IN (PAIR X Y) F.
+
+Let Z := EV F X.
+
+Let step1 : IN X (Domain F).
+Proof Domain_th1 F X Y i.
+
+Let step2 : IN (PAIR X Z) F.
+Proof EV_th1 F X step1.
+
+Lemma fe_Out : EQ Y Z.
+Proof function_well_definedness F f X Y Z i step2.
+
+End function_evaluation_proof.
+
+Theorem function_evaluation :
+ forall (F X Y : Ens) (f : is_a_function F) (i : IN (PAIR X Y) F),
+ EQ Y (EV F X).
+Proof fe_Out.
+
+
+(************* restricted_to ***********)
+
+Definition restricted_to (A F : Ens) :=
+  Set_Of F (fun M : Ens => IN (PR1 M) A).
+
+Theorem restricted_to_th1 :
+ forall (A F U : Ens) (i : IN U F) (j : IN (PR1 U) A),
+ IN U (restricted_to A F).
+Proof
+  fun (A F U : Ens) (i : IN U F) (j : IN (PR1 U) A) =>
+  Set_Of_th1 F (fun M : Ens => IN (PR1 M) A) U i j.
+
+Theorem restricted_to_th2 :
+ forall (A F U : Ens) (i : IN U (restricted_to A F)), IN (PR1 U) A.
+Proof
+  fun (A F U : Ens) (i : IN U (restricted_to A F)) =>
+  Set_Of_th2 F (fun M : Ens => IN (PR1 M) A) U i.
+
+Theorem restricted_to_th3 :
+ forall (A F U : Ens) (i : IN U (restricted_to A F)), IN U F.
+Proof
+  fun (A F U : Ens) (i : IN U (restricted_to A F)) =>
+  Set_Of_th3 F (fun M : Ens => IN (PR1 M) A) U i.
+
+Theorem restricted_to_th4 : forall A F : Ens, SUB (restricted_to A F) F.
+Proof fun A F : Ens => restricted_to_th3 A F.
+
+
+
+
+Section restricted_to_1.
+Variable A F : Ens.
+
+Section res_to_1a.
+Variable X : Ens.
+Hypothesis i : IN X (Domain (restricted_to A F)).
+
+Let Y := EV (restricted_to A F) X.
+
+
+Let stepa1 : IN (PAIR X Y) (restricted_to A F).
+Proof EV_th1 (restricted_to A F) X i.
+
+Let stepa2 : IN (PAIR X Y) F.
+Proof Set_Of_th3 F (fun M : Ens => IN (PR1 M) A) (PAIR X Y) stepa1.
+
+Let U := PAIR X Y.
+
+Let stepa3 : IN (PR1 U) A.
+Proof Set_Of_th2 F (fun M : Ens => IN (PR1 M) A) U stepa1.
+
+Let stepa4 : EQ X (PR1 U).
+Proof PAIR_proj_th3 X Y.
+
+Let stepa5 : IN X A.
+Proof Extensionality X (PR1 U) A stepa4 stepa3.
+
+Let stepa6 : IN X (Domain F).
+Proof Domain_th1 F X Y stepa2.
+
+Lemma  (*Fact*) res_to_1a_Out : IN X (intersection A (Domain F)).
+Proof intersection_th3 A (Domain F) X stepa5 stepa6.
+
+End res_to_1a.
+
+Let step1 : SUB (Domain (restricted_to A F)) (intersection A (Domain F)).
+Proof res_to_1a_Out.
+
+Section res_to_1b.
+Variable X : Ens.
+Hypothesis i : IN X (intersection A (Domain F)).
+
+Let stepb1 : IN X A.
+Proof intersection_th1 A (Domain F) X i.
+
+Let stepb2 : IN X (Domain F).
+Proof intersection_th2 A (Domain F) X i.
+
+Let Y := EV F X.
+Let U := PAIR X Y.
+
+Let stepb3 : IN U F.
+Proof EV_th1 F X stepb2.
+
+Let stepb4 : EQ X (PR1 U). 
+Proof PAIR_proj_th3 X Y.
+
+Let stepb5 : EQ (PR1 U) X.
+Proof EQ_symm X (PR1 U) stepb4.
+
+Let stepb6 : IN (PR1 U) A.
+Proof Extensionality (PR1 U) X A stepb5 stepb1.
+
+Let stepb7 : IN U (restricted_to A F).
+Proof restricted_to_th1 A F U stepb3 stepb6.
+
+Lemma  (*Fact*) res_to_1b_Out : IN X (Domain (restricted_to A F)).
+Proof Domain_th1 (restricted_to A F) X Y stepb7.
+
+End res_to_1b.
+
+Let step2 : SUB (intersection A (Domain F)) (Domain (restricted_to A F)).
+Proof res_to_1b_Out.
+
+Lemma res_to_1_Out :
+ EQ (intersection A (Domain F)) (Domain (restricted_to A F)).
+Proof
+  Build_EQ (intersection A (Domain F)) (Domain (restricted_to A F)) step2
+    step1.
+
+
+End restricted_to_1.
+
+Theorem restricted_to_th5 :
+ forall A F : Ens,
+ EQ (intersection A (Domain F)) (Domain (restricted_to A F)).
+Proof res_to_1_Out.
+
+Section res_to_2.
+Variable A F : Ens.
+Hypothesis f : is_a_function F.
+Hypothesis s : SUB (Domain F) A.
+
+Variable U : Ens.
+Hypothesis i : IN U F.
+
+Let X := PR1 U.
+Let Y := PR2 U.
+Let M := PAIR X Y.
+
+Let step1 : is_a_relation F.
+Proof function_is_a_relation F f.
+
+Let step2 : is_a_pair U.
+Proof step1 U i.
+
+Let step3 : EQ U M.
+Proof PAIR_proj_th1 U step2.
+
+Let step4 : EQ M U. 
+Proof EQ_symm U M step3.
+
+Let step5 : IN M F.
+Proof Extensionality M U F step4 i.
+
+Let step6 : IN X (Domain F).
+Proof Domain_th1 F X Y step5.
+
+Let step7 : IN X A.
+Proof s X step6.
+
+Lemma res_to_2_Out : IN U (restricted_to A F).
+Proof restricted_to_th1 A F U i step7.
+
+End res_to_2.
+
+Theorem restricted_to_th6 :
+ forall (A F : Ens) (f : is_a_function F) (s : SUB (Domain F) A),
+ SUB F (restricted_to A F).
+Proof res_to_2_Out.
+
+Theorem restricted_to_th7 :
+ forall (A F : Ens) (f : is_a_function F) (s : SUB (Domain F) A),
+ EQ F (restricted_to A F).
+Proof
+  fun (A F : Ens) (f : is_a_function F) (s : SUB (Domain F) A) =>
+  Build_EQ F (restricted_to A F) (restricted_to_th6 A F f s)
+    (restricted_to_th4 A F).
+
+Section res_to_3.
+Variable A F : Ens.
+Hypothesis f : is_a_function F.
+Variable X : Ens.
+Hypothesis i : IN X (intersection A (Domain F)).
+
+Let Y := EV F X.
+Let Z := EV (restricted_to A F) X.
+
+Let step1 : IN X (Domain F).
+Proof intersection_th2 A (Domain F) X i.
+
+Let step2 : IN X A.
+Proof intersection_th1 A (Domain F) X i.
+
+Let step3 : EQ (intersection A (Domain F)) (Domain (restricted_to A F)).
+Proof restricted_to_th5 A F.
+
+Let step4 : IN X (Domain (restricted_to A F)).
+Proof
+  EQ_forwards (intersection A (Domain F)) (Domain (restricted_to A F)) step3
+    X i.
+
+Let step5 : IN (PAIR X Y) F.
+Proof EV_th1 F X step1.
+
+Let step6 : IN (PAIR X Z) (restricted_to A F).
+Proof EV_th1 (restricted_to A F) X step4.
+
+Let step7 : IN (PAIR X Z) F.
+Proof restricted_to_th4 A F (PAIR X Z) step6.
+
+Lemma res_to_3_Out : EQ Y Z.
+Proof function_well_definedness F f X Y Z step5 step7.
+
+End res_to_3.
+
+Theorem restricted_to_th8 :
+ forall (A F : Ens) (f : is_a_function F) (X : Ens)
+   (i : IN X (intersection A (Domain F))),
+ EQ (EV F X) (EV (restricted_to A F) X).
+Proof res_to_3_Out.
+
+Theorem restricted_to_th9 :
+ forall (A F : Ens) (f : is_a_function F) (X : Ens) 
+   (i : IN X A) (j : IN X (Domain F)), EQ (EV F X) (EV (restricted_to A F) X).
+Proof
+  fun (A F : Ens) (f : is_a_function F) (X : Ens) (i : IN X A)
+    (j : IN X (Domain F)) =>
+  restricted_to_th8 A F f X (intersection_th3 A (Domain F) X i j).
+
+
+
+
+(******** the empty function ******)
+
+Section emptyfn_1.
+Variable X : Ens.
+Hypothesis i : IN X Zero.
+
+Let step1 : False.
+Proof EmptySet_th1 X i.
+
+Lemma emptyfn1_Out : is_a_pair X.
+Proof false_implies_everything (is_a_pair X) step1.
+
+End emptyfn_1.
+
+Theorem empty_function_relation : is_a_relation Zero.
+Proof emptyfn1_Out.
+
+Section emptyfn_2.
+Variable X Y Z : Ens.
+Hypothesis i : IN (PAIR X Y) Zero.
+
+Let step1 : False.
+Proof EmptySet_th1 (PAIR X Y) i.
+
+Lemma emptyfn2_Out : EQ Y Z.
+Proof false_implies_everything (EQ Y Z) step1.
+
+End emptyfn_2.
+
+Theorem empty_function_well_definedness : well_definedness Zero.
+Proof
+  fun (X Y Z : Ens) (i : IN (PAIR X Y) Zero) (j : IN (PAIR X Z) Zero) =>
+  emptyfn2_Out X Y Z i.
+
+Theorem empty_function_function : is_a_function Zero.
+Proof
+  Build_is_a_function Zero empty_function_relation
+    empty_function_well_definedness.
+
+Section efdom.
+Variable X : Ens.
+Hypothesis i : IN X (Domain Zero).
+
+Let Y := EV Zero X.
+
+Let step1 : IN (PAIR X Y) Zero.
+Proof EV_th1 Zero X i.
+
+Lemma efdom_Out : False.
+Proof EmptySet_th1 (PAIR X Y) step1.
+
+End efdom.
+
+Theorem empty_function_domain_empty : Its_empty (Domain Zero).
+Proof efdom_Out.
+
+Theorem empty_function_domain : EQ Zero (Domain Zero).
+Proof
+  EQ_symm (Domain Zero) Zero
+    (its_empty_implies_equals_emptyset (Domain Zero)
+       empty_function_domain_empty).
+
+
+
+
+
+(********** Cartesian product *********)
+
+
+Definition PowerPlus (A : Ens) := union A (Powerset A).
+
+Theorem PowerPlus_th1 : forall A : Ens, SUB A (PowerPlus A).
+Proof fun A : Ens => union_pr1 A (Powerset A).
+
+Theorem PowerPlus_th2 : forall A : Ens, SUB (Powerset A) (PowerPlus A).
+Proof fun A : Ens => union_pr2 A (Powerset A).
+
+
+
+Section powerplus1.
+Variable A X Y : Ens.
+Hypothesis x : IN X A.
+Hypothesis y : IN Y A.
+
+Let P := PowerPlus A.
+Let PP := PowerPlus P.
+
+
+
+Let step1 : IN (First X) P.
+Proof PowerPlus_th2 A (Singleton X) (Powerset_th4 A X x).
+
+Let step2 : SUB P PP.
+Proof PowerPlus_th1 P.
+
+Let step3 : IN (First X) PP.
+Proof step2 (First X) step1.
+
+Let step4 : SUB (Powerset A) P.
+Proof PowerPlus_th2 A.
+
+Let step5 : SUB (Powerset (Powerset A)) (Powerset P).
+Proof Powerset_th7 (Powerset A) P step4.
+
+Let step6 : SUB (Powerset P) PP.
+Proof PowerPlus_th2 P.
+
+Let step7 : SUB (Powerset (Powerset A)) PP.
+Proof SUB_trans (Powerset (Powerset A)) (Powerset P) PP step5 step6.
+
+Let step8 : IN (Second Y) (Powerset (Powerset A)).
+Proof Powerset_th6 A Y y.
+
+
+Let step9 : IN (Second Y) PP.
+Proof step7 (Second Y) step8.
+
+Lemma powerplus1_Out : IN (PAIR X Y) (Powerset PP).
+Proof Powerset_th5 PP (First X) (Second Y) step3 step9.
+
+End powerplus1.
+
+Definition PowerTotal (A : Ens) := Powerset (PowerPlus (PowerPlus A)).
+
+Theorem PowerTotal_th1 :
+ forall (A X Y : Ens) (x : IN X A) (y : IN Y A), IN (PAIR X Y) (PowerTotal A).
+Proof powerplus1_Out.
+
+Section powerplus2.
+Variable A B X Y : Ens.
+Hypothesis x : IN X A.
+Hypothesis y : IN Y B.
+
+Let U := union A B.
+Let step1 : SUB A U.
+Proof union_pr1 A B.
+Let step2 : SUB B U.
+Proof union_pr2 A B.
+Let step3 : IN X U.
+Proof step1 X x.
+Let step4 : IN Y U.
+Proof step2 Y y.
+
+Lemma powerplus2_Out : IN (PAIR X Y) (PowerTotal U).
+Proof PowerTotal_th1 U X Y step3 step4.
+
+End powerplus2.
+
+Theorem PowerTotal_th2 :
+ forall (A B X Y : Ens) (x : IN X A) (y : IN Y B),
+ IN (PAIR X Y) (PowerTotal (union A B)).
+Proof powerplus2_Out.
+
+
+ 
+
+Record in_cartesian (A B P : Ens) : Prop := 
+  {in_cartesian_pair : is_a_pair P;
+   in_cartesian_pr1 : IN (PR1 P) A;
+   in_cartesian_pr2 : IN (PR2 P) B}.
+
+
+Section in_cartesian_bounded_proof.
+Variable A B : Ens.
+
+Section cpb1.
+Variable U : Ens.
+Hypothesis i : in_cartesian A B U.
+
+Let step1 : is_a_pair U.
+Proof in_cartesian_pair A B U i.
+
+Let X := PR1 U.
+Let Y := PR2 U. 
+
+Let step4 : EQ U (PAIR X Y).
+Proof PAIR_proj_th1 U step1.
+
+Let step5 : IN X A.
+Proof in_cartesian_pr1 A B U i.
+
+Let step6 : IN Y B.
+Proof in_cartesian_pr2 A B U i.
+
+Let step7 : IN (PAIR X Y) (PowerTotal (union A B)). 
+Proof PowerTotal_th2 A B X Y step5 step6.
+
+Lemma cpb1_Out : IN U (PowerTotal (union A B)).
+Proof Extensionality U (PAIR X Y) (PowerTotal (union A B)) step4 step7.
+
+End cpb1.
+
+Let step8 : Bounded_By (PowerTotal (union A B)) (in_cartesian A B).
+Proof cpb1_Out.
+
+Lemma in_cartesian_bounded_Out : Bounded (in_cartesian A B).
+Proof Bounded_th2 (in_cartesian A B) (PowerTotal (union A B)) step8.
+
+End in_cartesian_bounded_proof.
+
+Theorem in_cartesian_bounded : forall A B : Ens, Bounded (in_cartesian A B).
+Proof in_cartesian_bounded_Out.
+
+
+Definition Cartesian (A B : Ens) := REPLACEMENT (in_cartesian A B).
+
+Theorem Cartesian_pr1 :
+ forall (A B M : Ens) (h : in_cartesian A B M), IN M (Cartesian A B).
+Proof
+  fun A B : Ens =>
+  REPLACEMENT_pr1 (in_cartesian A B) (in_cartesian_bounded A B).
+
+Theorem Cartesian_pr2 :
+ forall (A B M : Ens) (i : IN M (Cartesian A B)), in_cartesian A B M.
+Proof
+  fun A B : Ens =>
+  REPLACEMENT_pr2 (in_cartesian A B) (in_cartesian_bounded A B).
+
+Section cartesian_construction_section.
+Variable A B : Ens.
+Variable X Y : Ens.
+Hypothesis i : IN X A.
+Hypothesis j : IN Y B.
+
+Let U := PAIR X Y.
+
+Let step1 : is_a_pair U. 
+Proof a_pair_is_a_pair X Y.
+
+Let X1 := PR1 U.
+Let Y1 := PR2 U.
+
+Let step2 : EQ U (PAIR X1 Y1).
+Proof PAIR_proj_th1 U step1. 
+
+Let step3 : EQ X X1.
+Proof PAIR_uni_ac X Y X1 Y1 step2.
+
+Let step4 : EQ Y Y1.
+Proof PAIR_uni_bd X Y X1 Y1 step2.
+
+Let step5 : EQ X1 X. Proof EQ_symm X X1 step3.
+
+Let step6 : EQ Y1 Y. Proof EQ_symm Y Y1 step4.
+
+Let step7 : IN X1 A. Proof Extensionality X1 X A step5 i.
+
+Let step8 : IN Y1 B. Proof Extensionality Y1 Y B step6 j.
+
+Let step9 : in_cartesian A B U.
+Proof Build_in_cartesian A B U step1 step7 step8.
+
+Lemma cartesian_construction_Out : IN U (Cartesian A B).
+Proof Cartesian_pr1 A B U step9.
+
+
+
+End cartesian_construction_section.
+
+Theorem Cartesian_construction :
+ forall (A B X Y : Ens) (i : IN X A) (j : IN Y B),
+ IN (PAIR X Y) (Cartesian A B).
+Proof cartesian_construction_Out.
+
+Theorem Cartesian_th1 :
+ forall (A B U : Ens) (i : IN U (Cartesian A B)), is_a_pair U.
+Proof
+  fun (A B U : Ens) (i : IN U (Cartesian A B)) =>
+  in_cartesian_pair A B U (Cartesian_pr2 A B U i).
+
+Theorem Cartesian_proj1_th :
+ forall (A B U : Ens) (i : IN U (Cartesian A B)), IN (PR1 U) A.
+Proof
+  fun (A B U : Ens) (i : IN U (Cartesian A B)) =>
+  in_cartesian_pr1 A B U (Cartesian_pr2 A B U i).
+
+Theorem Cartesian_proj2_th :
+ forall (A B U : Ens) (i : IN U (Cartesian A B)), IN (PR2 U) B.
+Proof
+  fun (A B U : Ens) (i : IN U (Cartesian A B)) =>
+  in_cartesian_pr2 A B U (Cartesian_pr2 A B U i).
+
+Section cartpair.
+Variable A B X Y : Ens.
+Hypothesis i : IN (PAIR X Y) (Cartesian A B).
+
+Let U := PAIR X Y.
+Let X1 := PR1 U.
+Let Y1 := PR2 U.
+
+
+Let step1 : EQ X X1.
+Proof PAIR_proj_th3 X Y.
+
+Let step2 : IN X1 A. 
+Proof Cartesian_proj1_th A B U i.
+
+Lemma cartpairA_Out : IN X A.
+Proof Extensionality X X1 A step1 step2.
+
+Let step3 : EQ Y Y1.
+Proof PAIR_proj_th4 X Y.
+
+Let step4 : IN Y1 B. 
+Proof Cartesian_proj2_th A B U i.
+
+Lemma cartpairB_Out : IN Y B.
+Proof Extensionality Y Y1 B step3 step4.
+
+End cartpair.
+
+Theorem Cartesian_pair_th1 :
+ forall (A B X Y : Ens) (i : IN (PAIR X Y) (Cartesian A B)), IN X A.
+Proof cartpairA_Out.
+
+Theorem Cartesian_pair_th2 :
+ forall (A B X Y : Ens) (i : IN (PAIR X Y) (Cartesian A B)), IN Y B.
+Proof cartpairB_Out.
+
+
+(********* function graphs ***********)
+
+Section relations_in_cartesian_proof.
+Variable R : Ens.
+Hypothesis r : is_a_relation R.
+
+Let A := Domain R.
+Let B := Range R.
+
+Variable U : Ens.
+Hypothesis i : IN U R.
+
+Let step1 : is_a_pair U.
+Proof r U i.
+
+Let X := PR1 U.
+Let Y := PR2 U.
+
+Let step2 : EQ U (PAIR X Y).
+Proof PAIR_proj_th1 U step1. 
+
+Let step3 : EQ (PAIR X Y) U.
+Proof EQ_symm U (PAIR X Y) step2.
+
+Let step4 : IN (PAIR X Y) R.
+Proof Extensionality (PAIR X Y) U R step3 i.
+
+Let step5 : IN X A.
+Proof Domain_th1 R X Y step4.
+
+Let step6 : IN Y B.
+Proof Range_th1 R X Y step4.
+
+Let step7 : IN (PAIR X Y) (Cartesian A B).
+Proof Cartesian_construction A B X Y step5 step6.
+
+Lemma relations_in_cartesian_Out : IN U (Cartesian A B).
+Proof Extensionality U (PAIR X Y) (Cartesian A B) step2 step7.
+
+
+
+End relations_in_cartesian_proof.
+
+
+Theorem relations_in_cartesian :
+ forall (R : Ens) (r : is_a_relation R),
+ SUB R (Cartesian (Domain R) (Range R)).
+Proof relations_in_cartesian_Out.
+
+
+Section cartesian_is_relation_proof.
+Variable A B : Ens.
+Variable U : Ens.
+Variable i : IN U (Cartesian A B).
+
+Let step1 : in_cartesian A B U.
+Proof Cartesian_pr2 A B U i.
+
+Lemma cartesian_is_relation_Out : is_a_pair U.
+Proof in_cartesian_pair A B U step1.
+
+End cartesian_is_relation_proof.
+
+Theorem cartesian_is_relation :
+ forall A B : Ens, is_a_relation (Cartesian A B).
+Proof cartesian_is_relation_Out.
+
+Theorem cartesian_subs_are_relations :
+ forall (A B R : Ens) (s : SUB R (Cartesian A B)), is_a_relation R.
+Proof
+  fun (A B R : Ens) (s : SUB R (Cartesian A B)) =>
+  relation_sub (Cartesian A B) (cartesian_is_relation A B) R s. 
+
+(******* covering ***********)
+
+Section covering_1.
+
+
+Variable A B F G : Ens.
+Hypothesis f : is_a_function F.
+Hypothesis g : is_a_function G.
+Hypothesis u : EQ (Domain F) (union A B).
+Hypothesis v : EQ (Domain G) (union A B).
+Hypothesis i : EQ (restricted_to A F) (restricted_to A G).
+Hypothesis j : EQ (restricted_to B F) (restricted_to B G).
+
+Variable X : Ens.
+Hypothesis ix : IN X (Domain F). 
+Hypothesis jx : IN X (Domain G).
+
+Let U := union A B.
+
+Let step0a : SUB (Domain F) U.
+Proof EQ_forwards (Domain F) U u.
+
+Let iX : IN X U.
+Proof step0a X ix.
+
+
+Section covering_em.
+
+Hypothesis contra : NEQ (EV F X) (EV G X).
+
+
+
+Let step1 : SUB U (Domain F).
+Proof EQ_backwards (Domain F) U u.
+
+Let step2 : SUB U (Domain G).
+Proof EQ_backwards (Domain G) U v.
+
+Let step3 : SUB A (Domain F).
+Proof SUB_trans A U (Domain F) (union_pr1 A B) step1.
+
+Let step4 : SUB A (Domain G).
+Proof SUB_trans A U (Domain G) (union_pr1 A B) step2.
+
+Let step5 : SUB B (Domain F).
+Proof SUB_trans B U (Domain F) (union_pr2 A B) step1.
+
+Let step6 : SUB B (Domain G).
+Proof SUB_trans B U (Domain G) (union_pr2 A B) step2.
+
+
+Let step7 : IN X (Domain F).
+Proof ix.
+
+Let step8 : IN X (Domain G).
+Proof jx.
+
+
+
+
+Let FA := restricted_to A F.
+Let FB := restricted_to B F.
+Let GA := restricted_to A G.
+Let GB := restricted_to B G.
+
+Let step9 : EQ (EV FA X) (EV GA X).
+Proof
+  Big_Extensionality (fun fn : Ens => EQ (EV FA X) (EV fn X)) FA GA
+    (EQ_refl (EV FA X)) i. 
+
+Let step10 : EQ (EV FB X) (EV GB X).
+Proof
+  Big_Extensionality (fun fn : Ens => EQ (EV FB X) (EV fn X)) FB GB
+    (EQ_refl (EV FB X)) j. 
+
+
+Section covering_1_A.
+Hypothesis iA : IN X A.
+
+Let stepA1 : EQ (EV F X) (EV FA X).
+Proof restricted_to_th9 A F f X iA step7.
+
+Let stepA2 : EQ (EV G X) (EV GA X).
+Proof restricted_to_th9 A G g X iA step8.
+
+Let stepA3 : EQ (EV GA X) (EV G X).
+Proof EQ_symm (EV G X) (EV GA X) stepA2.
+
+Let stepA4 : EQ (EV F X) (EV GA X).
+Proof EQ_trans (EV F X) (EV FA X) (EV GA X) stepA1 step9.
+
+Let stepA5 : EQ (EV F X) (EV G X).
+Proof EQ_trans (EV F X) (EV GA X) (EV G X) stepA4 stepA3.
+
+Lemma  (*Fact*) stepA6 : False.
+Proof contra stepA5.
+
+End covering_1_A.
+
+Let step11 : ~ IN X A.
+Proof stepA6.
+
+Section covering_1_B.
+Hypothesis iB : IN X B.
+
+Let stepB1 : EQ (EV F X) (EV FB X).
+Proof restricted_to_th9 B F f X iB step7.
+
+Let stepB2 : EQ (EV G X) (EV GB X).
+Proof restricted_to_th9 B G g X iB step8.
+
+Let stepB3 : EQ (EV GB X) (EV G X).
+Proof EQ_symm (EV G X) (EV GB X) stepB2.
+
+Let stepB4 : EQ (EV F X) (EV GB X).
+Proof EQ_trans (EV F X) (EV FB X) (EV GB X) stepB1 step10.
+
+Let stepB5 : EQ (EV F X) (EV G X).
+Proof EQ_trans (EV F X) (EV GB X) (EV G X) stepB4 stepB3.
+
+Lemma  (*Fact*) stepB6 : False.
+Proof contra stepB5.
+
+End covering_1_B.
+
+Let step12 : ~ IN X B.
+Proof stepB6.
+
+Let step13 : ~ IN X U.
+Proof union_th3 A B X step11 step12.
+
+Lemma  (*Fact*) covering_em_Out : False.
+Proof step13 iX.
+
+End covering_em.
+
+Lemma covering_1_Out : EQ (EV F X) (EV G X).
+Proof excluded_middle (EQ (EV F X) (EV G X)) covering_em_Out.
+
+
+
+End covering_1.
+
+Theorem covering_th1 :
+ forall (A B F G : Ens) (f : is_a_function F) (g : is_a_function G)
+   (u : EQ (Domain F) (union A B))
+   (i : EQ (restricted_to A F) (restricted_to A G))
+   (j : EQ (restricted_to B F) (restricted_to B G)),
+ Extensionally_equivalent F G.
+Proof covering_1_Out.
+
+Theorem covering_th2 :
+ forall (A B F G : Ens) (f : is_a_function F) (g : is_a_function G)
+   (u : EQ (Domain F) (union A B)) (v : EQ (Domain G) (union A B))
+   (i : EQ (restricted_to A F) (restricted_to A G))
+   (j : EQ (restricted_to B F) (restricted_to B G)), 
+ EQ F G.
+Proof
+  fun (A B F G : Ens) (f : is_a_function F) (g : is_a_function G)
+    (u : EQ (Domain F) (union A B)) (v : EQ (Domain G) (union A B))
+    (i : EQ (restricted_to A F) (restricted_to A G))
+    (j : EQ (restricted_to B F) (restricted_to B G)) =>
+  Extensionality_for_functions F G f g
+    (EQ_trans (Domain F) (union A B) (Domain G) u
+       (EQ_symm (Domain G) (union A B) v)) (covering_th1 A B F G f g u i j). 
+
+
+(***** glueing two functions ******)
+
+Section glueing_relation_proof.
+Variable F G : Ens.
+Hypothesis f : is_a_relation F.
+Hypothesis g : is_a_relation G.
+Let H := union F G.
+
+Variable X : Ens.
+Hypothesis x : IN X H.
+
+Section gr1.
+Hypothesis x1 : IN X F.
+
+Lemma gr1_Out : is_a_pair X.
+Proof f X x1.
+End gr1.
+
+Section gr2.
+Hypothesis x2 : IN X G.
+Lemma gr2_Out : is_a_pair X.
+Proof g X x2.
+End gr2.
+
+Lemma gr_Out : is_a_pair X.
+Proof union_th4 (is_a_pair X) F G X x gr1_Out gr2_Out.
+
+End glueing_relation_proof.
+
+Theorem glueing_th1 :
+ forall (F G : Ens) (f : is_a_relation F) (g : is_a_relation G),
+ is_a_relation (union F G).
+Proof gr_Out.
+
+Section glueing_domain1.
+Variable F G X : Ens.
+Hypothesis x : IN X (Domain (union F G)).
+
+Let Y := EV (union F G) X.
+
+Let step1 : IN (PAIR X Y) (union F G).
+Proof EV_th1 (union F G) X x.
+
+Section gd1a.
+Hypothesis p1 : IN (PAIR X Y) F.
+
+Let step2 : IN X (Domain F).
+Proof Domain_th1 F X Y p1.
+
+Lemma gd1a_Out : IN X (union (Domain F) (Domain G)).
+Proof union_th1 (Domain F) (Domain G) X step2.
+End gd1a.
+
+Section gd1b.
+Hypothesis p2 : IN (PAIR X Y) G.
+Let step3 : IN X (Domain G).
+Proof Domain_th1 G X Y p2.
+
+Lemma gd1b_Out : IN X (union (Domain F) (Domain G)).
+Proof union_th2 (Domain F) (Domain G) X step3.
+End gd1b.
+
+Lemma glueing_domain1_Out : IN X (union (Domain F) (Domain G)).
+Proof
+  union_th4 (IN X (union (Domain F) (Domain G))) F G 
+    (PAIR X Y) step1 gd1a_Out gd1b_Out.
+End glueing_domain1.
+
+Theorem glueing_th2 :
+ forall F G : Ens, SUB (Domain (union F G)) (union (Domain F) (Domain G)).
+Proof glueing_domain1_Out.
+
+Section glueing_domain2.
+Variable F G X : Ens.
+Hypothesis x : IN X (union (Domain F) (Domain G)).
+
+Let H := union F G.
+
+Section gd2A.
+Hypothesis x1 : IN X (Domain F).
+
+Let Y := EV F X.
+
+Let step1 : IN (PAIR X Y) F.
+Proof EV_th1 F X x1.
+
+Let step2 : IN (PAIR X Y) H.
+Proof union_th1 F G (PAIR X Y) step1.
+
+Lemma gd2A_Out : IN X (Domain H).
+Proof Domain_th1 H X Y step2.
+
+End gd2A.
+
+Section gd2B.
+Hypothesis x1 : IN X (Domain G).
+
+Let Y := EV G X.
+
+Let step1 : IN (PAIR X Y) G.
+Proof EV_th1 G X x1.
+
+Let step2 : IN (PAIR X Y) H.
+Proof union_th2 F G (PAIR X Y) step1.
+
+Lemma gd2B_Out : IN X (Domain H).
+Proof Domain_th1 H X Y step2.
+
+End gd2B.
+
+Lemma gd2_Out : IN X (Domain H).
+Proof union_th4 (IN X (Domain H)) (Domain F) (Domain G) X x gd2A_Out gd2B_Out.
+
+End glueing_domain2.
+
+Theorem glueing_th3 :
+ forall F G : Ens, SUB (union (Domain F) (Domain G)) (Domain (union F G)).
+Proof gd2_Out.
+
+Theorem glueing_th4 :
+ forall F G : Ens, EQ (Domain (union F G)) (union (Domain F) (Domain G)).
+Proof
+  fun F G : Ens =>
+  Build_EQ (Domain (union F G)) (union (Domain F) (Domain G))
+    (glueing_th2 F G) (glueing_th3 F G).
+
+
+
+
+
+
+
+Section glueing_proof.
+Variable F G : Ens.
+Hypothesis f : is_a_function F.
+Hypothesis g : is_a_function G.
+Hypothesis e : Extensionally_equivalent F G.
+Let H := union F G.
+
+Let step1 : is_a_relation F.
+Proof function_is_a_relation F f.
+
+Let step2 : is_a_relation G.
+Proof function_is_a_relation G g.
+
+Let step3 : well_definedness F.
+Proof function_well_definedness F f.
+
+Let step4 : well_definedness G.
+Proof function_well_definedness G g.
+
+
+Let step5 : is_a_relation H.
+Proof glueing_th1 F G step1 step2.
+
+Section glu_wd.
+
+Variable X Y Z : Ens.
+Hypothesis i : IN (PAIR X Y) H.
+Hypothesis j : IN (PAIR X Z) H.
+
+Section gluA.
+Hypothesis j1 : IN (PAIR X Z) F.
+Hypothesis i1 : IN (PAIR X Y) F.
+
+Lemma gluA_Out : EQ Y Z.
+Proof step3 X Y Z i1 j1.
+End gluA.
+
+Section gluB.
+Hypothesis j1 : IN (PAIR X Z) G.
+Hypothesis i1 : IN (PAIR X Y) F.
+
+Let Bstep1 : IN X (Domain F).
+Proof Domain_th1 F X Y i1.
+
+Let Bstep2 : IN X (Domain G).
+Proof Domain_th1 G X Z j1.
+
+Let Bstep3 : EQ Y (EV F X).
+Proof function_th1 F f X Y i1.
+
+Let Bstep4 : EQ Z (EV G X).
+Proof function_th1 G g X Z j1.
+
+Let Bstep5 : EQ (EV G X) Z.
+Proof EQ_symm Z (EV G X) Bstep4.
+
+Let Bstep6 : EQ (EV F X) (EV G X).
+Proof e X Bstep1 Bstep2.
+
+Let Bstep7 : EQ Y (EV G X).
+Proof EQ_trans Y (EV F X) (EV G X) Bstep3 Bstep6.
+
+Lemma gluB_Out : EQ Y Z.
+Proof EQ_trans Y (EV G X) Z Bstep7 Bstep5.
+
+End gluB.
+
+Section gluC.
+Hypothesis j1 : IN (PAIR X Z) F.
+Hypothesis i1 : IN (PAIR X Y) G.
+
+Let Cstep1 : IN X (Domain F).
+Proof Domain_th1 F X Z j1.
+
+Let Cstep2 : IN X (Domain G).
+Proof Domain_th1 G X Y i1.
+
+Let Cstep3 : EQ Y (EV G X).
+Proof function_th1 G g X Y i1.
+
+Let Cstep4 : EQ Z (EV F X).
+Proof function_th1 F f X Z j1.
+
+Let Cstep5 : EQ (EV F X) Z.
+Proof EQ_symm Z (EV F X) Cstep4.
+
+Let Cstep6 : EQ (EV F X) (EV G X).
+Proof e X Cstep1 Cstep2.
+
+Let Cstep6a : EQ (EV G X) (EV F X).
+Proof EQ_symm (EV F X) (EV G X) Cstep6.
+
+Let Cstep7 : EQ Y (EV F X).
+Proof EQ_trans Y (EV G X) (EV F X) Cstep3 Cstep6a.
+
+Lemma gluC_Out : EQ Y Z.
+Proof EQ_trans Y (EV F X) Z Cstep7 Cstep5.
+
+End gluC.
+
+
+Section gluD.
+Hypothesis j1 : IN (PAIR X Z) G.
+Hypothesis i1 : IN (PAIR X Y) G.
+
+
+Lemma gluD_Out : EQ Y Z.
+Proof step4 X Y Z i1 j1.
+End gluD.
+
+Let step6 : IN (PAIR X Y) F -> EQ Y Z.
+Proof
+  union_th4 (IN (PAIR X Y) F -> EQ Y Z) F G (PAIR X Z) j gluA_Out gluB_Out.
+
+Let step7 : IN (PAIR X Y) G -> EQ Y Z.
+Proof
+  union_th4 (IN (PAIR X Y) G -> EQ Y Z) F G (PAIR X Z) j gluC_Out gluD_Out.
+
+Lemma glu_wd_Out : EQ Y Z.
+Proof union_th4 (EQ Y Z) F G (PAIR X Y) i step6 step7.
+
+End glu_wd.
+
+Let step8 : well_definedness H.
+Proof glu_wd_Out.
+
+Lemma glueing_proof_Out : is_a_function H.
+Proof Build_is_a_function H step5 step8.
+
+End glueing_proof.
+
+Theorem glueing_th5 :
+ forall (F G : Ens) (f : is_a_function F) (g : is_a_function G)
+   (e : Extensionally_equivalent F G), is_a_function (union F G).
+Proof glueing_proof_Out.
+
+(********** composition ********)
+
+Record Comp_inter (F G X Y Z : Ens) : Prop := 
+  {Comp_inter_xy : IN (PAIR X Y) F; Comp_inter_yz : IN (PAIR Y Z) G}.
+
+Record Comp_prop (F G X : Ens) : Prop := 
+  {Comp_pair : is_a_pair X;
+   Comp_intern : EXISTS (fun Y : Ens => Comp_inter F G (PR1 X) Y (PR2 X))}.
+
+Definition Comp_INTER (F G X : Ens) :=
+  CHOICE (fun Y : Ens => Comp_inter F G (PR1 X) Y (PR2 X)).
+
+Theorem Comp_INTER_pr1 :
+ forall (F G X : Ens) (c : Comp_prop F G X),
+ Comp_inter F G (PR1 X) (Comp_INTER F G X) (PR2 X).
+Proof
+  fun (F G X : Ens) (c : Comp_prop F G X) =>
+  CHOICE_pr (fun Y : Ens => Comp_inter F G (PR1 X) Y (PR2 X))
+    (Comp_intern F G X c).
+
+Theorem Comp_INTER_th1 :
+ forall (F G X : Ens) (c : Comp_prop F G X),
+ IN (PAIR (PR1 X) (Comp_INTER F G X)) F.
+Proof
+  fun (F G X : Ens) (c : Comp_prop F G X) =>
+  Comp_inter_xy F G (PR1 X) (Comp_INTER F G X) (PR2 X)
+    (Comp_INTER_pr1 F G X c).
+
+Theorem Comp_INTER_th2 :
+ forall (F G X : Ens) (c : Comp_prop F G X),
+ IN (PAIR (Comp_INTER F G X) (PR2 X)) G.
+Proof
+  fun (F G X : Ens) (c : Comp_prop F G X) =>
+  Comp_inter_yz F G (PR1 X) (Comp_INTER F G X) (PR2 X)
+    (Comp_INTER_pr1 F G X c).
+
+Theorem Comp_prop_th1 :
+ forall (F G X : Ens) (c : Comp_prop F G X), IN (PR1 X) (Domain F).
+Proof
+  fun (F G X : Ens) (c : Comp_prop F G X) =>
+  Domain_th1 F (PR1 X) (Comp_INTER F G X) (Comp_INTER_th1 F G X c).
+
+Theorem Comp_prop_th2 :
+ forall (F G X : Ens) (c : Comp_prop F G X), IN (PR2 X) (Range G).
+Proof
+  fun (F G X : Ens) (c : Comp_prop F G X) =>
+  Range_th1 G (Comp_INTER F G X) (PR2 X) (Comp_INTER_th2 F G X c).
+
+Section comp_prop_3.
+Variable F G X : Ens.
+Hypothesis c : Comp_prop F G X.
+
+Let step1 : is_a_pair X.
+Proof Comp_pair F G X c.
+Let step2 : IN (PR1 X) (Domain F).
+Proof Comp_prop_th1 F G X c.
+Let step3 : IN (PR2 X) (Range G).
+Proof Comp_prop_th2 F G X c.
+
+Let step4 : in_cartesian (Domain F) (Range G) X.
+Proof Build_in_cartesian (Domain F) (Range G) X step1 step2 step3.
+
+Lemma comp_prop_3_Out : IN X (Cartesian (Domain F) (Range G)).
+Proof Cartesian_pr1 (Domain F) (Range G) X step4.
+
+End comp_prop_3.
+
+Theorem Comp_prop_th3 :
+ forall (F G X : Ens) (c : Comp_prop F G X),
+ IN X (Cartesian (Domain F) (Range G)).
+Proof comp_prop_3_Out.
+
+
+
+Theorem composition_bounded_by :
+ forall F G : Ens,
+ Bounded_By (Cartesian (Domain F) (Range G)) (Comp_prop F G).
+Proof Comp_prop_th3.
+
+Theorem composition_bounded : forall F G : Ens, Bounded (Comp_prop F G).
+Proof
+  fun F G : Ens =>
+  Bounded_th2 (Comp_prop F G) (Cartesian (Domain F) (Range G))
+    (composition_bounded_by F G).
+
+Definition COMP (F G : Ens) := REPLACEMENT (Comp_prop F G).
+
+(******* note that this is the full composition of relations, like composition
+of correspondences in algebraic geometry ************)
+
+Theorem COMP_pr1 : forall F G X : Ens, Comp_prop F G X -> IN X (COMP F G).
+Proof
+  fun F G X : Ens =>
+  REPLACEMENT_pr1 (Comp_prop F G) (composition_bounded F G) X.
+
+Theorem COMP_pr2 : forall F G X : Ens, IN X (COMP F G) -> Comp_prop F G X.
+Proof
+  fun F G X : Ens =>
+  REPLACEMENT_pr2 (Comp_prop F G) (composition_bounded F G) X.
+
+Theorem COMP_th1 : forall F G : Ens, is_a_relation (COMP F G).
+Proof
+  fun (F G X : Ens) (i : IN X (COMP F G)) =>
+  Comp_pair F G X (COMP_pr2 F G X i).
+
+Theorem COMP_th2 :
+ forall F G : Ens, SUB (COMP F G) (Cartesian (Domain F) (Range G)).
+Proof
+  fun (F G X : Ens) (i : IN X (COMP F G)) =>
+  Comp_prop_th3 F G X (COMP_pr2 F G X i).
+
+Theorem COMP_th3 :
+ forall (F G X : Ens) (i : IN X (COMP F G)),
+ IN (PAIR (PR1 X) (Comp_INTER F G X)) F.
+Proof
+  fun (F G X : Ens) (i : IN X (COMP F G)) =>
+  Comp_INTER_th1 F G X (COMP_pr2 F G X i).
+
+Theorem COMP_th4 :
+ forall (F G X : Ens) (i : IN X (COMP F G)),
+ IN (PAIR (Comp_INTER F G X) (PR2 X)) G.
+Proof
+  fun (F G X : Ens) (i : IN X (COMP F G)) =>
+  Comp_INTER_th2 F G X (COMP_pr2 F G X i).
+
+Definition Comp_INTERp (F G X Y : Ens) := Comp_INTER F G (PAIR X Y).
+
+Section COMPp.
+Variable F G X Y : Ens.
+Hypothesis i : IN (PAIR X Y) (COMP F G).
+
+Let Z := PAIR X Y.
+
+Let step1 : IN Z (COMP F G).
+Proof i.
+
+Let step2 : EQ X (PR1 Z). 
+Proof PAIR_proj_th3 X Y.
+
+Let step3 : EQ Y (PR2 Z).
+Proof PAIR_proj_th4 X Y.
+
+Let step4 : IN (PAIR (PR1 Z) (Comp_INTERp F G X Y)) F.
+Proof COMP_th3 F G Z step1.
+
+Let step5 : IN (PAIR (Comp_INTERp F G X Y) (PR2 Z)) G.
+Proof COMP_th4 F G Z step1.
+
+Lemma COMPp_Out3 : IN (PAIR X (Comp_INTERp F G X Y)) F.
+Proof
+  Substitute X (PR1 Z) (fun U : Ens => IN (PAIR U (Comp_INTERp F G X Y)) F)
+    step2 step4.
+
+Lemma COMPp_Out4 : IN (PAIR (Comp_INTERp F G X Y) Y) G.
+Proof
+  Substitute Y (PR2 Z) (fun U : Ens => IN (PAIR (Comp_INTERp F G X Y) U) G)
+    step3 step5.
+
+End COMPp.
+
+Theorem COMP_th3p :
+ forall (F G X Y : Ens) (i : IN (PAIR X Y) (COMP F G)),
+ IN (PAIR X (Comp_INTERp F G X Y)) F.
+Proof COMPp_Out3.
+
+Theorem COMP_th4p :
+ forall (F G X Y : Ens) (i : IN (PAIR X Y) (COMP F G)),
+ IN (PAIR (Comp_INTERp F G X Y) Y) G.
+Proof COMPp_Out4.
+
+
+
+Section comp_wd.
+Variable F G : Ens.
+Hypothesis f : well_definedness F.
+Hypothesis g : well_definedness G.
+
+Variable X Y Z : Ens.
+Hypothesis i : IN (PAIR X Y) (COMP F G).
+Hypothesis j : IN (PAIR X Z) (COMP F G).
+
+Let V := Comp_INTERp F G X Y.
+Let W := Comp_INTERp F G X Z.
+
+Let step1 : IN (PAIR X V) F.
+Proof COMP_th3p F G X Y i.
+Let step2 : IN (PAIR V Y) G.
+Proof COMP_th4p F G X Y i.
+
+Let step3 : IN (PAIR X W) F.
+Proof COMP_th3p F G X Z j.
+Let step4 : IN (PAIR W Z) G.
+Proof COMP_th4p F G X Z j.
+
+Let step5 : EQ V W.
+Proof f X V W step1 step3.
+
+Let step6 : IN (PAIR V Z) G.
+Proof Substitute V W (fun U : Ens => IN (PAIR U Z) G) step5 step4.
+
+Lemma comp_wd_Out : EQ Y Z.
+Proof g V Y Z step2 step6.
+
+End comp_wd.
+
+Theorem composition_well_definedness :
+ forall (F G : Ens) (f : well_definedness F) (g : well_definedness G),
+ well_definedness (COMP F G).
+Proof comp_wd_Out.
+
+Theorem composition_th1 :
+ forall (F G : Ens) (f : well_definedness F) (g : well_definedness G),
+ is_a_function (COMP F G).
+Proof
+  fun (F G : Ens) (f : well_definedness F) (g : well_definedness G) =>
+  Build_is_a_function (COMP F G) (COMP_th1 F G)
+    (composition_well_definedness F G f g).
+
+Theorem composition_th2 :
+ forall (F G : Ens) (f : is_a_function F) (g : is_a_function G),
+ is_a_function (COMP F G).
+Proof
+  fun (F G : Ens) (f : is_a_function F) (g : is_a_function G) =>
+  composition_th1 F G (function_well_definedness F f)
+    (function_well_definedness G g).
+
+Section comp_ev_1.
+Variable F G X Y Z : Ens.
+Hypothesis i : IN (PAIR X Y) F.
+Hypothesis j : IN (PAIR Y Z) G.
+
+Let step1 : Comp_inter F G X Y Z.
+Proof Build_Comp_inter F G X Y Z i j.
+
+Let W := PAIR X Z.
+
+Let step2 : EQ X (PR1 W). 
+Proof PAIR_proj_th3 X Z.
+Let step3 : EQ (PR1 W) X.
+Proof EQ_symm X (PR1 W) step2.
+
+Let step4 : EQ Z (PR2 W).
+Proof PAIR_proj_th4 X Z.
+Let step5 : EQ (PR2 W) Z.
+Proof EQ_symm Z (PR2 W) step4.
+
+Let step6 : Comp_inter F G X Y (PR2 W).
+Proof Substitute (PR2 W) Z (fun U : Ens => Comp_inter F G X Y U) step5 step1.
+
+Let step7 : Comp_inter F G (PR1 W) Y (PR2 W).
+Proof
+  Substitute (PR1 W) X (fun U : Ens => Comp_inter F G U Y (PR2 W)) step3
+    step6.
+
+Let step8 : EXISTS (fun Y1 : Ens => Comp_inter F G (PR1 W) Y1 (PR2 W)).
+Proof EXISTS_th1 (fun Y1 : Ens => Comp_inter F G (PR1 W) Y1 (PR2 W)) Y step7.
+
+Let step9 : Comp_prop F G W.
+Proof Build_Comp_prop F G W (a_pair_is_a_pair X Z) step8.
+
+Lemma comp_ev_1_Out : IN W (COMP F G).
+Proof COMP_pr1 F G W step9.
+
+End comp_ev_1.
+
+Theorem COMP_th5 :
+ forall (F G X Y Z : Ens) (i : IN (PAIR X Y) F) (j : IN (PAIR Y Z) G),
+ IN (PAIR X Z) (COMP F G).
+Proof comp_ev_1_Out.
+
+
+Section comp_ev_2.
+Variable F G X : Ens.
+Hypothesis i : IN X (Domain F).
+Hypothesis j : IN (EV F X) (Domain G).
+
+Let Y := EV F X.
+Let Z := EV G Y.
+
+Let step1 : IN (PAIR X Y) F.
+Proof EV_th1 F X i.
+
+Let step2 : IN (PAIR Y Z) G.
+Proof EV_th1 G Y j.
+
+Lemma comp_ev_2_Out : IN (PAIR X Z) (COMP F G).
+Proof COMP_th5 F G X Y Z step1 step2.
+
+End comp_ev_2.
+
+Theorem composition_th3 :
+ forall (F G X : Ens) (i : IN X (Domain F)) (j : IN (EV F X) (Domain G)),
+ IN (PAIR X (EV G (EV F X))) (COMP F G).
+Proof comp_ev_2_Out.
+
+Section comp_ev_3.
+Variable F G X : Ens.
+Hypothesis f : is_a_function F.
+Hypothesis g : is_a_function G.
+Hypothesis i : IN X (Domain F).
+Hypothesis j : IN (EV F X) (Domain G).
+
+Let Z := EV G (EV F X).
+Let W := EV (COMP F G) X.
+
+Let step1 : is_a_function (COMP F G).
+Proof composition_th2 F G f g.
+
+Let step2 : well_definedness (COMP F G).
+Proof function_well_definedness (COMP F G) step1.
+
+Let step3 : IN (PAIR X Z) (COMP F G).
+Proof composition_th3 F G X i j.
+
+Let step4 : IN X (Domain (COMP F G)).
+Proof Domain_th1 (COMP F G) X Z step3.
+
+Let step5 : IN (PAIR X W) (COMP F G).
+Proof EV_th1 (COMP F G) X step4.
+
+Lemma comp_ev_3_Out : EQ W Z.
+Proof step2 X W Z step5 step3.
+
+End comp_ev_3.
+
+Theorem composition_th4 :
+ forall (F G X : Ens) (f : is_a_function F) (g : is_a_function G)
+   (i : IN X (Domain F)) (j : IN (EV F X) (Domain G)),
+ EQ (EV (COMP F G) X) (EV G (EV F X)).
+Proof comp_ev_3_Out.
+
+(******** associativity of composition ********)
+
+Section comp_assoc_1.
+Variable F G H P : Ens.
+Hypothesis p : IN P (COMP F (COMP G H)).
+
+Let step1 : is_a_pair P.
+Proof COMP_th1 F (COMP G H) P p.
+
+Let X := PR1 P.
+Let W := PR2 P.
+Let Y := Comp_INTERp F (COMP G H) X W.
+Let Z := Comp_INTERp G H Y W.
+
+Let step2 : EQ P (PAIR X W).
+Proof PAIR_proj_th1 P step1.
+Let step3 : EQ (PAIR X W) P.
+Proof EQ_symm P (PAIR X W) step2.
+
+Let step4 : IN (PAIR X W) (COMP F (COMP G H)).
+Proof
+  Substitute (PAIR X W) P (fun U : Ens => IN U (COMP F (COMP G H))) step3 p.
+
+Let step5 : IN (PAIR X Y) F.
+Proof COMP_th3p F (COMP G H) X W step4.
+
+Let step6 : IN (PAIR Y W) (COMP G H).
+Proof COMP_th4p F (COMP G H) X W step4.
+
+Let step7 : IN (PAIR Y Z) G.
+Proof COMP_th3p G H Y W step6.
+
+Let step8 : IN (PAIR Z W) H.
+Proof COMP_th4p G H Y W step6.
+
+Let step9 : IN (PAIR X Z) (COMP F G).
+Proof COMP_th5 F G X Y Z step5 step7.
+
+Let step10 : IN (PAIR X W) (COMP (COMP F G) H).
+Proof COMP_th5 (COMP F G) H X Z W step9 step8.
+
+Lemma comp_assoc_1_Out : IN P (COMP (COMP F G) H).
+Proof
+  Substitute P (PAIR X W) (fun U : Ens => IN U (COMP (COMP F G) H)) step2
+    step10.
+
+End comp_assoc_1.
+
+Theorem COMP_assoc_th1 :
+ forall F G H : Ens, SUB (COMP F (COMP G H)) (COMP (COMP F G) H).
+Proof comp_assoc_1_Out.
+
+Section comp_assoc_2.
+Variable F G H P : Ens.
+Hypothesis p : IN P (COMP (COMP F G) H).
+
+Let step1 : is_a_pair P.
+Proof COMP_th1 (COMP F G) H P p.
+
+Let X := PR1 P.
+Let W := PR2 P.
+Let Z := Comp_INTERp (COMP F G) H X W.
+Let Y := Comp_INTERp F G X Z.
+
+Let step2 : EQ P (PAIR X W).
+Proof PAIR_proj_th1 P step1.
+Let step3 : EQ (PAIR X W) P.
+Proof EQ_symm P (PAIR X W) step2.
+
+Let step4 : IN (PAIR X W) (COMP (COMP F G) H).
+Proof
+  Substitute (PAIR X W) P (fun U : Ens => IN U (COMP (COMP F G) H)) step3 p.
+
+Let step5 : IN (PAIR X Z) (COMP F G).
+Proof COMP_th3p (COMP F G) H X W step4.
+
+Let step6 : IN (PAIR Z W) H.
+Proof COMP_th4p (COMP F G) H X W step4.
+
+Let step7 : IN (PAIR X Y) F.
+Proof COMP_th3p F G X Z step5.
+
+Let step8 : IN (PAIR Y Z) G.
+Proof COMP_th4p F G X Z step5.
+
+Let step9 : IN (PAIR Y W) (COMP G H).
+Proof COMP_th5 G H Y Z W step8 step6.
+
+Let step10 : IN (PAIR X W) (COMP F (COMP G H)).
+Proof COMP_th5 F (COMP G H) X Y W step7 step9.
+
+Lemma comp_assoc_2_Out : IN P (COMP F (COMP G H)).
+Proof
+  Substitute P (PAIR X W) (fun U : Ens => IN U (COMP F (COMP G H))) step2
+    step10.
+
+End comp_assoc_2.
+
+Theorem COMP_assoc_th2 :
+ forall F G H : Ens, SUB (COMP (COMP F G) H) (COMP F (COMP G H)).
+Proof comp_assoc_2_Out.
+
+Theorem COMP_assoc :
+ forall F G H : Ens, EQ (COMP F (COMP G H)) (COMP (COMP F G) H).
+Proof
+  fun F G H : Ens =>
+  Build_EQ (COMP F (COMP G H)) (COMP (COMP F G) H) 
+    (COMP_assoc_th1 F G H) (COMP_assoc_th2 F G H).
+
+(**** one should also do the identity function of a set, and show that
+composition with it is the same as restriction to the set etc. ****)
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,50 @@
+#!/bin/sh
+
+# Instantiate links to library files in index template
+
+FILE=$1
+HIDDEN=$2
+
+cp -f $FILE.template tmp
+echo -n "Building file index-list.prehtml... "
+
+LIBDIRS=`find theories/* plugins/* -type d ! -name .coq-native`
+
+for k in $LIBDIRS; do
+    d=`basename $k`
+      ls $k | grep -q \.v'$'
+      if [ $? = 0 ]; then
+	for j in $k/*.v; do
+	    b=`basename $j .v`
+	    rm -f tmp2
+	    grep -q $k/$b.v tmp
+	    a=$?
+	    grep -q $k/$b.v $HIDDEN
+	    h=$?
+	    if [ $a = 0 ]; then
+	        if [ $h = 0 ]; then
+                    echo Error: $FILE and $HIDDEN both mention $k/$b.v; exit 1
+                else
+		    p=`echo $k | sed 's:^[^/]*/::' | sed 's:/:.:g'`
+		    sed -e "s:$k/$b.v:<a href=\"Coq.$p.$b.html\">$b</a>:g" tmp > tmp2
+		    mv -f tmp2 tmp
+                fi
+	    else
+	        if [ $h = 0 ]; then
+		    echo Warning: $k/$b.v will be hidden from the index
+                else
+                    echo Error: none of $FILE and $HIDDEN mention $k/$b.v
+                    exit 1
+	        fi
+
+            fi
+	done
+      fi
+    rm -f tmp2
+    sed -e "s/#$d#//" tmp > tmp2
+    mv -f tmp2 tmp
+done
+a=`grep theories tmp`
+if [ $? = 0 ]; then echo Error: extra files:; echo $a; exit 1; fi
+mv tmp $FILE
+echo Done

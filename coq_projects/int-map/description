@@ -1,0 +1,19 @@
+Name: IntMap
+Title: Maps indexed by binary integers : IntMap
+Author: Jean Goubault
+Email: 	goubault [@] lsv.ens-cachan.fr
+Institution: LSV/Dyade/INRIA
+Date: around 1999 (integrated within Coq 7.0)
+Description:
+  This library contains a data structure for finite sets implemented by
+  an efficient structure of map (trees indexed by binary integers).
+  It was initially developed by Jean Goubault.
+
+  This user contribution used to be part of Coq Standard Library. 
+  It is now considered to be obsolete and subsumed by the new 
+  FSets/FMap library. IntMap can be now seen as a particular
+  implementation of FMapInterface, see file FMapIntMap.
+
+Keywords: finite sets, maps, binary integers, efficient data structures, data structures
+Category: Computer Science/Data Types and Data Structures
+

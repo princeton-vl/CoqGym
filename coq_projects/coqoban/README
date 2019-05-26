@@ -1,0 +1,122 @@
+Welcome to Coqoban!
+
+This is a Coq implementation of Sokoban, the Japanese warehouse-keeper game.  
+The keeper must push the boxes to specified destination places. He can only
+push one box at a time, no more, and he can't pull. How to put the boxes in
+place?
+
+I would have liked to put a cedille underneath the "C", but I wasn't sure how to
+do that, or whether Coq could handle it.
+
+
+
+Let's talk about installing the game.
+
+Only two .v-files, so that shouldn't be too hard eh? Coqoban_engine.v contains
+the actual sokoban implementing script/program/data. It has a fair amount of
+remarks explaining what's going on, for those interested to know more about this
+implementation. Otherwise just compile it:
+
+coqc Coqoban_engine.v
+
+The file Coqoban_levels.v contains 355 levels to be played with Coqoban_engine.
+Proof General users may just load this file into (x)emacs and play. Still it can
+be useful to compile the levels:
+
+coqc -I . Coqoban_levels.v
+
+Now you can play easily without needing Proof General too, e.g.:
+
+-------
+bash-2.05b $ coqtop -I .
+Welcome to Coq 8.0 (Apr 2004)
+
+Coq < Require Import Coqoban_levels.
+-------
+
+
+
+The levels are called Level_1 up to Level_355. From Coqoban_levels.v:
+
+-------
+(* These Sokoban levels I have taken from the game KSokoban and include all of
+the *)
+(* Sasquatch (1-50), Mas Sasquatch (51-100), Sasquatch III (101-150), Microban
+*)
+(* (151-305), and Sasquatch IV (306-355) collections. These collections are made
+by *)
+
+
+(* David W. Skinner (sasquatch@betonrea.com)
+http://users.betonrea.com/~sasquatch/  *)
+-------
+
+There are more collections on his website. You can download them and transform 
+them into additional Coqoban_levels.v-like files using the Haskell-script 
+ksok2coqsok.hs. Sorry, I don't speak Ocaml :-S ...And obviously you can define
+your own new levels. Take care that Coq's lexer requires spaces after x's and
+O's! See Coqoban_engine.v for more details on parsing/printing.
+
+
+
+To play, say, e.g.:
+-------
+Coq < Goal (solvable Level_274).
+1 subgoal
+
+  ============================
+   (solvable Level_274)
+
+Unnamed_thm < unfold Level_274. (* Optional but useful *)
+1 subgoal
+
+  ============================
+   solvable
+     |> # # # # # # # # # # # # # # <|
+     |> # _ _ _ _ _ _ # _ _ _ _ _ # <|
+     +> # _ X + X X _ # _ O _ O O # <|
+     |> # # _ # # _ # # # _ # # _ # <|
+     |> _ # _ # _ _ _ _ _ _ _ # _ # <|
+     |> _ # _ # _ _ _ # _ _ _ # _ # <|
+     |> _ # _ # # # # # # # # # _ # <|
+     |> _ # _ _ _ _ _ _ _ _ _ _ _ # <|
+     |> _ # # # # # # # # # # # # # <|
+     |><|
+-------
+
+Boards are represented by rows between |> and <|. Other signs:
+_ = open field
+# = wall
++ = YOU
+O = destination square
+X = box
+* = a box on a destination square
+o = YOU, on a destination square
+
+
+
+Tactics used to play Coqoban are:
+n. (step/push north)
+e. (step/push east)
+s. (step/push south)
+w. (step/push west)
+
+These apply even if there's a wall in the way. You can also use Coq
+tacticals, e.g.
+do 5 n.
+Undo 3.
+Restart.
+Abort.
+
+By the by. I'd like to hear if anyone has written a Coqoban-playing tactic that
+solves Coqoban goals automatically...
+
+Goal (solvable Level_83).
+unfold Level_83.
+MyCoqobanTactic.
+Qed.
+
+Share and enjoy!
+Jasper Stein (jasper@cs.kun.nl)
+
+(Compatibility with Coq 8.0 by HH)

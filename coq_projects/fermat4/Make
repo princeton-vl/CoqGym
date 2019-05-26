@@ -1,0 +1,8 @@
+-R . Fermat4
+
+ArithCompl.v
+Tactics.v
+Pythagorean.v
+Descent.v
+Diophantus20.v
+Fermat4.v

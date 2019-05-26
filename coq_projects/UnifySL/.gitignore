@@ -1,0 +1,6 @@
+*.vo
+*.glob
+*.v.d
+*.aux
+.depend
+CONFIGURE

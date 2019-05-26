@@ -1,0 +1,27 @@
+This directory contains the formalization of Buchberger's algorithm.
+
+
+It is composed of :
+
+-  A proof of correctness of the algorithm as described in 
+    `A machine checked implementation of Buchberger's algorithm' in JAR Jan. 
+2001.
+
+- An implementation of the algorithm. With respect to the paper,
+  terms are not abstracted but built directly from coef and monomials.
+
+- A constructive proof of Dickson's lemma due to Henrik Persson
+
+To build the directory, do
+
+  coq_makefile *.v > Makefile
+
+Then
+
+  make depend;make all
+  
+In Extract.v we explain how the extracted code produced in
+the file sin_num.ml can be used to compute Grobner basis.
+
+ Laurent Thery            Henrik Persson                      
+ thery@sophia.inria.fr    Henrik.Persson@prover.com

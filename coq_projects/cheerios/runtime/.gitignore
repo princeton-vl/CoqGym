@@ -1,0 +1,9 @@
+_build
+*.native
+*.dat
+*.pdf
+test/positive_serializer.ml
+test/positive_serializer.mli
+test/tree_serializer.ml
+test/tree_serializer.mli
+test/test_file

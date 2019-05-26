@@ -1,0 +1,10 @@
+Name: Topology
+Title: General Topology
+Description: This library develops some of the basic concepts and results of general topology.
+
+Keywords: topology, filters, nets, metric spaces, real analysis, Urysohn's lemma, Tietze extension theorem
+Category: Mathematics/Real Calculus and Topology
+Author: Daniel Schepler
+Email: dschepler@gmail.com
+Require: ZornsLemma
+License: LGPL

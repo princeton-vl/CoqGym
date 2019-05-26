@@ -1,0 +1,18 @@
+Name: RulerCompassGeometry
+Title: Ruler and compass geometry axiomatization
+Author: Jean Duprat
+Email: Jean.Duprat@ens-lyon.fr
+Homepage:
+Institution: LIP, Ecole Normale Superieure de Lyon
+Address: 36, Allee d'Italie, 69365 Lyon Cedex 05
+Date: 2007-11
+Description: This library contains an axiomatization of the ruler and 
+compass euclidian geometry. Files A1 to A6 contain the axioms and the 
+basic constructions. The other files build the proof that this 
+axiomatization induces the whole plane geometry except the continuity 
+axiom. For that the proofs of the Hilbert's axioms conclude this work in 
+the files E1 to E5.
+License: GNU Lesser Public License
+Keywords: geometry, plane geometry, ruler and compass geometry, Euclidian geometry, Hilbert's axioms
+
+Category: Mathematics/Geometry/General

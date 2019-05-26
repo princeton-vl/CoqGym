@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+set -e
+
+COMPSER=../../sertop/compser.exe
+SERCOMP=../../sertop/sercomp.exe
+FILE_IN="$1"
+FILE_OUT="${FILE_IN%.v}.sexp"
+
+$SERCOMP --mode=sexp --exn_on_opaque "$FILE_IN" > "$FILE_OUT"
+$COMPSER "$FILE_OUT"

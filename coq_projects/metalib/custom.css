@@ -1,0 +1,61 @@
+body {
+    background-color: #fff;
+    color: #000;
+    margin: 0em;
+    padding: 0em;
+}
+
+a  { text-decoration: none; }
+h1 { font-size: 200%; font-weight: bolder; }
+h2 { font-size: 150%; font-weight: bolder; }
+h3 { font-size: 125%; font-weight: bolder; }
+
+#main{
+    padding: 1em;
+}
+
+#main a.idref:visited { background-color: inherit; color: #36f; }
+#main a.idref:link    { background-color: inherit; color: #36f; }
+#main a.idref:hover   { }
+#main a.idref:active  { }
+
+#main a.modref:visited { background-color: inherit; color: #36f; }
+#main a.modref:link    { background-color: inherit; color: #36f; }
+#main a.modref:hover   { }
+#main a.modref:active  { }
+
+.doc {
+  background: rgb(224,224,255);
+  padding: 1ex;
+}
+
+.code {
+    display: block;
+    font-family: monospace;
+}
+
+.inlinecode {
+    display: inline;
+    font-family: monospace;
+}
+
+h1.section {
+    border-bottom: 4px solid black;
+}
+
+#footer {
+    font-size: 80%;
+}
+
+#footer a:visited { color: #00f; }
+#footer a:link    { color: #00f; }
+#footer a:hover   { }
+#footer a:active  { }
+
+.id                     { display: inline; }
+.id[type="constructor"] { color: #060; }
+.id[type="var"]         { color: #606; }
+.id[type="definition"]  { color: #060; }
+.id[type="lemma"]       { color: #060; }
+.id[type="inductive"]   { color: #060; }
+.id[type="keyword"]     { color: #c00; }

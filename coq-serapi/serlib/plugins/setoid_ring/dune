@@ -1,0 +1,7 @@
+(library
+ (name serlib_setoid_ring)
+ (public_name coq-serapi.serlib.newring_plugin)
+ (wrapped false)
+ (synopsis "Serialization Library for Coq Setoid Newring Plugin")
+ (preprocess (staged_pps ppx_import ppx_sexp_conv))
+ (libraries coq.plugins.newring serlib serlib_ltac sexplib))

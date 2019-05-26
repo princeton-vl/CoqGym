@@ -1,0 +1,44 @@
+
+
+An Operational Semantics of Lazy Evaluation
+and a Proof of Subject Reduction
+-------------------------------------------
+
+This directory contains two subdirectories which define and prove 
+properties about the semantics of lazy PCF:  
+
+OpSem:   Coq commands necessary to implement an operational 
+         semantics of lazy evaluation of PCF.  
+
+SubjRed: Additional Coq code necessary to implement the proof of the
+         subject reduction property for the operational semantics.  
+
+The operational semantics were developed by S. Purushothaman and 
+Jill Seaman at Penn State University and are described in [2],
+listed below. The implementation in Coq was developed by Jill Seaman 
+at AT&T Bell Labs and a report describing this work is also listed
+below [1].
+
+
+--------------------------------------------------------------
+References:
+
+[1] Jill Seaman and Amy Felty, "Proving Properties About a Lazy
+Functional Language with the Coq Proof Development System", 1993.
+
+[2] S. Purushothaman and Jill Seaman, "An Adequate Operational
+Semantics for Lazy Evaluation with Sharing", ESOP'92.
+
+Note: The report [1] can be retrieved by anonymous ftp as follows.
+
+% ftp research.att.com
+Name: anonymous
+Password:  <<your e-mail address>>
+ftp> cd dist/felty
+ftp> binary
+ftp> get ppcoq.dvi.Z
+ftp> quit
+
+Use the unix uncompress command on this file to get ppcoq.dvi.
+
+

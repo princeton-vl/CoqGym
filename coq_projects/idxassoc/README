@@ -1,0 +1,55 @@
+This code was developped by IDEALX (http://IDEALX.org/) and
+contributors (their names can be found in the CONTRIBUTORS file). It
+is released under the terms of the BSD license (see LICENSE file
+for details).
+
+
+README file for ASSOCIATIVE ARRAYS V0.1 (April 2001)
+ 
+
+
+
+Description :
+-----------
+
+ We define the associative array (key -> value associations) 
+datatype as list of couples, providing definitions of standards 
+operations such as adding, deleting. 
+    
+ We introduce predicates for membership of a key and of couples. 
+    
+ Finally we define a search operator ("find") which returns the 
+value associated with a key or the "none" option (see file 
+Option.v which should be part of this contribution) on failure.
+  
+ Lemmas we prove about these concepts were motivated by our 
+needs at the moment we created this file. We hope they'll suit 
+your needs too but anyway, feel free to communicate any wish 
+or remark.
+ 
+
+Installation :
+------------
+
+To use this library, do the following :
+
+$ tar xvfz tar xvfz idx-assoc-0.1.tar.gz 
+$ cd cd idx-assoc-0.1/src/assoc/
+$ make
+
+
+Within the coqtop loop, just type :
+Coq < Require Assoc.
+
+
+Documentation :
+-------------
+
+You can generate a bundle of html files with :
+
+$ make html
+
+
+
+
+Have fun !

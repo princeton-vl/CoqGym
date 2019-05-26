@@ -1,0 +1,152 @@
+Lesson 5 (Relations_3.v, Relations_3_facts.v)
+
+In the previous lesson, with the proof of Lemma 1, you probably
+noticed that we were getting closer to proving more realistic mathematical 
+facts. In this lesson, we will prove Newman's Lemma,  a beginner's
+item for sure, but that will have all the flavour of doing real maths.
+
+First, as is usual in mathematics, a few definitions, collected in 
+Relations_3.v. The definition of Strongly_confluent was given in Relation_2.v
+for pedagogical purposes, but in fact it probably belongs here. Can 
+you insert the definition of Strongly_confluent here, after the definition of 
+coherent? Draw for yourself a little diagram to understand what 
+locally_confluent means. I use lower-case initials for properties of
+the elements, and upper-case initials for the corresponding property of
+the relation (e.g. locally_confluent versus Locally_confluent, 
+confluent versus Confluent, noetherian versus Noetherian).
+
+Take a good look at the definition of noetherian. This is not so much like
+prolog any longer, because the body of the clause contains an imbedded
+universal quantifier. We can still read it as before: if I can prove
+that, for all y (R x y) implies (noetherian y), then I have a proof
+that (noetherian x). This is an inductive definition. How does it start?
+Well, assume you have a point x that has no successors by R, i.e.
+for all y (not R x y). The the antecedent of the definition of noetherian
+is valid for that x, so (noetherian x). In the next step you get all
+the points at distance one from these, and so on. If you can reach every 
+element in this way, the relation R is called Noetherian. It is
+neat to be able to describe such a sophisticated property using the vocabulary
+we have learned so far.
+Note that the Hint Unfold and the Hint's are exactly the usual ones.
+
+Let us do some warming up exercizes, that will prove useful lemmas anyway.
+Rstar_imp_coherent is proved just with the obvious argument. The fact
+that coherent is a symmetric relation is obvious, and the proof
+requires the kind of gymnastics that we are familiar with since Lesson 1.
+
+Proof of Strong_confluence.
+The proof is by induction again, but here we will see that the property to 
+prove by induction doesn't appear quite as magically as in the previous 
+theorems.
+
+After expansion of the relevant definitions, one obtains
+the goal:
+(Rstar U R x b) -> <U> ExT([z: U] (Rstar U R a z) /\ (Rstar U R b z))
+and one is positioned to say:
+Elim H'0.
+Try to continue the proof like this. You go a pretty long way before you 
+reach a dead end. This is because the fact that can be proved by induction 
+is a more general one: it is the above statement, for all b.
+Observe what Generalize b does. The proposed solution clears b. Likewise,
+after Elim H'0. it clears H'0. Strictly speaking, this is not necessary,
+but it is a good habit to get rid of hypotheses that are certainly useless.
+
+
+The base case of the induction is easily dealt with. For the induction step,
+one notices that the hyptheses of Lemma 1 are present. (In one click)
+one deduces the existence of an element z0. Auto takes care of the 
+administrative work. Using the induction hypothesis, one obtains an element
+z1, (again in one click) which is exactly what is needed to prove the goal.
+
+Given Lemma1, which itself was proved by induction, it was quite easy to
+prove Strong_confluence. Strong_confluence_direct is the same result,
+except that we show it without using Lemma 1; or rather, we prove Lemma 1
+on the fly, where it is needed. The proof of Strong_confluence_direct
+starts exactly like that of Strong_confluence, until the place where Lemma1
+was invoked. Here, with the Cut command, we begin to live on credit.
+Assume you have the goal:
+Concl
+--
+Context
+
+With Cut P, you say that you "borrow" proposition P.
+You can now use it, because your goal becomes:
+
+P -> Concl
+--------
+Context
+which you can readily change to
+
+Concl
+-----
+H: P
+Context
+
+if you want. Of course, you will have to repay your debts before the 
+end of this theorem, because the goal
+
+P
+----
+Context
+ 
+has been added to your list of obligations.
+
+After borrowing the conclusion of Lemma 1, the proof goes on as before.
+To prove the intermediary fact that you introduced, you can use
+the proof of Lemma 1, but you must first be in exactly the same situation,
+i.e. generalize H'1 and y. Not that y is not cleared. Try it.
+
+The final part of the proof is exactly that of Lemma 1.
+Remark: some people use Cut all the time. I prefer not to. In the case
+where you want to prove that an element exists with certain properties,
+it is reasonable to give it explicitly in the proof. Here, this is almost
+what happens. You provide an element that allows constructing the solution.
+
+We will now see that working with noetherian induction is no big deal.
+The first exercize, Noetherian_contains_Noetherian, is intuitively
+easy: If there were an infinite chain in R', it would also
+be there in R, so it can't exist. The proof by induction is very similar 
+to proofs we have already performed. Notice that you can Elim H'
+directly, without unfoldind Noetherian first. Auto does the rest,
+discovering astutely how to use the definition_of_noetherian.
+
+The next result is known as Newman's lemma. We have all the definitions
+we need to state it properly. The proof is by noetherian induction.
+You should try it yourself for a moment, and look at these 
+explanations only when (and if) you are stuck.
+
+We start exactly as in the previous proof. Alas Auto doesn't conclude 
+the proof magically for you.  There are two tempting hypotheses
+in the context:
+H'4 : (Rstar U R x0 z)
+H'3 : (Rstar U R x0 y)
+Clearly, one must exploit them to go further. Excessive enthusisasm
+may have you do an Elim H'3 and and Elim H'4. I have made this mistake
+initially. I did conclude the proof, eventually, but with so much
+sweat that I was certain there was a better way. If you think about
+how the proof goes on when you do it by hand, you don't need an extra
+induction, you can use the inversion of Rstar, Rstar_cases, to exploit
+both H'3 and H'4. This will give rise to a number of cases.
+The first case contains an hypothesis:
+h1 : <U> x0 == y
+How can we use such an information? Well, do Info eqT.
+You see that eqT is just a brave old inductive definition, and the its
+elimination principle just performs a substitution, replacing the left
+hand-side by the right hand side in the conclusion of the goal.
+This is exactly what we want here. 
+You can write:
+Elim h1; Auto.
+or equivalently
+Rewrite <- h1; Auto.
+
+Check what 
+Rewrite -> h1.
+would do.
+
+You eliminate  fairly easily the special cases in this way. When you are in
+the general case, you use the definition of local confluence and the induction
+hypothesis, and you are home with a sprinkling of transitivity of Rstar.
+
+This is it for Lesson 5. You found this probably a bit longer than the previous
+lessons, but what a satisfaction to have proved a non-trivial fact, for once.
+

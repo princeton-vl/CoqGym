@@ -1,0 +1,11 @@
+Name: QArith
+Title: A Library for Rational Numbers (QArith)
+Author: Pierre Letouzey
+Institution: LRI, Orsay
+Description: 
+  This contribution is a proposition of a library formalizing 
+  rational number in Coq.   	 
+Keywords: Q, Arithmetic, Rational numbers, Setoid, Ring
+
+Category: Mathematics/Arithmetic and Number Theory/Rational numbers
+Category: Miscellaneous/Extracted Programs/Arithmetic

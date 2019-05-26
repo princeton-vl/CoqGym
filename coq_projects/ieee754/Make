@@ -1,0 +1,9 @@
+-R . IEEE754
+
+Diadic.v 
+IEEE754_algorithms.v 
+IEEE754_def.v 
+IEEE754_properties.v 
+IEEE.v
+tests.v 
+Registers.v

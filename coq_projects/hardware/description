@@ -1,0 +1,14 @@
+Name: Hardware
+Title: Verification and synthesis of hardware linear arithmetic structures.
+Author: Solange Coupet-Grimal & Line Jakubiec
+Institution: Laboratoire d'Informatique de Marseille
+Description: Verification and synthesis of hardware linear arithmetic
+structures. Example of a left-to-right comparator.
+Three approaches are tackled : 
+- the usual verification of a circuit, consisting in proving that the
+description satisfies the specification,
+- the synthesis of a circuit from its specification using the Coq extractor,
+- the same approach as above but using the Program tactic.
+Keywords: hardware verification, comparator circuit
+Category: Computer Science/Architecture
+Category: Miscellaneous/Extracted Programs/Hardware

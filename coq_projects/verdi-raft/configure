@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+
+## Configures and calls coqproject.sh (https://github.com/dwoos/coqproject)
+
+## Configuration options for coqproject.sh
+DEPS=(StructTact Verdi Cheerios)
+DIRS=(raft raft-proofs systems extraction/vard/coq extraction/vard-serialized/coq extraction/vard-log/coq extraction/vard-serialized-log/coq)
+NAMESPACE_raft="VerdiRaft"
+NAMESPACE_raft_proofs="VerdiRaft"
+NAMESPACE_systems="VerdiRaft"
+NAMESPACE_extraction_vard_coq="VerdiRaft"
+NAMESPACE_extraction_vard_serialized_coq="VerdiRaft"
+NAMESPACE_extraction_vard_log_coq="VerdiRaft"
+NAMESPACE_extraction_vard_serialized_log_coq="VerdiRaft"
+NAMESPACE_extraction_vard_debug="VerdiRaft"
+CANARIES=("StructTact.StructTactics" "Build StructTact before building Verdi Raft" "Verdi.Verdi" "Build Verdi before building Verdi Raft" "Cheerios.Cheerios" "Build Cheerios before building Verdi Raft")
+Verdi_DIRS=(core lib systems extraction)
+Cheerios_DIRS=(core extraction)
+source script/coqproject.sh

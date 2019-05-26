@@ -1,0 +1,24 @@
+opam-version: "1.2"
+version: "dev"
+maintainer: "palmskog@gmail.com"
+
+homepage: "https://github.com/uwplse/cheerios"
+dev-repo: "https://github.com/uwplse/cheerios.git"
+bug-reports: "https://github.com/uwplse/cheerios/issues"
+license: "BSD-2-Clause"
+
+build: [
+  [ make "-j%{jobs}%" "-C" "runtime" ]
+]
+available: [ ocaml-version >= "4.02.3" ]
+depends: [
+  "ocamlbuild" {build}
+]
+
+authors: [
+  "Keith Simmons <>"
+  "Doug Woos <>"
+  "James Wilcox <>"
+  "Justin Adsuara <>"
+  "Karl Palmskog <>"
+]

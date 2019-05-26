@@ -1,0 +1,20 @@
+Name: IPC
+Title: Intuitionistic Propositional Checker
+Author: Klaus Weich
+Institution: LMU, Munich
+Description: 
+  This development treats proof search in intuitionistic propositional logic,
+  a fragment of any constructive type theory. We present new and more
+  efficient decision procedures for intuitionistic propositional
+  logic. They themselves are given by (non-formal) constructive proofs.
+  We take one of them to demonstrate that constructive type theory can
+  be used in practice to develop a real, efficient, but error-free proof
+  searcher. This was done by formally proving the decidability of
+  intuitionistic propositional logic in Coq; the proof searcher was
+  automatically extracted.
+Keywords: intuitionistic logic , proof search , proof-as-programs ,
+  correct-by-construction , program verification, program extraction 
+Category: Mathematics/Logic/Foundations
+
+Category: Computer Science/Decision Procedures and Certified Algorithms/Decision procedures
+Category: Miscellaneous/Extracted Programs/Decision procedures

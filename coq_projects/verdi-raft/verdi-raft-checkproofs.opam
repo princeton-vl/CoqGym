@@ -1,0 +1,31 @@
+opam-version: "1.2"
+version: "dev"
+maintainer: "palmskog@gmail.com"
+
+homepage: "https://github.com/uwplse/verdi-raft"
+dev-repo: "https://github.com/uwplse/verdi-raft.git"
+bug-reports: "https://github.com/uwplse/verdi-raft/issues"
+license: "BSD"
+
+build: [
+  [ "./configure" ]
+  [ make "quick" "-j%{jobs}%" ]
+  [ make "checkproofs" "J=%{jobs}%" ]
+]
+depends: [
+  "coq" {>= "8.7" & < "8.10~"}
+  "verdi" {= "dev"}
+  "StructTact" {= "dev"}
+  "cheerios" {= "dev"}
+]
+
+authors: [
+  "James Wilcox <>"
+  "Doug Woos <>"
+  "Pavel Panchekha <>"
+  "Zachary Tatlock <>"
+  "Steve Anton <>"
+  "Karl Palmskog <>"
+  "Ryan Doenges <>"
+  "Justin Adsuara <>"
+]

@@ -1,0 +1,10 @@
+opam*/
+Etc.v
+Makefile
+*.bak
+*.d
+*.vo
+*.glob
+*.v.d
+*.aux
+.coq-native/

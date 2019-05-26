@@ -1,0 +1,112 @@
+FILES = \
+	AutoDerive.v \
+	Compactness.v \
+	Complex.v \
+	Continuity.v \
+	Coquelicot.v \
+	Derive.v \
+	Derive_2d.v \
+	Equiv.v \
+	ElemFct.v \
+	Hierarchy.v \
+	Iter.v \
+	KHInt.v \
+	Lim_seq.v \
+	Lub.v \
+	Markov.v \
+	PSeries.v \
+	Rbar.v \
+	Rcomplements.v \
+	RInt.v \
+	RInt_analysis.v \
+	RInt_gen.v \
+	Seq_fct.v \
+	Series.v \
+	SF_seq.v
+
+OBJS = $(addprefix theories/,$(addsuffix o,$(FILES)))
+
+.PHONY: all check dist doc install
+.PHONY: clean theories/clean examples/clean
+
+all: $(OBJS)
+
+clean: theories/clean examples/clean
+
+Remakefile: Remakefile.in config.status
+	./config.status Remakefile
+
+configure config.status: configure.in
+	autoconf
+	./config.status --recheck
+
+%.vo: %.v
+	@COQDEP@ -R theories Coquelicot $< | @REMAKE@ -r $@
+	@COQC@ -R theories Coquelicot $<
+
+theories/clean:
+	rm -f $(OBJS) theories/*.glob
+
+html/index.html: $(OBJS)
+	rm -rf html
+	mkdir -p html
+	@COQDOC@ -toc -interpolate -utf8 -html -g -R theories Coquelicot -d html \
+	  --coqlib http://coq.inria.fr/distrib/current/stdlib/ \
+	  --external http://ssr2.msr-inria.inria.fr/doc/ssreflect-1.4/ Ssreflect \
+	  $(addprefix theories/,$(FILES))
+
+doc: html/index.html deps.dot
+	dot -Tcmapx -odeps.map -Tpng -ohtml/deps.png deps.dot
+	sed -e '/img src="deps.png"/ r deps.map' -i html/Coquelicot.Coquelicot.html
+	rm -f deps.map
+
+deps.dot: $(addprefix theories/,$(FILES))
+	(echo "digraph coquelicot_deps {" ;
+	 echo "node [shape = ellipse, style=filled, URL=\"Coquelicot.\N.html\", color=black, fillcolor=cornflowerblue];";
+	(cd theories ; @COQDEP@ -R . Coquelicot $(FILES)) | sed -n -e 's/[.]vo.*: [^ ]*[.]v//p' |
+	while read src dst; do
+	  for d in $dst; do
+	    echo $src "->" ${d%.vo} ";"
+	  done
+	done ;
+	echo "}") | tred > $@
+
+EXAMPLES = \
+	BacS2013.v \
+	BacS2013_bonus.v \
+	Bessel.v \
+	DAlembert.v
+
+EXOBJS = $(addprefix examples/,$(addsuffix o,$(EXAMPLES)))
+
+check: $(EXOBJS)
+
+examples/clean:
+	rm -f $(EXOBJS) examples/*.glob
+
+install:
+	prefix=@prefix@
+	exec_prefix=@exec_prefix@
+	mkdir -p @libdir@
+	cp $(OBJS) @libdir@
+
+EXTRA_DIST = \
+	configure
+
+REMOVE_FROM_DIST = \
+	examples/Wasow.v
+
+dist: $(EXTRA_DIST)
+	PACK=@PACKAGE_TARNAME@-@PACKAGE_VERSION@
+	DIRS=`git ls-tree -d -r --name-only HEAD`
+	FILES=`git ls-tree -r --name-only HEAD`
+	rm -rf $PACK.tar.gz $PACK
+	mkdir $PACK
+	for d in $DIRS; do mkdir $PACK/$d; done
+	for f in $FILES $(EXTRA_DIST); do cp $f $PACK/$f; done
+	for f in $(REMOVE_FROM_DIST) ; do rm -rf $PACK/$f; done
+	#git log --pretty="format:%ad %s" --date=short > $PACK/ChangeLog
+	cat /dev/null > $PACK/ChangeLog
+	rm `find $PACK -name .gitignore`
+	tar czf $PACK.tar.gz $PACK
+	rm -rf $PACK

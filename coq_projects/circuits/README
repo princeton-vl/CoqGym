@@ -1,0 +1,96 @@
+(****************************************************************)
+(*           The Calculus of Inductive Constructions            *)
+(*                       COQ v5.10                              *)
+(*                                                              *)
+(* Laurent Arditi.  Laboratoire I3S. CNRS ura 1376.             *)
+(* Universite de Nice - Sophia Antipolis                        *)
+(* arditi@unice.fr, http://wwwi3s.unice.fr/~arditi/lolo.html    *)
+(*                                                              *)
+(* date: nov. 1995                                              *)
+(* file: README                                                 *)
+(* contents:                                                    *)
+(****************************************************************)
+
+Some proofs of hardware developped in Coq V 5.10 in summer and
+fall 1995.
+
+To compile, define the COQTOP variable (e.g. COQTOP=/usr/local/V5.10)
+and type "make".
+
+================================================================
+
+* The directory GENE contains generalities:
+ - Arith_compl contains lemmas about arithmetic (Nat)
+ - Bool_compl contains lemmas about booleans (Bool)
+
+There is a theory to represent bit-vectors as list of booleans.  The
+files Lists_* add new definitions and lemmas to the PolyList theory.
+Then, the BV.v file defines the bit-vector type as an instance of the
+polymorphic list type. We provide an abstraction function to convert a
+BV to its natural value.
+
+I hope the BV theory will be used to develop other proofs of
+hardware. So, if you use it, please send me an email (at
+arditi@unice.fr). All suggestions and criticisms are welcomed.
+
+The file Memo.v is an incomplete definitions of memory type. It is
+also based on polymorphic lists.
+
+================================================================
+* The directory ADDER contains the definition and proof of a
+combinatorial adder.
+
+We start from half-adder cell (HalfAdder.v), that is used to
+model full-adder cell (FullAdder.v). The complete adder is a chain of
+full adders (Adder.v). The two inputs may have different lengths.
+The proof of this adder is in AdderProof.v
+
+================================================================
+
+We specified and proved two circuits using two different
+methodologies. Both are specified at the register transfer level using
+bit-vectors.
+
+================================================================
+
+* The directory MULTIPLIER contains the proof of a sequential
+multiplier.
+The circuit has been simplified so there is only two registers R1 and
+R2. We show that at the end of the computation, R1 and R2 hold the two
+parts of the product of the two inputs (V1 and V2).
+
+This example shows the verification of a sequential circuit when the
+specification is a single but "complex" relation (here output = input1
+* input2) and the implementation is a loop transformed in recursive
+form (while cond do ....). The final theorem shows that at the end of
+the loop, the specification relation holds. This needs to find and
+prove an invariant (generalization of the final theorem).
+
+================================================================
+
+* The directory BLOCK contains the proof of a memory block instruction.
+The instruction fills a memory block starting at adress DI, ending at
+DI+CX+1, with the value of AL.
+Here we specifed the specification level with functions over time for
+each registers and the memory.
+At the implementation we use additional registers AD and DA (connected
+to address and data buses). We compose 3 functions for each component.
+We then show that, for each component, its specification function is
+equivalent to the composition of its implementation functions.
+
+In this example, we prove the equivalence of two descriptions (D and
+D') involving loops:
+
+D:  f1;                      D':   f1';
+    while cond do f2;              while cond' do f2';
+    f3.                            f3'.
+
+Here we do not need to prove any invariant.
+
+================================================================
+
+NOTE: these examples are my first works with Coq, so I'm sure the
+definitions and proofs could be much more concise and elegants.
+
+
+

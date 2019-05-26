@@ -1,0 +1,104 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Only needed for typesetting ICFP 17 paper
+%% not part of semantics of the language
+
+defns
+ Jtex :: '' ::=
+
+
+defn
+  G |-- a ~ g b ok  ::   :: wffalt :: 'AltAn_'
+{{ tex [[G]] \vdash [[a]] [[~]]_{[[g]]} [[b]] [[ok]] }}
+by
+
+G |- a : A
+G |- b : B
+G ; dom G |- g : A ~ B
+------------------ :: Wff
+G |-- a ~g b ok
+
+defn
+   Good G D ::   :: GoodDefn :: ''
+by
+
+defn G |== a : A ::   :: alternative :: 'EA_'
+ {{ com alternative rules for comparison }}
+ {{ tex [[G]] \vDash [[a]] : [[A]] }}
+by
+
+G |= A : TYPE
+G, x:A |== a : B
+x notin fv a
+----------------------- :: IrrelAbs
+G |== a : all- x:A -> B
+
+G |= a : all - x:A -> B
+G |= b : A
+----------------------- :: IrrelApp
+G |== a : B { b / x }
+
+G |= phi ok
+G,c:phi |= a : B
+----------------------- :: CAbs
+G |== a : all c:phi. B
+
+G |= a : all c:(a ~ b : A). B
+G; dom G |= a == b : A
+----------------------- :: CApp
+G |== a : B { o / c }
+
+defn
+ G |== a : A == b : B ::  :: hetalt :: 'EA_'
+ by
+
+c : (a : A ~ b : B) in G
+-------------------------- :: Kind
+G |== A : TYPE == B : TYPE
+
+
+defn G |-- a : A :: :: altantyp :: 'AltAn_'
+ {{ tex [[G]] \vdash [[a]] : [[A]] }}
+by
+
+G |-- a : A
+|A| = |B|
+------------------ :: Conv
+G |-- a : B
+
+defn G ; D |-- g : a ~ b :: :: altande :: 'AltAn_'
+{{ tex [[G]] ; [[D]] \vdash [[g]] : [[a]] \sim [[b]] }}
+
+ by
+G ; D |- g1 : a1 ~ b1
+G ; D |- g2 : a2 ~ b2
+G |- a1 rho a2 : A
+G |- b1 rho b2 : B
+-------------------------------------- :: AppCong
+G ; D |-- g1 rho g2 : a1 rho a2 ~ b1 rho b2
+
+
+G ; D |- g1 : a1 ~ b1
+G ; D |- g2 : a2 ~ b2
+G |- a1 rho a2 : A
+G |- b1 rho b2 : B
+G ; D |- g : B ~ A
+------------------------------------------------------------- :: AppCongEq
+G ; D |-- ((# g1 rho g2 #) |> g) : (a1 rho a2) ~ ((# b1 rho b2 #) |> g)
+
+
+G ; D |- g1 : A1 ~ A2
+G, x : A1 ; D |- g2 : B1 ~ B2
+B3 = B2 { x |> sym g1 / x }
+G |- (all rho x:A1 -> B1) : TYPE
+G |- (all rho x:A2 -> B3) : TYPE
+---------------------------------------------------------- :: PiCong
+G ; D |-- all rho x:g1 -> g2 : (all rho x:A1 -> B1) ~ (all rho x:A2 -> B3)
+
+G ; D |- g1 : phi1 == phi2
+G, c:phi1 ; D |- g3 : B1 ~ B2
+B3 = B2 { c |> sym g1 / c }
+G |- all c:phi1 . B1 : TYPE
+G |- all c:phi2 . B3 : TYPE
+----------------------------------------------------- :: CPiCong
+G ; D |-- (all c: g1. g3) : (all c:phi1. B1) ~ (all c:phi2. B3)

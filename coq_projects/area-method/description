@@ -1,0 +1,14 @@
+Name: AreaMethod
+Title: The Chou, Gao and Zhang area method
+Author: Julien Narboux
+Institution: Université de Strasbourg
+Date: 2004-2010
+Description: 
+This contribution is the implementation of the Chou, Gao and Zhang's area method decision procedure for euclidean plane geometry.
+This development contains a partial formalization of the book "Machine Proofs in Geometry, Automated Production of Readable Proofs for Geometry Theorems" by Chou, Gao and Zhang.
+The examples shown automatically (there are more than 100 examples) includes the Ceva, Desargues, Menelaus, Pascal, Centroïd, Pappus, Gauss line, Euler line, Napoleon theorems.
+Changelog
+2.1 : remove some not needed assumptions in some elimination lemmas (2010)
+2.0 : extension implementation to Euclidean geometry (2009-2010)
+1.0 : first implementation for affine geometry (2004)
+Keywords: geometry, Chou Gao Zhang area method, decision procedure, automatic theorem proving

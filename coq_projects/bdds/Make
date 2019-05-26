@@ -1,0 +1,37 @@
+-R . BDDs
+
+BDDdummy_lemma_2.v 
+BDDdummy_lemma_3.v 
+BDDdummy_lemma_4.v 
+BDDvar_ad_nat.v 
+bdd1.v 
+bdd10.v 
+bdd11.v 
+bdd2.v 
+bdd3.v 
+bdd4.v 
+bdd5_1.v 
+bdd5_2.v 
+bdd6.v 
+bdd7.v 
+bdd8.v 
+bdd9.v 
+bdds.v 
+d3.v 
+imecaux.v 
+mul06.v 
+mul07.v 
+mul08.v 
+pigtest.v 
+rip06.v 
+rip08.v 
+tauto.v 
+u.v 
+werner.v
+extract.v
+
+-extra extraction/dyade "extract.vo" "($(MAKE) -C extraction all)"
+-extra testbg extraction/dyade
+       "@echo '***** test: checking the tautology ztwaalf1_be *****'
+	extraction/dyade extraction/ztwaalf1_be
+	@echo '******************** End of test ***********************'"

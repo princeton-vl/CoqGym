@@ -1,0 +1,41 @@
+This directory builds a standalone Tautology Checker using 
+the code extracted in the upper directory.
+
+Syntax: 
+
+./dyade <file> 
+
+where: 
+
+<file> is the file containing the boolean formula. 
+Syntax of such a file: 
+
+Comments	//  (reading is suspended until the end of the line)
+Variable	any alphanumeric chain plus the character _
+Not		~
+And		&
+Or		#
+Implication	->
+Equivalence	<->
+Parenthesis	( ) 
+True value	<T>
+False value	<F>
+
+Priority of connectives , from lower to higher
+<-> ->  (associate to the right)
+# 	(associate to the left)
+&       (associate to the left)
+~
+
+The output is "Tautology" (and exit code 0) or "Not a tautology" 
+(and exit code 1).
+
+
+One example of test (ztwaalf1_be) is included.
+====================================================================
+./dyade ztwaalf1_be
+Tautology
+====================================================================
+
+
+Pierre Letouzey, nov 2001

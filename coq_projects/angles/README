@@ -1,0 +1,16 @@
+
+Dans cette contribution de Frédérique Guilhot (projet Lemme, INRIA Sophia Antipolis, Frederique.Guilhot@sophia.inria.fr) on donne une formalisation de la théorie des angles orientés de vecteurs non nuls. En utilisant ces objets, on démontre en Coq des théorèmes classiques de la géométrie plane dont : 
+  - le théorème qui donne une condition nécessaire et suffisante pour que quatre points soient cocycliques, 
+  - le théorème qui montre que les symétriques de l'orthocentre d'un triangle  par rapport à ses côtés sont sur son cercle circonscrit, 
+  - le théorème de la droite de Simson 
+  - le théorème de Napoléon. 
+
+Ce développement a été fait en utilisant l'interface Pcoq, avec des notations mathématiques classiques. Pour plus d'information, merci de consulter le rapport de recherche: http://www-sop.inria.fr/lemme/FGRR.ps.
+
+Formalization of the theory of oriented angles of non zero vectors using Coq is given (by Frédérique Guilhot, projet Lemme, INRIA Sophia Antipolis, Frederique.Guilhot@sophia.inria.fr). Using this theory, some classical plane geometry theorems are proved, among them : 
+  - the theorem which gives a necessary and sufficient condition so that four points are cocyclic, 
+  - the one which shows that the reflected points with respect to the sides of a triangle orthocenter are on its circumscribed circle, 
+  - the Simson's theorem 
+  - the Napoleon's theorem.
+
+This development has been made using the Pcoq graphical interface, with standard mathematical notations. For further information, please read the research report: http://www-sop.inria.fr/lemme/FGRR.ps

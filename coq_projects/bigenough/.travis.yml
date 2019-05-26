@@ -1,0 +1,59 @@
+dist: trusty
+sudo: required
+language: generic
+
+branches:
+  only:
+  - master
+
+services:
+  - docker
+
+env:
+  global:
+  - NJOBS="2"
+  - CONTRIB_NAME="bigenough"
+  matrix:
+  - DOCKERIMAGE="mathcomp/mathcomp:1.7.0-coq-8.7"
+  - DOCKERIMAGE="mathcomp/mathcomp:1.7.0-coq-8.8"
+  - DOCKERIMAGE="mathcomp/mathcomp:1.7.0-coq-8.9"
+  - DOCKERIMAGE="mathcomp/mathcomp:1.7.0-coq-dev"
+  - DOCKERIMAGE="mathcomp/mathcomp-dev:coq-8.7"
+  - DOCKERIMAGE="mathcomp/mathcomp-dev:coq-8.8"
+  - DOCKERIMAGE="mathcomp/mathcomp-dev:coq-8.9"
+  - DOCKERIMAGE="mathcomp/mathcomp-dev:coq-dev"
+
+install: |
+  # Prepare the COQ container
+  docker pull "${DOCKERIMAGE}"
+  docker run -d -i --init --name=COQ -v ${TRAVIS_BUILD_DIR}:/home/coq/${CONTRIB_NAME} -w /home/coq/${CONTRIB_NAME} "${DOCKERIMAGE}"
+  docker exec COQ /bin/bash --login -c "
+    # This bash script is double-quoted to interpolate Travis CI env vars:
+    echo \"Build triggered by ${TRAVIS_EVENT_TYPE}\"
+    export PS4='+ \e[33;1m(\$0 @ line \$LINENO) \$\e[0m '
+    set -ex  # -e = exit on failure; -x = trace for debug
+    # Using flambda makes sense here as we usually get ~10% faster
+    # builds in math-comp.
+    opam switch \$COMPILER_EDGE
+    eval \$(opam env)
+    opam update -y
+    opam config list
+    opam repo list
+    opam list
+    sudo chown -R coq:coq /home/coq/${CONTRIB_NAME}
+    opam pin add -y -n coq-mathcomp-bigenough .
+    # install deps only
+    opam install -y -vvv --deps-only coq-mathcomp-bigenough
+    "
+script:
+- echo -e "${ANSI_YELLOW}Building ${CONTRIB_NAME}...${ANSI_RESET}" && echo -en 'travis_fold:start:script\\r'
+- |
+  docker exec COQ /bin/bash --login -c "
+    export PS4='+ \e[33;1m(\$0 @ line \$LINENO) \$\e[0m '
+    set -ex
+    eval \$(opam env)
+    opam install -y -vvv coq-mathcomp-bigenough
+    "
+- docker stop COQ  # optional
+- echo -en 'travis_fold:end:script\\r'
+

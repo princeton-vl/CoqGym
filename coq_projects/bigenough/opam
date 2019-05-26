@@ -1,0 +1,17 @@
+opam-version: "1.2"
+name: "coq-mathcomp-bigenough"
+version: "1.0.0"
+maintainer: "Cyril Cohen <cyril.cohen@inria.fr>"
+
+homepage: "https://github.com/math-comp/bigenough"
+bug-reports: "https://github.com/math-comp/bigenough/issues"
+license: "CeCILL-B"
+dev-repo: "https://github.com/math-comp/bigenough"
+
+build: [ make "-j" "%{jobs}%" ]
+install: [ make "install" ]
+remove: [ "sh" "-c" "rm -rf '%{lib}%/coq/user-contrib/mathcomp/bigenough'" ]
+depends: [ "coq-mathcomp-ssreflect" { (>= "1.6.0" | = "dev") } ]
+
+tags: [ "keyword:bigenough" "keyword:asymptotic reasonning" "keyword:small scale reflection" "keyword:mathematical components" ]
+authors: [ "Cyril Cohen <cyril.cohen@inria.fr>" ]

@@ -1,0 +1,13 @@
+Name:Hedges
+Title:Some properties of hedges used by hedged bisimulation
+Author:Sébastien Briais
+Institution: Ecole Polytechnique Fédérale de Lausanne.
+Date:20 April 2004
+Description:
+These properties are in section 6.1 of the paper
+   "On Bisimulations for the Spi-Calculus" by J. Borgström
+   and U. Nestmann.
+   However, we consider here an extended message language.
+Keywords: bisimulation, spi-calculus, hedges
+Require:
+Category: Computer Science/Concurrent Systems and Protocols/Theory of concurrent systems

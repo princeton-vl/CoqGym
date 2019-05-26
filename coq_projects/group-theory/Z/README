@@ -1,0 +1,9 @@
+To develop group theory, I needed Z because of the property
+
+		a**m a**n = a** (m+n)
+
+These files have been lifted from work by Valerie Menissier-Morain. Of course,
+Z should be given special attention in the library.
+
+
+Gilles Kahn, January 1996.

@@ -1,0 +1,8 @@
+version = "%%VERSION%%"
+description = "Cheerios framework runtime library"
+requires = "bytes"
+archive(byte) = "cheerios_runtime.cma"
+archive(byte, plugin) = "cheerios_runtime.cma"
+archive(native) = "cheerios_runtime.cmxa"
+archive(native, plugin) = "cheerios_runtime.cmxs"
+exists_if = "cheerios_runtime.cma"

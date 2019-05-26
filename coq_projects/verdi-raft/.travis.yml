@@ -1,0 +1,71 @@
+language: generic
+
+services:
+  - docker
+
+env:
+  global:
+    - THIS_REPO=verdi-raft
+  matrix:
+    - MODE=build COQ_VERSION=coq8.7-32bit
+    - MODE=build COQ_VERSION=coq8.8-32bit
+    - MODE=vard OPAMBUILDTEST=1 COQ_VERSION=coq8.8
+    - MODE=vard-serialized OPAMBUILDTEST=1 COQ_VERSION=coq8.8
+    - MODE=vard-log OPAMBUILDTEST=1 COQ_VERSION=coq8.8
+    - MODE=vard-serialized-log OPAMBUILDTEST=1 COQ_VERSION=coq8.8
+
+# The "docker run" command will pull if needed.
+# Running this first gives two tries in case of network lossage.
+before_script:
+  - timeout 5m docker pull palmskog/xenial-for-verdi-$COQ_VERSION || true
+
+# Using travis_wait here seems to cause the job to terminate after 1 minute
+# with no error (!).
+# The git commands are tried twice, in case of temporary network failure.
+# The fcntl line works around a bug where Travis truncates logs and fails.
+script:
+  - python -c "import fcntl; fcntl.fcntl(1, fcntl.F_SETFL, 0)"
+  - REMOTE_ORIGIN_URL=`git config --get remote.origin.url`
+  - echo "THIS_REPO=${THIS_REPO}"
+  - echo "COQ_VERSION=${COQ_VERSION}"
+  - echo "MODE=${MODE}"
+  - echo "OPAMBUILDTEST=${OPAMBUILDTEST}"
+  - echo "TRAVIS_BRANCH=${TRAVIS_BRANCH}"
+  - echo "REMOTE_ORIGIN_URL=${REMOTE_ORIGIN_URL}"
+  - echo "TRAVIS_EVENT_TYPE=${TRAVIS_EVENT_TYPE}"
+  - echo "TRAVIS_COMMIT=${TRAVIS_COMMIT}"
+  - echo "TRAVIS_PULL_REQUEST=${TRAVIS_PULL_REQUEST}"
+  - echo "TRAVIS_PULL_REQUEST_BRANCH=${TRAVIS_PULL_REQUEST_BRANCH}"
+  - echo "TRAVIS_PULL_REQUEST_SHA=${TRAVIS_PULL_REQUEST_SHA}"
+  - echo "TRAVIS_REPO_SLUG=${TRAVIS_REPO_SLUG}"
+  - >-
+    docker run palmskog/xenial-for-verdi-$COQ_VERSION /bin/bash -c "true &&
+       if [ $TRAVIS_EVENT_TYPE = pull_request ] ; then
+         git clone --quiet --depth 9 $REMOTE_ORIGIN_URL $THIS_REPO || git clone --quiet --depth 9 $REMOTE_ORIGIN_URL $THIS_REPO
+         cd $THIS_REPO
+         git fetch origin +refs/pull/$TRAVIS_PULL_REQUEST/merge
+         git checkout -qf $TRAVIS_PULL_REQUEST_SHA
+         git config user.email noone@cares.com
+         git config user.name Noone Cares
+         git remote add theupstream https://github.com/$TRAVIS_REPO_SLUG.git
+         git pull --depth 9 theupstream $TRAVIS_BRANCH || git pull --depth 9 theupstream $TRAVIS_BRANCH
+       else
+         git clone --quiet --depth 9 -b $TRAVIS_BRANCH $REMOTE_ORIGIN_URL $THIS_REPO || git clone --quiet --depth 9 -b $TRAVIS_BRANCH $REMOTE_ORIGIN_URL $THIS_REPO
+         cd $THIS_REPO
+         git checkout -qf $TRAVIS_COMMIT
+       fi &&
+       openssl aes-256-cbc -K $encrypted_cd2d8c660bce_key -iv $encrypted_cd2d8c660bce_iv -in .travis/travis_rsa.enc -out .travis/travis_rsa -d &&
+       mkdir -p ~/.ssh &&
+       cp .travis/travis_rsa ~/.ssh &&
+       chmod 600 ~/.ssh/travis_rsa &&
+       cp .travis/ssh_config ~/.ssh/config &&
+       ./.travis-ci.sh $MODE $OPAMBUILDTEST"
+
+git:
+  depth: 9
+
+notifications:
+  slack:
+    on_start: always
+    rooms:
+      - secure: "T242nWLwd3mR3pIQabXxl9jV9grQJrRBTVpzMTm6aWwQw4pUJd9zwJ5rzW567fngaZdrnxH/5hHildh1uIhUSTeC3g1WtmNZFg+P41j3ppKWXNGMsYJIo/QVDfwCTwuPcLbnEKP9ARiv/QECWTyzoE3jkU9U+xpVTWB7RG4R4cyXCKePStsVbYIiudpyHjAw+mY0PTWiSfqTDnhV0XE9/59lh+X624tfNrjIsYMJrQtNOfNDKOe2MHxt5WZV7bjY5dC6U6shz37sLxntURpW7FsAfRf81fnzFFgD+g7/Kzghh5t9duM8BJGSbLEHe8YJealRGOnNcJIG9xgP3dF0nwFxzrua2KtRWeLZlRDmto0Kt0oVVoQgYaMJS0kds7DWjnm3dX8KriPEywAixj+PSRar7o6jpiH2Jd3afDMq0r4PNjyjTYoqm/uuUIYzYV03O9ntZ2tKTDIH/uIXlQynQjSoe9Xkn+ql6kulQT56WmM+zlXluarDA5rw1GVRK4n3hkNGAXukYk1Wvu/KvRqxeVgqdAUTXs3A6CtcvXtguHfgYzNyuoJJnDlenKHmJq/jteNnwMIZR29LqL47vRpkI5zRrpfxf6c9BYl97elh2tnKBVP98n3VEdXqxpkqHVcW0lXlemyuso9bMkS5v6lpxDtFkZMjQuZJrk/WQ0DJGhY="

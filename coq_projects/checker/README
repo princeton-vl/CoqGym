@@ -1,0 +1,15 @@
+This directory contains two developments.
+
+The first one, Functions.v, is self-contained. It is a small library
+of abstract properties of mappings from a Set to a Set.
+A mapping is One-one if it is Injective, and Onto if it is Surjective.
+A few preservation lemmas are shown. A Set X is defined to be Finite if
+evry One-one mapping from X to X is Onto.
+
+The second one, Checker, applies these notions to an abstract proof that 
+a mutilated checkerboard of even length (2 diagonally opposite squares
+removed) cannot be covered by dominos. 
+
+G. Huet
+March 1996
+

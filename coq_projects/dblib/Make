@@ -1,0 +1,9 @@
+-R src Dblib
+
+src/DblibTactics.v
+src/DeBruijn.v
+src/DemoExplicitSystemF.v
+src/DemoImplicitSystemF.v
+src/DemoLambda.v
+src/DemoValueTerm.v
+src/Environments.v

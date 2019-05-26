@@ -1,0 +1,6 @@
+A small library to do epsilon - N reasonning.
+
+The repository contains a package to reasoning with big enough objects
+(mostly natural numbers). This repository is essentially for archiving
+purposes as `bigenough` will be subsumed by the near tactics. The
+formalization is based on the Mathematical Components library.

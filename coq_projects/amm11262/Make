@@ -1,0 +1,8 @@
+-R . AMM11262
+
+./unicode_format/utf_AMM11262.v
+./unicode_format/utf_example2.v
+./unicode_format/utf_example1.v
+./ascii_format/AMM11262.v
+./ascii_format/example1.v
+./ascii_format/example2.v

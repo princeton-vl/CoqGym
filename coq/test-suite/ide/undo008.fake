@@ -1,0 +1,18 @@
+# Script simulating a dialog between coqide and coqtop -ideslave
+# Run it via fake_ide
+#
+# Undoing declarations, as non-first step
+# new in 8.2
+#
+ADD { Theorem h : O=O. }
+ADD { assert True by trivial. }
+ADD here { Definition i := O. }
+ADD { Definition j := O. }
+EDIT_AT here
+# <replay>
+ADD { Definition j := O. }
+# <\replay>
+ADD { assert True by trivial. }
+ADD { trivial. }
+ADD { Qed. }
+QUERY { Check i. }

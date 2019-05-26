@@ -1,0 +1,13 @@
+-R . ParamPi
+
+bout_red.v
+fresh.v
+induc.v
+inp_red.v
+out_red.v
+processus.v
+substitutions.v
+subtyping.v
+swaps_proofs.v
+tau_red.v
+typing_proofs.v

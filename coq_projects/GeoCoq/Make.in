@@ -1,0 +1,4 @@
+# Library name
+-R . GeoCoq
+
+# Coq files (filled by the configure)

@@ -1,0 +1,19 @@
+Name: IEEE754
+Title: A formalisation of the IEEE754 norm on floating-point arithmetic
+Author: Patrick Loiseleur
+Institution: Ecole Normale Supérieure de Lyon
+Description: This library contains a non-verified implementation of
+binary floating-point addition and multiplication operators inspired
+by the IEEE-754 standard. It is today outdated.
+
+See the attached 1997 report rapport-stage-dea.ps.gz for a discussion
+(in French) of this work.
+
+For the state of the art at the time of updating this notice, see
+e.g. "Flocq: A Unified Library for Proving Floating-point Algorithms
+in Coq" by S. Boldo and G. Melquiond, 2011.
+
+Keywords: floating-point arithmetic, floats, IEEE
+Category: Computer Science/Data Types and Data Structures
+Category: Computer Science/Semantics and Compilation/Semantics
+Date: 1997

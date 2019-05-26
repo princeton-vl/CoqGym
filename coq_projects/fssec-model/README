@@ -1,0 +1,78 @@
+This file briefly describes the pourpose of this model and the contents of each module.
+
+We specify and formally verifiy security properties of an extension of a
+UNIX filesystem. The extensions include MLS controls, separated MAC and DAC
+administration, efective administrative groups, ACLs, and generalized owners
+for files and directories. The security properties we verify are: a complete
+formalization of the Bell-LaPadula security model, the standard DAC
+properties based on ACLs, and those for security attributes.
+
+The model takes the form of a state machine. The state has been defined in module SFSstate.v and the operations in several modules each with the name of a UNIX file system call (e.g. open, chmod, etc.). Some new system calls have been specified due to the introduction of new security attributes.
+
+The reader should start reading the model by the module named SFSstate.v, which contains an informal interpretation of the basic (formal) terms, which, in turn, allows he or she to underestand the remaining formalization.
+
+After reading the aformetioned module we recomend you to read module DACandMAC.v which states some commonly used preconditions. Then, the reader could follow with modules named whith file system operation names (i.e. those not ending with "IsSecure").   
+
+Before reading files with names of the form *IsSecure, we suggets to read module ModelProperties.v, which contains the formalization of the properties we proved. Files *IsSecure contain proof scripts of the corresponding operation. For example, file openIsSecure stores the proof scripts about properies verified by operation open.
+
+Finally, module ModelLemmas.v states the main lemma of the verification, i.e. basic security theorem.
+
+Readers interested in this work could download from lifia.info.unlp.edu.ar the MSc author's thesis "Formal Verification of an Extension of a Secure, Compatible UNIX File System". Also in that URL, you will find documentation about LiSex (Lifia Secure Linux) which is an implementation of this model. New versions of LiSex will implement improvments of the present module.
+
+
+Maximiliano Cristiá
+Universidad Nacional de Rosario y Lifia (UNLP)
+Argentina
+
+
+MODULE CONTENTS 
+aclstatIsSecure: proof scripts of aclstat
+aclstat: specification of aclstat
+addUsrGrpToAclIsSecure: proof scripts of addUsrGrpToAcl
+addUsrGrpToAcl: specification of addUsrGrpToAcl
+AuxiliaryLemmas: auxiliary lemmas for many proof scripts
+chmodIsSecure: proof scripts of chmod
+chmod: specification of chmod
+chobjscIsSecure: proof scripts of chobjsc
+chobjsc: specification of chobjsc
+chownIsSecure: proof scripts of chown
+chown: specification of chown
+chsubscIsSecure: proof scripts of chsubsc
+chsubsc: specification of chsubsc
+closeIsSecure: proof scripts of close
+close: specification of close
+createIsSecure: proof scripts of crate
+create: specification of create
+DACandMAC: contains preconditions used un many operations' specification
+delUsrGrpFromAclIsSecure: proof scripts of delUsrGrpFromAcl
+delUsrGrpFromAcl: specification of delUsrGrpFromAcl
+InitialState: defines a possible initial state of the system
+ListFunctions: some definitions and lemmas about lists and sets
+ListSet: identical to ListSet.v of the standard library, except for the definition of set_remove.
+mkdirIsSecure: proof scripts of mkdir
+mkdir: specification of mkdir
+ModelLemmas: contains two lemmas about the system as a whole
+ModelProperties: formalization of the properties the system (should) verify
+openIsSecure: proof scripts of open
+open: specification of open
+oscstatIsSecure: proof scripts of oscstat
+oscstat: specification of oscstat
+owner_closeIsSecure: proof scripts of owner_close
+owner_close: specification of owner_close
+readdirIsSecure: proof scripts of readdir
+readdir: specification of readdir
+readIsSecure: proof scripts of read
+read: specification of read
+rmdirIsSecure: proof scripts of rmdir
+rmdir: specification of rmdir
+setACLdata: some auxiliary definitions used in chmod, chown, and others
+SFSstate: system state definition and other basic definitions.
+sscstatIsSecure: proof scripts of sscstat
+sscstat: specification of sscstat
+statIsSecure: proof scripts of stat
+stat: specification of stat
+TransFunc: definition of the transition relation
+unlinkIsSecure: proof scripts of unlink
+unlink: specification of unlink
+writeIsSecure: proof scripts of write
+write: specification of write

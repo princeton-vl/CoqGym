@@ -1,0 +1,14 @@
+# Script simulating a dialog between coqide and coqtop -ideslave
+# Run it via fake_ide
+#
+# Undoing declarations, as first step
+# Was bugged in 8.1
+#
+ADD here { Theorem c : O=O. }
+ADD { Inductive T : Type := I. }
+EDIT_AT here
+# <replay>
+ADD { Inductive T : Type := I. }
+# <\replay>
+ADD { trivial. }
+ADD { Qed. }

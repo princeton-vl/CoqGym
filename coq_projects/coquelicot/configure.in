@@ -1,0 +1,64 @@
+AC_INIT([Coquelicot], [3.0.2],
+        [Guillaume Melquiond <guillaume.melquiond@inria.fr>],
+        [coquelicot])
+
+m4_divert_push(99)
+if test "$ac_init_help" = "long"; then
+  ac_init_help=short
+fi
+m4_divert_pop(99)
+
+m4_divert_push([HELP_ENABLE])
+Fine tuning of the installation directory:
+AS_HELP_STRING([--libdir=DIR], [library @<:@DIR=`$COQC -where`/user-contrib/Coquelicot@:>@])
+m4_divert_pop([HELP_ENABLE])
+
+AC_PROG_CXX
+
+AC_ARG_VAR(COQBIN, [path to Coq executables [empty]])
+if test ${COQBIN##*/}; then COQBIN=$COQBIN/; fi
+
+AC_ARG_VAR(COQC, [Coq compiler command [coqc]])
+AC_MSG_CHECKING([for coqc])
+if test ! "$COQC"; then COQC=`which ${COQBIN}coqc`; fi
+AC_MSG_RESULT([$COQC])
+
+AC_ARG_VAR(COQDEP, [Coq dependency analyzer command [coqdep]])
+AC_MSG_CHECKING([for coqdep])
+if test ! "$COQDEP"; then COQDEP=`which ${COQBIN}coqdep`; fi
+AC_MSG_RESULT([$COQDEP])
+
+AC_ARG_VAR(COQDOC, [Coq documentation generator command [coqdoc]])
+AC_MSG_CHECKING([for coqdoc])
+if test ! "$COQDOC"; then COQDOC=`which ${COQBIN}coqdoc`; fi
+AC_MSG_RESULT([$COQDOC])
+
+AC_MSG_CHECKING([for SSReflect])
+AS_IF(
+  [ echo "Require Import mathcomp.ssreflect.ssreflect." > conftest.v
+    $COQC conftest.v > conftest.err ],
+  [ AC_MSG_RESULT([yes]) ],
+  [ AC_MSG_RESULT([no])
+    AC_MSG_ERROR([ *** Unable to find library mathcomp.ssreflect >= 1.6 (http://math-comp.github.io/math-comp/)])])
+rm -f conftest.v conftest.vo conftest.err
+
+if test "$libdir" = '${exec_prefix}/lib'; then
+  libdir="`$COQC -where`/user-contrib/Coquelicot"
+fi
+
+AC_MSG_NOTICE([building remake...])
+case `uname -s` in
+MINGW*)
+	$CXX -Wall -O2 -o remake.exe remake.cpp -lws2_32
+	if test $? != 0; then AC_MSG_FAILURE([failed]); fi
+	AC_SUBST([REMAKE], [./remake.exe])
+	;;
+*)
+	$CXX -Wall -O2 -o remake remake.cpp
+	if test $? != 0; then AC_MSG_FAILURE([failed]); fi
+	AC_SUBST([REMAKE], [./remake])
+	;;
+esac
+
+AC_CONFIG_FILES(Remakefile)
+AC_OUTPUT

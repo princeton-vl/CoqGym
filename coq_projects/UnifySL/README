@@ -1,0 +1,21 @@
+Update 2018/01/10:
+
+From previous version, I made the following updates:
+
+1) Support both Axiomatization and Sequent Calculus approach of defining ProofTheory.
+1.1) Basic settings for these two proof theories are in GeneralLogic/ProofTheory/BasicSequentCalculus.v and MinimunLogic/ProofTheory/Minimun.v.
+1.2) Now, axiomatic proof theories does not depend on any assumption about "derivable". Especially, they does not depend on "NormalProofTheory" any more; in other words, we do not require "derivable" to be "provable from a finite subset of assumptions".
+1.3) Besides, a tactic called "AddSequentCalculus Gamma" can be used such that we can prove properties about an axiomatization as if we defined "derivable" as "provable from a finite subset of assumptions".
+
+2) Proofs of Lindenbaum lemmas in completeness proofs are significantly improved.
+
+3) Add some tactics for object language theorem derivation, especially for axiomatic proof theories.
+
+4) "-->" are split from "&&" and "||" from semantic definitions. In the future, these typeclasses may get future split.
+
+5) I add a file "DESIGN" recording design choices and the reason behind.
+
+
+============================================
+
+The last version with syntactic reduction explicitly defined is 88df9a5724c5968a6e598c9484c502e0c5acf867.

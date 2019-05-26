@@ -1,0 +1,14 @@
+-R . Lambda
+
+Test.v
+Terms.v
+Substitution.v
+Simulation.v
+Residuals.v
+Reduction.v
+Redexes.v
+Marks.v
+Lambda.v
+Cube.v
+Confluence.v
+Conversion.v

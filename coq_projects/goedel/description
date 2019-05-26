@@ -1,0 +1,14 @@
+Name: Goedel
+Title: The Gödel-Rosser 1st incompleteness theorem
+Author: Russell O'Connor
+Email: roconnor@alumni.uwaterloo.ca
+Homepage: http://r6.ca
+Institution: University of California at Berkeley
+Date: 2007-04-13
+Description: A proof that any first order theory extending NN (which is PA
+without induction) that is complete is inconsistent
+Url: http://r6.ca/goedel1.html
+Keywords: Goedel Rosser Incompleteness Logic Hilbert
+Version: 8.1
+Require: Pocklington
+Category: Mathematics/Logic/Foundations

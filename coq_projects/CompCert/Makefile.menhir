@@ -1,0 +1,52 @@
+#######################################################################
+#                                                                     #
+#              The Compcert verified compiler                         #
+#                                                                     #
+#        François Pottier, INRIA Paris-Rocquencourt                   #
+#                                                                     #
+#  Copyright Institut National de Recherche en Informatique et en     #
+#  Automatique.  All rights reserved.  This file is distributed       #
+#  under the terms of the GNU General Public License as published by  #
+#  the Free Software Foundation, either version 2 of the License, or  #
+#  (at your option) any later version.  This file is also distributed #
+#  under the terms of the INRIA Non-Commercial License Agreement.     #
+#                                                                     #
+#######################################################################
+
+# This is a Makefile fragment for Menhir-specific aspects.
+
+# Executable.
+
+MENHIR = menhir
+
+# This flag can be set to true or false. It controls whether we use
+# Menhir's table back-end or code back-end. The table back-end is a
+# bit slower, but supports more features, including advanced error
+# reporting.
+
+MENHIR_TABLE = true
+
+# To pass or not to pass --table.
+
+ifeq ($(MENHIR_TABLE),true)
+  MENHIR_MODE = --table
+else
+  MENHIR_MODE =
+endif
+
+# Options.
+
+MENHIR_FLAGS = -v --no-stdlib -la 1
+
+# Using Menhir in --table mode requires MenhirLib.
+
+ifeq ($(MENHIR_TABLE),true)
+  MENHIR_LIBS = menhirLib.cmx
+else
+  MENHIR_LIBS =
+endif
+
+# The compilation rule.
+
+%.ml %.mli: %.mly
+	$(MENHIR) $(MENHIR_MODE) $(MENHIR_FLAGS) $<

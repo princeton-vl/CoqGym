@@ -1,0 +1,36 @@
+opam-version: "1.2"
+version: "dev"
+maintainer: "palmskog@gmail.com"
+
+homepage: "https://github.com/uwplse/verdi-raft"
+dev-repo: "https://github.com/uwplse/verdi-raft.git"
+bug-reports: "https://github.com/uwplse/verdi-raft/issues"
+license: "BSD"
+
+build: [
+  [ "./configure" ]
+  [ make "-j%{jobs}%" "vard-log" ]
+]
+build-test: [make "vard-log-test"]
+available: [ ocaml-version >= "4.02.3" ]
+depends: [
+  "coq" {>= "8.7" & < "8.10~"}
+  "verdi" {= "dev"}
+  "StructTact" {= "dev"}
+  "verdi-runtime" {= "dev"}
+  "ocamlbuild" {build}
+  "ounit" {test & >= "2.0.0"}
+  "cheerios" {= "dev"}
+  "cheerios-runtime" {= "dev"}
+]
+
+authors: [
+  "James Wilcox <>"
+  "Doug Woos <>"
+  "Pavel Panchekha <>"
+  "Zachary Tatlock <>"
+  "Steve Anton <>"
+  "Karl Palmskog <>"
+  "Ryan Doenges <>"
+  "Justin Adsuara <>"
+]

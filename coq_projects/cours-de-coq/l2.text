@@ -1,0 +1,86 @@
+Lesson 2 (ex1_auto.v)
+
+By now, you must be thinking that Coq is weird game, which
+seems to verify mathematical facts, but needs excruciating details.
+This is true, as it is true of most similar systems today. But still,
+there are things that Coq can do alone, with its Auto tactic.
+
+Here, we go through the examples of the first lesson again, allowing 
+the use of Auto. Auto (for Automatic) is NOT magic, it is systematic. To use
+it well, you must understand it.
+ 
+Example trivial
+
+Auto understands Assumption and Intros.
+Auto gives you a detailed script of what it does.
+
+Example and_commutative
+Auto does not do any Elim automatically. So you must do it. But Auto finds
+the theorem ``conj'' alone. This is because it belongs to a special list of
+theorems called the Hint list. To know what this list is at a given time,
+you do Print Hint. The list is presented witht the top operator of
+the theorem as a key. For example, conj is a theorem associated to and.
+Intuitively this means that if a conclusion has and as top operator, Auto 
+will try  to use conj to prove it.
+
+While you are looking at this list, look at the theorems associated to or.
+There is an integer associated to each theorem. For the moment we 
+ca safely ignore it.
+
+Example or_commutative
+Elimination of Or creates two subgoals. Both are solved by Auto, 
+but differently. This allows for a compact proof script. Look at the proof.
+Is it the one you obtained without Auto?
+
+Examples mp, S , resolution
+
+Auto not only tries to apply theorems in the hint list, but also
+theorems in the context. One may think that the context is temporarily
+added to the hint list.
+
+Example Praeclarum
+The strategy here is to do the necessary Elims, breaking apart the 
+conjunctions. Auto does the rest. Look at the command that Auto generated.
+Can you understand it?
+
+Example Witnesses
+Auto is not of much help there (for the moment) because neither  does it  do 
+Elims, nor does it create an unknown to be supplied later as
+a witness for the existential quantifier.
+
+Example Simple
+
+First we have to do the Elim necessary to give a name to the element you
+can reach from x. Try Auto now. Nothing happens. Auto finds things to do,
+but not enough to completely prove the goal. So it gives up.
+
+Auto does not invent the intermediary value necessary to apply transitivity.
+You must first do this step (Apply H' with y). Then Auto can conclude.
+
+The system will not allow you to put theorems like transitivity, that need 
+an additional argument to be applied, in the Hint list either.
+
+
+Examples not_not, not_quite_classic
+You can take advantage of Auto here, if you first remove all occurrences of
+not with Unfold not.
+
+Example mini_cases
+You can resolve this example very efficiently, by attacking directly 
+the interesting case. In fact, this is a recommended strategy: attack
+interesting cases head on, and leave simple ones for later.
+
+Example not_not_converse
+Here, I don't see how Auto could help. Do you?
+
+Example Peirce
+Try it by hand, then use Auto.
+
+
+NOTE. The real command is not Auto but Auto n where n is
+an integer that limits the search depth. If you think that Auto should
+have worked, you may be right: try again with a higher level, like 10.
+If you use too high a number, you may see Auto take much more time for 
+relatively little use.
+
+
