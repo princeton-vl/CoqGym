@@ -329,7 +329,7 @@ The following content is NOT a part of the CoqGym dataset, and therefore you do 
 
 * Make sure CoqGym has been properly installed and configured. The `coq_gym` conda environment is activated, the OPAM switch is on `4.07.1+flambda`.
 * Automated theorem provers: [Vampire](https://vprover.github.io), [CVC4](http://cvc4.cs.stanford.edu/), [Eprover](http://www.eprover.org), and [Z3](https://github.com/Z3Prover/z3). Install all of them and make sure they are accessible in PATH, otherwise you may see a performance degradation of the hammer baseline.
-* [Pytorch](https://pytorch.org/): Install the correct version for your hardware in the conda environment `coq_gym`.
+* [PyTorch](https://pytorch.org/): Install the correct version for your hardware in the conda environment `coq_gym`.
 * The instructions below assume that you are in the [ASTactic](./ASTactic/) directory.
 
 
