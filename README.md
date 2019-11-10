@@ -294,7 +294,7 @@ You may implement your own tools for similar purposes.
 
 ### 4.1 Interacting with CoqGym
 
-`eval_env.py` enables the interactiong with the proofs in CoqGym. 
+`eval_env.py` enables the interacting with the proofs in CoqGym. 
 See [ASTactic/agent.py](ASTactic/agent.py) for examples.
 
 
