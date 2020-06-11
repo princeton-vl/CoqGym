@@ -1,7 +1,7 @@
 #!/bin/bash
 OPAM_SWITCH="4.07.1+flambda"
 COQ_ROOT=$(pwd)/coq
-DEPENDENCIES="dune=2.6.0 cmdliner=1.0.4 ppx_sexp_conv=v0.12.0 ppx_deriving=4.4 sexplib=v0.12.0 ppx_import=1.6.2 camlp5=7.08 coq=8.10.2"
+DEPENDENCIES="dune=1.10.0 cmdliner=1.0.4 ppx_sexp_conv=v0.12.0 ppx_deriving=4.3 sexplib=v0.12.0 ppx_import=1.6.2 camlp5=7.08 coq=8.9.1"
 
 echo "Installing Dependencies.."
 opam switch $OPAM_SWITCH && eval $(opam env)
