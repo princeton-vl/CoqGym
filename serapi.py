@@ -358,11 +358,18 @@ class SerAPI:
         'remove a checkpoint created by push'
         states = self.states_stack.pop()
         self.states_stack[-1].extend(states)
+        return len(states)
 
 
     def pop(self):
         'rollback to a checkpoint created by push'
         self.cancel(self.states_stack.pop())
+
+    def pop_n(self, cnt):
+        states = []
+        for i in range(cnt):
+            states.append(self.states_stack[-1].pop())
+        self.cancel(states)
 
 
     def clean(self):

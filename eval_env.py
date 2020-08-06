@@ -72,7 +72,7 @@ class ProofEnv:
                 self.num_tactics_left -= 1
                 command = 'timeout %d (%s).' % (time_left, command[:-1])
             responses, _ = self.serapi.execute(command)
-            self.serapi.pull()  # delete the saved state if no error
+            states_cnt = self.serapi.pull()  # delete the saved state if no error
         except CoqExn as ex: 
             self.serapi.pop()  # restore the state
             return self.feedback('ERROR', error=ex)
@@ -97,7 +97,7 @@ class ProofEnv:
             self.success = True
             return self.feedback('SUCCESS')
         elif shelved_goals + given_up_goals != []:
-            self.serapi.pop()
+            self.serapi.pop_n(states_cnt)
             return self.feedback('ERROR', error=(shelved_goals, given_up_goals))
         else:
             return self.feedback('PROVING', fg_goals=fg_goals, bg_goals=bg_goals, 
