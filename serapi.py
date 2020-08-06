@@ -365,6 +365,7 @@ class SerAPI:
         'rollback to a checkpoint created by push'
         self.cancel(self.states_stack.pop())
 
+
     def pop_n(self, cnt):
         states = []
         for i in range(cnt):
