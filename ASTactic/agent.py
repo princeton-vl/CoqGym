@@ -32,8 +32,10 @@ term_parser = GallinaTermParser(caching=True)
 sexp_cache = SexpCache('../sexp_cache', readonly=True)
 
 def filter_env(env):
+    "Get the last 10 toplevel constants"
     filtered_env = []
-    for const in [const for const in env['constants'] if const['qualid'].startswith('SerTop')][-10:]:
+    toplevel_consts = [const for const in env['constants'] if const['qualid'].startswith('SerTop')]
+    for const in toplevel_consts[-10:]:
         ast = sexp_cache[const['sexp']]
         filtered_env.append({'qualid': const['qualid'], 'ast': term_parser.parse(ast)})
     return filtered_env
