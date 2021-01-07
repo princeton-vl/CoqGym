@@ -7,7 +7,6 @@ from collections import OrderedDict
 import json
 import sexpdata
 from utils import update_env
-from gallina import GallinaTermParser
 import os
 from glob import glob
 import pdb
