@@ -10,12 +10,11 @@ from lark.lexer import Token
 
 
 class AvgLoss:
-    'Maintaining the average of a set of losses'
+    "Maintaining the average of a set of losses"
 
     def __init__(self, device):
-        self.sum = torch.tensor(0., device=device)
+        self.sum = torch.tensor(0.0, device=device)
         self.num = 0
-
 
     def add(self, v):
         self.sum += v
@@ -26,24 +25,28 @@ class AvgLoss:
 
 
 class ContextReader(nn.Module):
-
     def __init__(self, opts):
         super().__init__()
         self.opts = opts
-        self.linear1 = nn.Linear(opts.hidden_dim + opts.term_embedding_dim + 3, opts.hidden_dim)
+        self.linear1 = nn.Linear(
+            opts.hidden_dim + opts.term_embedding_dim + 3, opts.hidden_dim
+        )
         self.relu1 = nn.ReLU()
         self.linear2 = nn.Linear(opts.hidden_dim, 1)
-        self.default_context = torch.zeros(self.opts.term_embedding_dim + 3, device=self.opts.device)
-
+        self.default_context = torch.zeros(
+            self.opts.term_embedding_dim + 3, device=self.opts.device
+        )
 
     def forward(self, states, embeddings):
-        assert states.size(0) == len(embeddings) 
+        assert states.size(0) == len(embeddings)
         context = []
         for state, embedding in zip(states, embeddings):
             if embedding.size(0) == 0:  # no premise
                 context.append(self.default_context)
             else:
-                input = torch.cat([state.unsqueeze(0).expand(embedding.size(0), -1), embedding], dim=1)
+                input = torch.cat(
+                    [state.unsqueeze(0).expand(embedding.size(0), -1), embedding], dim=1
+                )
                 weights = self.linear2(self.relu1(self.linear1(input)))
                 weights = F.softmax(weights, dim=0)
                 context.append(torch.matmul(embedding.t(), weights).squeeze())
@@ -52,17 +55,19 @@ class ContextReader(nn.Module):
 
 
 class ContextRetriever(nn.Module):
-
     def __init__(self, opts):
         super().__init__()
         self.opts = opts
-        self.linear1 = nn.Linear(opts.hidden_dim + opts.term_embedding_dim + 3, opts.hidden_dim)
+        self.linear1 = nn.Linear(
+            opts.hidden_dim + opts.term_embedding_dim + 3, opts.hidden_dim
+        )
         self.relu1 = nn.ReLU()
         self.linear2 = nn.Linear(opts.hidden_dim, 1)
 
-
     def forward(self, state, embeddings):
-        input = torch.cat([state.unsqueeze(0).expand(embeddings.size(0), -1), embeddings], dim=1)
+        input = torch.cat(
+            [state.unsqueeze(0).expand(embeddings.size(0), -1), embeddings], dim=1
+        )
         logits = self.linear2(self.relu1(self.linear1(input)))
         return logits.view(logits.size(0))
 
@@ -72,37 +77,72 @@ def clear_state(node):
 
 
 class TacticDecoder(nn.Module):
-
     def __init__(self, grammar, opts):
         super().__init__()
         self.opts = opts
         self.grammar = grammar
-        self.symbol_embeddings = nn.Embedding(len(self.grammar.symbols), opts.symbol_dim)
-        self.production_rule_embeddings = nn.Embedding(len(self.grammar.production_rules), opts.embedding_dim)
-        self.lex_rule_embeddings = nn.Embedding(len(self.grammar.terminal_symbols), opts.embedding_dim)
-        self.default_action_embedding = torch.zeros(self.opts.embedding_dim, device=self.opts.device)
+        self.symbol_embeddings = nn.Embedding(
+            len(self.grammar.symbols), opts.symbol_dim
+        )
+        self.production_rule_embeddings = nn.Embedding(
+            len(self.grammar.production_rules), opts.embedding_dim
+        )
+        self.lex_rule_embeddings = nn.Embedding(
+            len(self.grammar.terminal_symbols), opts.embedding_dim
+        )
+        self.default_action_embedding = torch.zeros(
+            self.opts.embedding_dim, device=self.opts.device
+        )
         self.default_state = torch.zeros(self.opts.hidden_dim, device=self.opts.device)
-        self.controller = nn.GRUCell(2 * opts.embedding_dim + 2 * opts.term_embedding_dim + 6 + opts.hidden_dim + opts.symbol_dim, opts.hidden_dim)
-        self.state_decoder = nn.Sequential(nn.Linear(opts.hidden_dim, opts.embedding_dim), nn.Tanh())
+        self.controller = nn.GRUCell(
+            2 * opts.embedding_dim
+            + 2 * opts.term_embedding_dim
+            + 6
+            + opts.hidden_dim
+            + opts.symbol_dim,
+            opts.hidden_dim,
+        )
+        self.state_decoder = nn.Sequential(
+            nn.Linear(opts.hidden_dim, opts.embedding_dim), nn.Tanh()
+        )
         self.context_reader = ContextReader(opts)
         self.context_retriever = ContextRetriever(opts)
-        self.INT_classifier = nn.Sequential(nn.Linear(opts.hidden_dim, opts.hidden_dim // 2), 
-                                            nn.ReLU(inplace=True),
-                                            nn.Linear(opts.hidden_dim // 2, 4))
+        self.INT_classifier = nn.Sequential(
+            nn.Linear(opts.hidden_dim, opts.hidden_dim // 2),
+            nn.ReLU(inplace=True),
+            nn.Linear(opts.hidden_dim // 2, 4),
+        )
 
-        self.hint_dbs = ['arith', 'zarith', 'algebra', 'real', 'sets', 'core', 'bool', 'datatypes', 'coc', 'set', 'zfc']
-        self.HINT_DB_classifier = nn.Sequential(nn.Linear(opts.hidden_dim, opts.hidden_dim // 2),
-                                                nn.ReLU(inplace=True),
-                                                nn.Linear(opts.hidden_dim // 2, len(self.hint_dbs)))
+        self.hint_dbs = [
+            "arith",
+            "zarith",
+            "algebra",
+            "real",
+            "sets",
+            "core",
+            "bool",
+            "datatypes",
+            "coc",
+            "set",
+            "zfc",
+        ]
+        self.HINT_DB_classifier = nn.Sequential(
+            nn.Linear(opts.hidden_dim, opts.hidden_dim // 2),
+            nn.ReLU(inplace=True),
+            nn.Linear(opts.hidden_dim // 2, len(self.hint_dbs)),
+        )
 
     def action2embedding(self, action):
         if isinstance(action, tuple):  # a production rule
             idx = self.grammar.production_rules.index(action)
-            return self.production_rule_embeddings(torch.LongTensor([idx]).to(self.opts.device)).squeeze()
+            return self.production_rule_embeddings(
+                torch.LongTensor([idx]).to(self.opts.device)
+            ).squeeze()
         else:  # a token
             idx = self.grammar.terminal_symbols.index(action)
-            return self.lex_rule_embeddings(torch.LongTensor([idx]).to(self.opts.device)).squeeze()
-
+            return self.lex_rule_embeddings(
+                torch.LongTensor([idx]).to(self.opts.device)
+            ).squeeze()
 
     def gather_frontier_info(self, frontiers):
         indice = []  # indice for incomplete ASTs
@@ -120,29 +160,40 @@ class TacticDecoder(nn.Module):
                 assert node.parent is None
                 s_tm1.append(self.default_state)
                 a_tm1.append(self.default_action_embedding)
-                p_t.append(torch.cat([self.default_state, self.default_action_embedding]))
+                p_t.append(
+                    torch.cat([self.default_state, self.default_action_embedding])
+                )
             else:
                 s_tm1.append(node.pred.state)
                 a_tm1.append(self.action2embedding(node.pred.action))
-                p_t.append(torch.cat([node.parent.state, self.action2embedding(node.parent.action)]))
+                p_t.append(
+                    torch.cat(
+                        [node.parent.state, self.action2embedding(node.parent.action)]
+                    )
+                )
             symbols.append(node.symbol)
 
         if indice == []:  # all trees are complete
             return [], None, None, None, None
 
-        symbol_indice = torch.LongTensor([self.grammar.symbols.index(s) for s in symbols])
+        symbol_indice = torch.LongTensor(
+            [self.grammar.symbols.index(s) for s in symbols]
+        )
         n_t = self.symbol_embeddings(symbol_indice.to(self.opts.device))
         s_tm1 = torch.stack(s_tm1)
         a_tm1 = torch.stack(a_tm1)
-        p_t = torch.stack(p_t)        
+        p_t = torch.stack(p_t)
         return indice, s_tm1, a_tm1, p_t, n_t
 
-
     def initialize_trees(self, batchsize):
-        asts = [NonterminalNode(self.grammar.start_symbol, parent=None) for i in range(batchsize)]  # partial results
-        frontiers = [[asts[i]] for i in range(batchsize)]  # the stacks for DFS, whose top are the next nodes
+        asts = [
+            NonterminalNode(self.grammar.start_symbol, parent=None)
+            for i in range(batchsize)
+        ]  # partial results
+        frontiers = [
+            [asts[i]] for i in range(batchsize)
+        ]  # the stacks for DFS, whose top are the next nodes
         return asts, frontiers
-
 
     def expand_node_set_pred(self, node, rule, stack):
         node.expand(rule)
@@ -158,20 +209,36 @@ class TacticDecoder(nn.Module):
         if stack != []:
             stack[-1].pred = node
 
-
-    def expand_nonterminal(self, node, expansion_step, nonterminal_expansion_step, actions_gt, teacher_forcing, stack):
+    def expand_nonterminal(
+        self,
+        node,
+        expansion_step,
+        nonterminal_expansion_step,
+        actions_gt,
+        teacher_forcing,
+        stack,
+    ):
         # selcet a production rule and compute the loss
         applicable_rules = self.grammar.get_applicable_rules(node.symbol)
 
         if teacher_forcing:
-            logits = torch.matmul(self.production_rule_embeddings.weight[applicable_rules], self.state_decoder(node.state))
+            logits = torch.matmul(
+                self.production_rule_embeddings.weight[applicable_rules],
+                self.state_decoder(node.state),
+            )
             action_idx = actions_gt[expansion_step]
-            rule = self.grammar.production_rules[action_idx]  # expand the tree using the ground truth action 
-            action_gt_onehot = torch.LongTensor([applicable_rules.index(action_idx)]).to(self.opts.device)
+            rule = self.grammar.production_rules[
+                action_idx
+            ]  # expand the tree using the ground truth action
+            action_gt_onehot = torch.LongTensor(
+                [applicable_rules.index(action_idx)]
+            ).to(self.opts.device)
             loss = F.cross_entropy(logits.unsqueeze(0), action_gt_onehot)
 
         else:
-            logits = torch.matmul(self.production_rule_embeddings.weight, self.state_decoder(node.state))
+            logits = torch.matmul(
+                self.production_rule_embeddings.weight, self.state_decoder(node.state)
+            )
             rule_idx = applicable_rules[logits[applicable_rules].argmax().item()]
             rule = self.grammar.production_rules[rule_idx]
             if nonterminal_expansion_step < len(actions_gt):
@@ -179,8 +246,8 @@ class TacticDecoder(nn.Module):
                 action_gt_onehot = torch.LongTensor([action_idx]).to(self.opts.device)
                 loss = F.cross_entropy(logits.unsqueeze(0), action_gt_onehot)
             else:
-                loss = 0.
-            
+                loss = 0.0
+
             if expansion_step > self.opts.size_limit:  # end the generation process asap
                 rule_idx = applicable_rules[0]
                 rule = self.grammar.production_rules[rule_idx]
@@ -189,25 +256,37 @@ class TacticDecoder(nn.Module):
 
         return loss
 
-
-    def expand_terminal(self, node, expansion_step, environment, local_context, goal, actions_gt, teacher_forcing):
-        loss = 0.        
+    def expand_terminal(
+        self,
+        node,
+        expansion_step,
+        environment,
+        local_context,
+        goal,
+        actions_gt,
+        teacher_forcing,
+    ):
+        loss = 0.0
         if teacher_forcing:
             token_gt = actions_gt[expansion_step]
 
-        if node.symbol in ['QUALID', 'LOCAL_IDENT']:
-            if node.symbol == 'QUALID':
-                candidates = environment['idents'] + local_context['idents']
+        if node.symbol in ["QUALID", "LOCAL_IDENT"]:
+            if node.symbol == "QUALID":
+                candidates = environment["idents"] + local_context["idents"]
             else:
-                candidates = local_context['idents']
+                candidates = local_context["idents"]
             if candidates == []:
-                token = random.choice(['H'] + goal['quantified_idents'])
+                token = random.choice(["H"] + goal["quantified_idents"])
             else:
-                if node.symbol == 'QUALID':
-                    candidate_embeddings = torch.cat([environment['embeddings'], local_context['embeddings']])
+                if node.symbol == "QUALID":
+                    candidate_embeddings = torch.cat(
+                        [environment["embeddings"], local_context["embeddings"]]
+                    )
                 else:
-                    candidate_embeddings = local_context['embeddings']
-                context_scores = self.context_retriever(node.state, candidate_embeddings)
+                    candidate_embeddings = local_context["embeddings"]
+                context_scores = self.context_retriever(
+                    node.state, candidate_embeddings
+                )
                 if teacher_forcing:
                     target = torch.zeros_like(context_scores)
                     if token_gt in candidates:
@@ -216,7 +295,7 @@ class TacticDecoder(nn.Module):
                 else:
                     token = candidates[context_scores.argmax()]
 
-        elif node.symbol in 'INT':
+        elif node.symbol in "INT":
             cls = self.INT_classifier(node.state)
             if teacher_forcing:
                 cls_gt = torch.LongTensor([int(token_gt) - 1]).to(self.opts.device)
@@ -224,19 +303,21 @@ class TacticDecoder(nn.Module):
             else:
                 token = str(cls.argmax().item() + 1)
 
-        elif node.symbol == 'HINT_DB':
+        elif node.symbol == "HINT_DB":
             cls = self.HINT_DB_classifier(node.state)
             if teacher_forcing:
-                cls_gt = torch.LongTensor([self.hint_dbs.index(token_gt)]).to(self.opts.device)
+                cls_gt = torch.LongTensor([self.hint_dbs.index(token_gt)]).to(
+                    self.opts.device
+                )
                 loss = F.cross_entropy(cls.unsqueeze(0), cls_gt)
             else:
                 token = self.hint_dbs[cls.argmax().item()]
 
-        elif node.symbol == 'QUANTIFIED_IDENT':
-            if goal['quantified_idents'] == []:
-                candidates = ['x']
+        elif node.symbol == "QUANTIFIED_IDENT":
+            if goal["quantified_idents"] == []:
+                candidates = ["x"]
             else:
-                candidates = goal['quantified_idents']
+                candidates = goal["quantified_idents"]
             token = random.choice(candidates)
 
         # generadddte a token with the lex rule
@@ -244,25 +325,48 @@ class TacticDecoder(nn.Module):
 
         return loss
 
-    
-    def expand_partial_tree(self, node, expansion_step, nonterminal_expansion_step, environment, local_context, goal, actions_gt, 
-                            teacher_forcing, stack):
+    def expand_partial_tree(
+        self,
+        node,
+        expansion_step,
+        nonterminal_expansion_step,
+        environment,
+        local_context,
+        goal,
+        actions_gt,
+        teacher_forcing,
+        stack,
+    ):
         assert node.state is not None
         if isinstance(node, NonterminalNode):
-            return self.expand_nonterminal(node, expansion_step, nonterminal_expansion_step, actions_gt, teacher_forcing, stack)
+            return self.expand_nonterminal(
+                node,
+                expansion_step,
+                nonterminal_expansion_step,
+                actions_gt,
+                teacher_forcing,
+                stack,
+            )
         else:
-            return self.expand_terminal(node, expansion_step, environment, local_context, goal, actions_gt, teacher_forcing)
-
+            return self.expand_terminal(
+                node,
+                expansion_step,
+                environment,
+                local_context,
+                goal,
+                actions_gt,
+                teacher_forcing,
+            )
 
     def forward(self, environment, local_context, goal, actions, teacher_forcing):
         if not teacher_forcing:
             # when train without teacher forcing, only consider the expansion of non-terminal nodes
-            actions = [[a for a in act if isinstance(a, int)] for act in actions] 
+            actions = [[a for a in act if isinstance(a, int)] for act in actions]
 
         loss = AvgLoss(self.opts.device)
 
         # initialize the trees
-        batchsize = goal['embeddings'].size(0)
+        batchsize = goal["embeddings"].size(0)
         asts, frontiers = self.initialize_trees(batchsize)
 
         # expand the trees in a depth-first order
@@ -273,12 +377,21 @@ class TacticDecoder(nn.Module):
             # collect inputs from all partial trees: s_{t-1}, a_{t-1}, p_t, n_t
             indice, s_tm1, a_tm1, p_t, n_t = self.gather_frontier_info(frontiers)
             if indice == []:  # all trees are complete
-                break 
+                break
 
-            r = [torch.cat([environment[i]['embeddings'], local_context[i]['embeddings']], dim=0) for i in indice]
+            r = [
+                torch.cat(
+                    [environment[i]["embeddings"], local_context[i]["embeddings"]],
+                    dim=0,
+                )
+                for i in indice
+            ]
             u_t = self.context_reader(s_tm1, r)
 
-            states = self.controller(torch.cat([a_tm1, goal['embeddings'][indice], u_t, p_t, n_t], dim=1), s_tm1)
+            states = self.controller(
+                torch.cat([a_tm1, goal["embeddings"][indice], u_t, p_t, n_t], dim=1),
+                s_tm1,
+            )
 
             # store states and expand nodes
             for j, idx in enumerate(indice):
@@ -286,8 +399,19 @@ class TacticDecoder(nn.Module):
                 node = stack.pop()
                 node.state = states[j]
                 g = {k: v[idx] for k, v in goal.items()}
-                loss.add(self.expand_partial_tree(node, expansion_step, nonterminal_expansion_step[idx], 
-                                                  environment[idx], local_context[idx], g, actions[idx], teacher_forcing, stack))
+                loss.add(
+                    self.expand_partial_tree(
+                        node,
+                        expansion_step,
+                        nonterminal_expansion_step[idx],
+                        environment[idx],
+                        local_context[idx],
+                        g,
+                        actions[idx],
+                        teacher_forcing,
+                        stack,
+                    )
+                )
                 if isinstance(node, NonterminalNode):
                     nonterminal_expansion_step[idx] += 1
 
@@ -298,9 +422,9 @@ class TacticDecoder(nn.Module):
 
         return asts, loss.value()
 
-
     def duplicate(self, ast, stack):
         old2new = {}
+
         def recursive_duplicate(node, parent=None):
             if isinstance(node, Token):
                 new_node = deepcopy(node)
@@ -326,34 +450,48 @@ class TacticDecoder(nn.Module):
             return new_node
 
         new_ast = recursive_duplicate(ast)
-        new_stack = [old2new[node] for node in stack] 
+        new_stack = [old2new[node] for node in stack]
         return new_ast, new_stack
-
 
     def beam_search(self, environment, local_context, goal):
         # initialize the trees in the beam
-        assert goal['embeddings'].size(0) == 1  # only support batchsize == 1
+        assert goal["embeddings"].size(0) == 1  # only support batchsize == 1
         beam, frontiers = self.initialize_trees(1)
-        log_likelihood = [0.]  # the (unnormalized) objective function maximized by the beam search
+        log_likelihood = [
+            0.0
+        ]  # the (unnormalized) objective function maximized by the beam search
         complete_trees = []  # the complete ASTs generated during the beam search
 
         expansion_step = 0
         while True:
             # collect inputs from all partial trees
             indice, s_tm1, a_tm1, p_t, n_t = self.gather_frontier_info(frontiers)
-            # check if there are complete trees 
+            # check if there are complete trees
             for i in range(len(beam)):
                 if i not in indice:
-                    normalized_log_likelihood = log_likelihood[i] / (expansion_step ** self.opts.lens_norm)  # length normalization
-                    beam[i].traverse_pre(clear_state) 
+                    normalized_log_likelihood = log_likelihood[i] / (
+                        expansion_step ** self.opts.lens_norm
+                    )  # length normalization
+                    beam[i].traverse_pre(clear_state)
                     complete_trees.append((beam[i], normalized_log_likelihood))
             if indice == []:  # all trees are complete, terminate the beam search
                 break
 
-            r = [torch.cat([environment['embeddings'], local_context['embeddings']], dim=0) for i in indice]
+            r = [
+                torch.cat(
+                    [environment["embeddings"], local_context["embeddings"]], dim=0
+                )
+                for i in indice
+            ]
             u_t = self.context_reader(s_tm1, r)
 
-            states = self.controller(torch.cat([a_tm1, goal['embeddings'].expand(len(indice), -1), u_t, p_t, n_t], dim=1), s_tm1)
+            states = self.controller(
+                torch.cat(
+                    [a_tm1, goal["embeddings"].expand(len(indice), -1), u_t, p_t, n_t],
+                    dim=1,
+                ),
+                s_tm1,
+            )
 
             # compute the log likelihood and pick the top candidates
             beam_candidates = []
@@ -364,57 +502,98 @@ class TacticDecoder(nn.Module):
 
                 if isinstance(node, NonterminalNode):
                     applicable_rules = self.grammar.get_applicable_rules(node.symbol)
-                    if expansion_step > self.opts.size_limit:  # end the generation process asap
-                        beam_candidates.append((idx, log_likelihood[i], applicable_rules[0]))
+                    if (
+                        expansion_step > self.opts.size_limit
+                    ):  # end the generation process asap
+                        beam_candidates.append(
+                            (idx, log_likelihood[i], applicable_rules[0])
+                        )
                     else:
-                        logits = torch.matmul(self.production_rule_embeddings.weight[applicable_rules], self.state_decoder(node.state))
+                        logits = torch.matmul(
+                            self.production_rule_embeddings.weight[applicable_rules],
+                            self.state_decoder(node.state),
+                        )
                         log_cond_prob = logits - logits.logsumexp(dim=0)
                         for n, cand in enumerate(applicable_rules):
-                            beam_candidates.append((idx, log_likelihood[idx] + log_cond_prob[n].item(), cand))
+                            beam_candidates.append(
+                                (
+                                    idx,
+                                    log_likelihood[idx] + log_cond_prob[n].item(),
+                                    cand,
+                                )
+                            )
 
-                elif node.symbol in ['QUALID', 'LOCAL_IDENT']:
-                    if node.symbol == 'QUALID':
-                        candidates = environment['idents'] + local_context['idents']
+                elif node.symbol in ["QUALID", "LOCAL_IDENT"]:
+                    if node.symbol == "QUALID":
+                        candidates = environment["idents"] + local_context["idents"]
                     else:
-                        candidates = local_context['idents']
+                        candidates = local_context["idents"]
                     if candidates == []:
-                        candidates = ['H'] + goal['quantified_idents']
-                        log_cond_prob = - math.log(len(candidates))
+                        candidates = ["H"] + goal["quantified_idents"]
+                        log_cond_prob = -math.log(len(candidates))
                         for cand in candidates:
-                            beam_candidates.append((idx, log_likelihood[idx] + log_cond_prob, cand))
+                            beam_candidates.append(
+                                (idx, log_likelihood[idx] + log_cond_prob, cand)
+                            )
                     else:
-                        if node.symbol == 'QUALID':
-                            candidate_embeddings = torch.cat([environment['embeddings'], local_context['embeddings']])
+                        if node.symbol == "QUALID":
+                            candidate_embeddings = torch.cat(
+                                [environment["embeddings"], local_context["embeddings"]]
+                            )
                         else:
-                            candidate_embeddings = local_context['embeddings']
-                        context_scores = self.context_retriever(node.state, candidate_embeddings)
+                            candidate_embeddings = local_context["embeddings"]
+                        context_scores = self.context_retriever(
+                            node.state, candidate_embeddings
+                        )
                         log_cond_prob = context_scores - context_scores.logsumexp(dim=0)
                         for n, cand in enumerate(candidates):
-                            beam_candidates.append((idx, log_likelihood[idx] + log_cond_prob[n].item(), cand))
-                       
-                elif node.symbol == 'INT':
+                            beam_candidates.append(
+                                (
+                                    idx,
+                                    log_likelihood[idx] + log_cond_prob[n].item(),
+                                    cand,
+                                )
+                            )
+
+                elif node.symbol == "INT":
                     cls = self.INT_classifier(node.state)
                     log_cond_prob = cls - cls.logsumexp(dim=0)
                     for n in range(cls.size(0)):
-                        beam_candidates.append((idx, log_likelihood[idx] + log_cond_prob[n].item(), str(n + 1)))
+                        beam_candidates.append(
+                            (
+                                idx,
+                                log_likelihood[idx] + log_cond_prob[n].item(),
+                                str(n + 1),
+                            )
+                        )
 
-                elif node.symbol == 'HINT_DB':
+                elif node.symbol == "HINT_DB":
                     cls = self.HINT_DB_classifier(node.state)
                     log_cond_prob = cls - cls.logsumexp(dim=0)
                     for n in range(cls.size(0)):
-                        beam_candidates.append((idx, log_likelihood[idx] + log_cond_prob[n].item(), self.hint_dbs[n]))
-              
-                elif node.symbol == 'QUANTIFIED_IDENT':
-                    if len(goal['quantified_idents']) > 0:
-                        candidates = list(goal['quantified_idents'])
+                        beam_candidates.append(
+                            (
+                                idx,
+                                log_likelihood[idx] + log_cond_prob[n].item(),
+                                self.hint_dbs[n],
+                            )
+                        )
+
+                elif node.symbol == "QUANTIFIED_IDENT":
+                    if len(goal["quantified_idents"]) > 0:
+                        candidates = list(goal["quantified_idents"])
                     else:
-                        candidates = ['x']
-                    log_cond_prob = - math.log(len(candidates))
+                        candidates = ["x"]
+                    log_cond_prob = -math.log(len(candidates))
                     for cand in candidates:
-                        beam_candidates.append((idx, log_likelihood[idx] + log_cond_prob, cand))
+                        beam_candidates.append(
+                            (idx, log_likelihood[idx] + log_cond_prob, cand)
+                        )
 
             # expand the nodes and update the beam
-            beam_candidates = sorted(beam_candidates, key=lambda x: x[1], reverse=True)[:self.opts.beam_width]
+            beam_candidates = sorted(beam_candidates, key=lambda x: x[1], reverse=True)[
+                : self.opts.beam_width
+            ]
             new_beam = []
             new_frontiers = []
             new_log_likelihood = []
@@ -434,6 +613,7 @@ class TacticDecoder(nn.Module):
             log_likelihood = new_log_likelihood
             expansion_step += 1
 
-        complete_trees = sorted(complete_trees, key=lambda x: x[1], reverse=True)  # pick the top ASTs
-        return [t[0] for t in complete_trees[:self.opts.num_tactic_candidates]]
-
+        complete_trees = sorted(
+            complete_trees, key=lambda x: x[1], reverse=True
+        )  # pick the top ASTs
+        return [t[0] for t in complete_trees[: self.opts.num_tactic_candidates]]

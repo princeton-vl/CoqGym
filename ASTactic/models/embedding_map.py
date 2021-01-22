@@ -1,8 +1,8 @@
 import torch
 import torch.nn as nn
 
-class EmbeddingMap(nn.Module):
 
+class EmbeddingMap(nn.Module):
     def __init__(self, dim, opts):
         self.dim = dim
         self.opts = opts
