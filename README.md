@@ -75,7 +75,7 @@ Alternatively, you may also use CoqGym in a [container](#2-using-coqgym-in-a-con
 1. Build the Coq projects (can take a while): `cd coq_projects && make && cd ..`
 1. Create and activate the conda environment: `conda env create -f coq_gym.yml && conda activate coq_gym`
 
-*Note*: [Coq](https://github.com/coq/coq), [SerAPI](https://github.com/ejgallego/coq-serapi), [CoqHammer](https://github.com/lukaszcz/coqhammer), and the Coq projects in the [coq_projects](./coq_projects) directory are indendent software projects with their own code repositories, but please follow the instructions above to build the specific versions we need.
+*Note*: [Coq](https://github.com/coq/coq), [SerAPI](https://github.com/ejgallego/coq-serapi), [CoqHammer](https://github.com/lukaszcz/coqhammer), and the Coq projects in [coq_projects](./coq_projects) directory are indendent software projects with their own code repositories, but please follow the instructions above to build the specific versions we need.
 
 ### 1.3 Extracting the Proofs from Coq Code (Optional)
 
@@ -380,7 +380,7 @@ Assuming you want to test the model checkpoint `runs/astactic/checkpoints/model_
 ## 6. Credits
 
 * The code is formatted using [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black).
-* This repo includes the codebase of [Coq](https://github.com/coq/coq), [SerAPI](https://github.com/ejgallego/coq-serapi), [CoqHammer](https://github.com/lukaszcz/coqhammer), and the Coq projects in the [coq_projects](./coq_projects).
+* This repo includes the codebase of [Coq](https://github.com/coq/coq), [SerAPI](https://github.com/ejgallego/coq-serapi), [CoqHammer](https://github.com/lukaszcz/coqhammer), and the Coq projects in [coq_projects](./coq_projects).
 
 ## 7. Contributing
 
