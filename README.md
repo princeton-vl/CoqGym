@@ -45,6 +45,8 @@ For any questions, please ask in [Discussions](https://github.com/princeton-vl/C
     &nbsp; &nbsp;  5.2 [Extracting Proof Steps](#52-extracting-proof-steps)  
     &nbsp; &nbsp;  5.3 [Training](#53-training)  
     &nbsp; &nbsp;  5.4 [Testing](#54-testing)  
+6. [Credits](#6-credits)
+7. [Contributing](#7-contributing)
     
     
 ---
@@ -373,3 +375,13 @@ Assuming you want to test the model checkpoint `runs/astactic/checkpoints/model_
 
 
 *Caveat*: Testing is computationally expensive, but the workloads are embarrassingly parallel, which means you can run them in parallel in any order. We do not provide the code for that because it depends on a particular HPC infrastructure.
+
+
+## 6. Credits
+
+* The code is formatted using [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black).
+* This repo includes the codebase of [Coq](https://github.com/coq/coq), [SerAPI](https://github.com/ejgallego/coq-serapi), [CoqHammer](https://github.com/lukaszcz/coqhammer), and the Coq projects in the [coq_projects](./coq_projects).
+
+## 7. Contributing
+
+We welcome and appreciate contributions from the community. For bug fixes and relatively minor changes (such as comments, typos, etc.), feel free to submit a pull request directly. For anything beyond, please first post in [Discussions](https://github.com/princeton-vl/CoqGym/discussions) before implementing. 
