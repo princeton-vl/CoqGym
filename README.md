@@ -17,7 +17,7 @@ International Conference on Machine Learning (ICML) 2019
 }
 ```
 
-For any questions, please ask in [Discussions](https://github.com/princeton-vl/CoqGym/discussions).
+For potential bugs, please open an issue. For any other questions, please ask in [Discussions](https://github.com/princeton-vl/CoqGym/discussions).
 
 
 ## Table of Contents
