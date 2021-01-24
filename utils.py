@@ -7,10 +7,11 @@ from glob import glob
 from progressbar import ProgressBar
 from collections import defaultdict
 import lmdb
+from typing import Callable
 import pdb
 
 
-def log(msg, msg_type="INFO"):
+def log(msg: str, msg_type: str = "INFO") -> None:
     if msg_type == "INFO":
         prefix = ""
     elif msg_type == "WARNING":
@@ -26,7 +27,7 @@ comment_pattern = re.compile(
 )
 
 
-def remove_comments(code):
+def remove_comments(code: str) -> str:
     characters = []
     num_left = 0
     in_string = False
@@ -53,7 +54,7 @@ def remove_comments(code):
     return code_without_comment
 
 
-def normalize_spaces(s):
+def normalize_spaces(s: str) -> str:
     return re.sub(r"\s+", " ", s, flags=re.DOTALL)
 
 
@@ -71,7 +72,7 @@ def get_code(coq_code):
 
 
 class SexpCache:
-    def __init__(self, db_path, readonly=False):
+    def __init__(self, db_path: str, readonly: bool = False) -> None:
         if readonly:
             self.env = lmdb.open(
                 db_path,
@@ -86,7 +87,7 @@ class SexpCache:
                 db_path, map_size=1e11, writemap=True, readahead=False, max_readers=1024
             )
 
-    def dump(self, sexp):
+    def dump(self, sexp: str) -> None:
         sexp_bytes = sexp.encode("utf-8")
         digest = sha1(sexp_bytes).hexdigest()
         key = digest.encode("utf-8")
@@ -94,7 +95,7 @@ class SexpCache:
             txn.put(key, sexp_bytes, dupdata=False, overwrite=False)
         return digest
 
-    def __getitem__(self, key):
+    def __getitem__(self, key: str) -> str:
         with self.env.begin() as txn:
             return txn.get(key.encode("utf-8")).decode("utf-8")
 
@@ -192,7 +193,7 @@ def extract_code(meta, loc2code):
     return coq_code
 
 
-def dst_filename(src, data_path):
+def dst_filename(src, data_path) -> str:
     return os.path.join(data_path, *os.path.splitext(src)[0].split(os.path.sep)[1:])
 
 
@@ -217,7 +218,12 @@ def update_env(env, env_delta):
     return env
 
 
-def iter_proofs(data_root, callback, include_synthetic=False, show_progress=False):
+def iter_proofs(
+    data_root: str,
+    callback,
+    include_synthetic: bool = False,
+    show_progress: bool = False,
+) -> None:
     def iter_proofs_in_file(filename, file_data):
         env = {"constants": [], "inductives": []}
         for proof_data in file_data["proofs"]:
@@ -237,7 +243,7 @@ def iter_proofs(data_root, callback, include_synthetic=False, show_progress=Fals
     iter_coq_files(data_root, iter_proofs_in_file, show_progress)
 
 
-def iter_coq_files(data_root, callback, show_progress=False):
+def iter_coq_files(data_root: str, callback, show_progress: bool = False) -> None:
     coq_files = glob(os.path.join(data_root, "**/*.json"), recursive=True)
     bar = ProgressBar(max_value=len(coq_files))
     for i, f in enumerate(coq_files):
@@ -247,7 +253,7 @@ def iter_coq_files(data_root, callback, show_progress=False):
             bar.update(i)
 
 
-def iter_sexp_cache(db_path, callback):
+def iter_sexp_cache(db_path: str, callback) -> None:
     env = lmdb.open(db_path, map_size=1e11, readonly=True, readahead=True, lock=False)
     bar = ProgressBar(max_value=env.stat()["entries"])
     with env.begin() as txn:
