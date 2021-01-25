@@ -14,13 +14,14 @@ avg_time = 0
 
 for f in glob(os.path.join(sys.argv[1], "*.json")):
     results = json.load(open(f))["results"]
-    for r in results:
-        proj = r["filename"].split(os.path.sep)[2]
-        if r["success"] and r["time"] <= TIME_LIMIT:
-            num_success[proj] += 1
-            avg_time += r["time"]
-        else:
-            num_fail[proj] += 1
+    for theory in results:
+        for r in theory:
+            proj = r["filename"].split(os.path.sep)[2]
+            if r["success"] and r["time"] <= TIME_LIMIT:
+                num_success[proj] += 1
+                avg_time += r["time"]
+            else:
+                num_fail[proj] += 1
 
 total_success = 0
 total_fail = 0
