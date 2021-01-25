@@ -32,7 +32,7 @@ COMPCERT_ARCH = x86_$(LBITS)-linux
 endif
 
 CompCert : 
-	opam install menhir=20181113 && eval $(opam env)
+	opam install --yes menhir=20181113 && eval $(opam env)
 	cd CompCert/ && ./configure $(COMPCERT_ARCH) && make
 
 math-comp : 
