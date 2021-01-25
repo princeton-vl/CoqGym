@@ -140,3 +140,15 @@ cython_debug/
 *.vo
 *.pyc
 coq_projects/
+
+# PyCharm
+.idea/*
+
+# Files created during install and make process
+coq/*
+coq-serapi/*
+ASTactic/coqhammer/*
+data/*
+projs_split.json
+sexp_cache/*
+
