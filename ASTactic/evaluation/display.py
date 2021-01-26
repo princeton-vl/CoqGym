@@ -3,8 +3,6 @@ import json
 import os
 from glob import glob
 from collections import defaultdict
-import csv
-import pdb
 
 TIME_LIMIT = 600
 

@@ -1,9 +1,0 @@
-[submodule "coq"]
-	path = coq
-	url = git@github.com:princeton-vl/coq.git
-[submodule "coq-serapi"]
-	path = coq-serapi
-	url = git@github.com:princeton-vl/coq-serapi.git
-[submodule "ASTactic/coqhammer"]
-	path = ASTactic/coqhammer
-	url = https://github.com/lukaszcz/coqhammer

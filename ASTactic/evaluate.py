@@ -145,4 +145,4 @@ if __name__ == "__main__":
     opts = vars(opts)
     del opts["device"]
     json.dump({"options": opts, "results": results}, open(oup_file, "wt"))
-    log("results saved to " + oup_file)
+    log("\nResults saved to " + oup_file)

@@ -166,4 +166,4 @@ if __name__ == "__main__":
             else:
                 pickle.dump(step, open(os.path.join(dirname, "%08d.pickle" % i), "wb"))
 
-    print("output saved to ", args.output)
+    print("\nOutput saved to ", args.output)
