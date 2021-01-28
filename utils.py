@@ -9,6 +9,7 @@ from collections import defaultdict
 import lmdb
 from typing import Callable
 import pdb
+from argparse import ArgumentParser
 
 
 def log(msg: str, msg_type: str = "INFO") -> None:
@@ -73,6 +74,7 @@ def get_code(coq_code):
 
 class SexpCache:
     def __init__(self, db_path: str, readonly: bool = False) -> None:
+        
         if readonly:
             self.env = lmdb.open(
                 db_path,
@@ -217,12 +219,12 @@ def update_env(env, env_delta):
     ]
     return env
 
-
 def iter_proofs(
     data_root: str,
     callback,
     include_synthetic: bool = False,
     show_progress: bool = False,
+    lightmode: bool = False
 ) -> None:
     def iter_proofs_in_file(filename, file_data):
         env = {"constants": [], "inductives": []}
@@ -240,13 +242,15 @@ def iter_proofs(
                     subprf_data["env"] = env
                     callback(filename, subprf_data)
 
-    iter_coq_files(data_root, iter_proofs_in_file, show_progress)
+    iter_coq_files(data_root, iter_proofs_in_file, show_progress, lightmode)
 
 
-def iter_coq_files(data_root: str, callback, show_progress: bool = False) -> None:
+def iter_coq_files(data_root: str, callback, show_progress: bool = False, lightmode: bool = False) -> None:
     coq_files = glob(os.path.join(data_root, "**/*.json"), recursive=True)
     bar = ProgressBar(max_value=len(coq_files))
     for i, f in enumerate(coq_files):
+        if lightmode and i > 100:
+            break
         file_data = json.load(open(f))
         callback(f, file_data)
         if show_progress:

@@ -141,8 +141,9 @@ cython_debug/
 *.pyc
 coq_projects/
 
-# PyCharm
+# IDE
 .idea/*
+.vscode/*
 
 # Files created during install and make process
 coq/*
@@ -151,4 +152,11 @@ ASTactic/coqhammer/*
 data/*
 projs_split.json
 sexp_cache/*
+*/proof_steps/*
 
+# Slurm stuff
+*.out
+*.slurm
+
+# Results from runs
+experimental/evaluation/results/*

@@ -61,7 +61,7 @@ class ProofEnv:
         if self.failure:
             return self.feedback("ALREADY_FAILED")
         time_left = self.timeout - (time() - self.start_time)
-        print("%d: %s: %.02f" % (self.num_tactics_left, command, time_left))
+        #print("%d: %s: %.02f" % (self.num_tactics_left, command, time_left))
         if time_left <= 0:
             return self.feedback("MAX_TIME_REACHED")
 
