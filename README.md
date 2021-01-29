@@ -5,7 +5,7 @@
 Code for the paper:  
 
 [Learning to Prove Theorems via Interacting with Proof Assistants](https://arxiv.org/abs/1905.09381)      
-Kaiyu Yang and Jia Deng   
+[Kaiyu Yang](https://www.cs.princeton.edu/~kaiyuy/) and [Jia Deng](https://www.cs.princeton.edu/~jiadeng/)  
 International Conference on Machine Learning (ICML) 2019   
 
 ```
