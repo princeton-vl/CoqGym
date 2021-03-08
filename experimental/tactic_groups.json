@@ -1,0 +1,62 @@
+{
+    "easy goals": [
+        "reflexivity",
+        "f_equal",
+        "symmetry",
+        "assumption",
+        "trivial",
+        "auto",
+        "exact",
+        "discriminate",
+        "constructor",
+        "contradiction",
+        "intuition",
+        "omega",
+        "eauto",
+        "tauto",
+        "contradict",
+        "ring",
+        "field",
+        "easy"
+    ],
+    "transformations": [
+        "intro",
+        "intros",
+        "subst",
+        "simpl",
+        "unfold",
+        "left",
+        "right"
+    ],
+    "apply": [
+        "apply"
+    ],
+    "rewrite": [
+        "rewrite"
+    ],
+    "goal break up": [
+        "split",
+        "destruct",
+        "inversion",
+        "inversion_clear",
+        "induction",
+        "elim",
+        "case"
+    ],
+    "other": [
+        "generalize",
+        "idtac",
+        "hnf",
+        "exists",
+        "red",
+        "congruence",
+        "specialize",
+        "clear",
+        "injection",
+        "exfalso",
+        "cbv",
+        "lia",
+        "cbn",
+        "revert"
+    ]
+}

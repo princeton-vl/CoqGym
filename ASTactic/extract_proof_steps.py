@@ -141,29 +141,28 @@ if __name__ == "__main__":
         "--data_root", type=str, default="../data", help="The folder for CoqGym"
     )
     arg_parser.add_argument(
-        "--output", type=str, default="./proof_steps/", help="The output file"
+        "--output", type=str, default="./proof_steps_test/", help="The output file"
     )
     arg_parser.add_argument("--filter", type=str, help="filter the proofs")
     args = arg_parser.parse_args()
     print(args)
-
+    print("TEST ONLY")
     iter_proofs(
         args.data_root, process_proof, include_synthetic=False, show_progress=True
     )
 
-    for split in ["train", "valid"]:
-        for i, step in enumerate(proof_steps[split]):
-            dirname = os.path.join(args.output, split)
-            if not os.path.exists(dirname):
-                os.makedirs(dirname)
-            if args.filter:
-                pickle.dump(
-                    step,
-                    open(
-                        os.path.join(dirname, "%s-%08d.pickle" % (args.filter, i)), "wb"
-                    ),
-                )
-            else:
-                pickle.dump(step, open(os.path.join(dirname, "%08d.pickle" % i), "wb"))
+    for i, step in enumerate(proof_steps["test"]):
+        dirname = os.path.join(args.output, "test")
+        if not os.path.exists(dirname):
+            os.makedirs(dirname)
+        if args.filter:
+            pickle.dump(
+                step,
+                open(
+                    os.path.join(dirname, "%s-%08d.pickle" % (args.filter, i)), "wb"
+                ),
+            )
+        else:
+            pickle.dump(step, open(os.path.join(dirname, "%08d.pickle" % i), "wb"))
 
     print("\nOutput saved to ", args.output)

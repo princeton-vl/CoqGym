@@ -6,7 +6,9 @@ from dataloader import create_dataloader
 from utils import log
 from agent import Agent
 import gnn.prover
-import astactic.prover
+import simple_embedding.prover
+import simple_gnn.prover
+import gast_tactic_groups.prover
 import sys
 import pdb
 
@@ -21,7 +23,7 @@ def main():
     }
 
     # create the model
-    model = gnn.prover.Prover(opts)
+    model = gast_tactic_groups.prover.Prover(opts)
     model.to(opts.device)
 
     print("Training the following model:")
@@ -59,6 +61,7 @@ def main():
     best_acc = -1.0
     for n_epoch in range(start_epoch, start_epoch + opts.num_epochs):
         log("EPOCH #%d" % n_epoch)
+        log("\n---------------\n")
 
         # training
         loss_train = agent.train(n_epoch)

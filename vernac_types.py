@@ -32,7 +32,8 @@ class Type:
     def parsing_rules(self):
         "return a list of strings (production rules) and a list of symbols (dependencies)"
         raise NotImplementedError
-
+    
+    
     def to_ebnf(self, recursive=False, skip_symbols=None):
         if skip_symbols is None:
             skip_symbols = set()

@@ -2,32 +2,13 @@ import torch
 import torch.nn as nn
 from experimental.gnn.term_encoder import TermEncoder
 from experimental.gnn.tactic_predictor import TacticPredictor
+from experimental.gnn.premise_predictor import PremisePredictor
 from itertools import chain
 
 
-simple_tactic_space = ["intro",
-                "intros",
-                "split",
-                "assumption",
-                "trivial",
+tactic_space = [
                 "reflexivity",
-                "omega",
-                "congruence",
-                "left",
-                "right",
-                "ring",
-                "symmetry",
-                "f_equal",
-                "tauto",
-                "idtac",
-                "exfalso",
-                "cbv",
-                "lia",
-                "field",
-                "easy",
-                "cbn",
-                "intuition",
-                "OTHER"
+                "OUT OF VOCAB"
 ]
 
 class Prover(nn.Module):
@@ -36,81 +17,62 @@ class Prover(nn.Module):
         super().__init__()
         self.opts = opts
         self.term_encoder = TermEncoder(opts)
-        self.tactic_predictor = TacticPredictor(opts)
+        self.tactic_predictor = TacticPredictor(opts, tactic_space)
+        self.premise_predictor = PremisePredictor(opts)
 
-
-    def forward(self, global_context, local_context, goal, actions):
-        # compute embeddings
-        global_embeddings, local_embeddings, goal_embeddings = self.embed_terms(global_context, local_context, goal)
-        global_prepped, local_prepped, goal_prepped = self.format(global_context, 
-                                                global_embeddings,
-                                                local_context,
-                                                local_embeddings,
-                                                goal,
-                                                goal_embeddings)
+    def forward(self, batch):
         
-        # predict tactics
-        predictions = self.fnn_prediction(global_prepped, local_prepped, goal_prepped)
-        print(predictions)
+        # get goal asts
+        
+
+        # compute embeddings
+        global_embedding, local_embedding, goal_embedding = self.embed_terms(global_context, local_context, goal, goal_text)
+        
+        global_prepped, local_prepped, goal_prepped = self.format(global_context, 
+                                                global_embedding,
+                                                local_context,
+                                                local_embedding,
+                                                goal,
+                                                goal_embedding)
+
+
+        # predictions
+        tac_preds = self.tactic_predictor(global_prepped, local_prepped, goal_prepped)
+        #arg_preds = self.premise_predictor(global_prepped, local_prepped, goal_prepped)
+        
         # compute losses
-        loss = self.compute_loss(predictions, actions)
+        loss = self.compute_loss(tac_preds, actions)
         
         return loss
 
 
-    def embed_terms(self, global_context, local_context, goal):
+    def embed_terms(self, gc, lc, goal, goal_text):
+        batch_size = len(gc)
 
-        all_asts = list(
-            chain(
-                [env["ast"] for env in chain(*global_context)],
-                [context["ast"] for context in chain(*local_context)],
-                goal,
-            )
-        )
-
-        all_embeddings = self.term_encoder(all_asts)
-
-        batchsize = len(global_context)
         global_embeddings = []
-        j = 0
-        for n in range(batchsize):
-            size = len(global_context[n])
-            global_embeddings.append(
-                torch.cat(
-                    [
-                        torch.zeros(size, 3, device=self.opts.device),
-                        all_embeddings[j : j + size],
-                    ],
-                    dim=1,
-                )
-            )
-            global_embeddings[-1][:, 0] = 1.0
-            j += size
-
         local_embeddings = []
-        for n in range(batchsize):
-            size = len(local_context[n])
-            local_embeddings.append(
-                torch.cat(
-                    [
-                        torch.zeros(size, 3, device=self.opts.device),
-                        all_embeddings[j : j + size],
-                    ],
-                    dim=1,
-                )
-            )
-            local_embeddings[-1][:, 1] = 1.0
-            j += size
-
         goal_embeddings = []
-        for n in range(batchsize):
-            goal_embeddings.append(
-                torch.cat(
-                    [torch.zeros(3, device=self.opts.device), all_embeddings[j]], dim=0
-                )
-            )
+        for i in range(batch_size):
+            current_gc = gc[i]
+            current_lc = lc[i]
+            current_goal = goal[i]
+            global_asts = [env["ast"] for env in current_gc]
+            local_asts = [context["ast"] for context in current_lc]
+            goal_asts = [current_goal]
+            ge = self.term_encoder(global_asts)
+            le = self.term_encoder(local_asts)
+            goal_embedding = self.term_encoder(goal_asts)
+            ge = torch.cat(ge)
+            le = torch.cat(le)
+            global_embeddings.append(ge)
+            local_embeddings.append(le)
+            goal_embeddings.append(goal_embedding[0])
+        
+        """
+        for n in range(batch_size):
+            goal_embeddings[n] = torch.tens([torch.zeros(3, device=self.opts.device), goal_embeddings[n]], dim=0)
             goal_embeddings[-1][2] = 1.0
-            j += 1
+        """
 
         goal_embeddings = torch.stack(goal_embeddings)
 
@@ -141,25 +103,24 @@ class Prover(nn.Module):
         return g_context, l_context, goal
 
 
-    def fnn_prediction(self, global_embedding, local_embedding, goal_embedding):
-        return self.tactic_predictor(global_embedding, local_embedding, goal_embedding)
-
-
     def compute_loss(self, tactic_predictions, tactic_true):
         target = self.tactic_space_mapping(tactic_true)
         criterion = nn.CrossEntropyLoss()
         loss = criterion(tactic_predictions, target)
-        print(loss)
+
+        true_prediction = tactic_space[torch.argmax(tactic_predictions)]
+        #print(f"\n{true_prediction} | {tactic_true}\n")
+
         return loss
     
 
     def tactic_space_mapping(self, actions):
         target = torch.empty(self.opts.batchsize, dtype=torch.long)
         for i, action in enumerate(actions):
-            if action in simple_tactic_space:
-                index = simple_tactic_space.index(action)
+            if action in tactic_space:
+                index = tactic_space.index(action)
             else:
-                index = 22
+                index = 1
             target[i] = index
 
         return target

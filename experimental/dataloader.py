@@ -56,11 +56,13 @@ class ProofStepsData(Dataset):
         }
         """
         proof_step = pickle.load(open(self.proof_steps[idx], "rb"))
-        proof_step["goal"] = proof_step["goal"]["ast"]
+        proof_step["goal_ast"] = proof_step["goal"]["ast"]
+        proof_step["goal_text"] = proof_step["goal"]["text"]
         proof_step["tactic_actions"] = proof_step["tactic"]["actions"]
         proof_step["tactic_str"] = proof_step["tactic"]["text"]
+        del proof_step["goal"]
         del proof_step["tactic"]
-
+        
         return proof_step
 
 
@@ -72,7 +74,8 @@ def create_dataloader(split, opts):
             "n_step",
             "env",
             "local_context",
-            "goal",
+            "goal_ast",
+            "goal_text",
             "is_synthetic",
             "tactic_actions",
             "tactic_str",

@@ -245,7 +245,7 @@ def iter_proofs(
     iter_coq_files(data_root, iter_proofs_in_file, show_progress, lightmode)
 
 
-def iter_coq_files(data_root: str, callback, show_progress: bool = False, lightmode: bool = False) -> None:
+def iter_coq_files(data_root: str, callback, show_progress: bool = True, lightmode: bool = False) -> None:
     coq_files = glob(os.path.join(data_root, "**/*.json"), recursive=True)
     bar = ProgressBar(max_value=len(coq_files))
     for i, f in enumerate(coq_files):
@@ -265,3 +265,9 @@ def iter_sexp_cache(db_path: str, callback) -> None:
         for i, (key, value) in enumerate(cursor):
             callback(i, key, value.decode("utf-8"))
             bar.update(i)
+
+def get_node_count_ast(ast):
+    count = 0
+    for tree in ast.iter_subtrees():
+        count += 1
+    return count

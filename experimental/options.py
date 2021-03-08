@@ -15,9 +15,8 @@ import pdb
 def parse_args():
     parser = argparse.ArgumentParser()
 
-    parser.add_argument("--tac_grammar", type=str, default="tactics.ebnf")
-
     # experimental setup
+    parser.add_argument("--tactic_space", type=str, default="full")
     parser.add_argument("--exp_id", type=str)
     parser.add_argument("--datapath", type=str, default="proof_steps/")
     parser.add_argument("--projs_split", type=str, default="../projs_split.json")
@@ -40,25 +39,11 @@ def parse_args():
     parser.add_argument("--filter", type=str)
 
     # term encoder
-    parser.add_argument("--term_embedding_dim", type=int, default=256)
+    parser.add_argument("--term_embedding_dim", type=int, default=1024)
+    parser.add_argument("--hops", type=int, default=4)
 
-    # tactic decoder
-    parser.add_argument("--size_limit", type=int, default=50)
-    parser.add_argument(
-        "--embedding_dim",
-        type=int,
-        default=256,
-        help="dimension of the grammar embeddings",
-    )
-    parser.add_argument(
-        "--symbol_dim",
-        type=int,
-        default=256,
-        help="dimension of the terminal/nonterminal symbol embeddings",
-    )
-    parser.add_argument(
-        "--hidden_dim", type=int, default=256, help="dimension of the LSTM controller"
-    )
+    # predictor
+    parser.add_argument("--dropout_rate", type=float, default=0.4)
 
     parser.add_argument("--teacher_forcing", type=float, default=1.0)
 
