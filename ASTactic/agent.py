@@ -40,7 +40,7 @@ def filter_env(env):
     ]
     for const in toplevel_consts[-10:]:
         ast = sexp_cache[const["sexp"]]
-        filtered_env.append({"qualid": const["qualid"], "ast": term_parser.parse(ast)})
+        filtered_env.append({"qualid": const["qualid"], "text": const["type"], "ast": term_parser.parse(ast)})
     return filtered_env
 
 

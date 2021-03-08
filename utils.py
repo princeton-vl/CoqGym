@@ -247,9 +247,12 @@ def iter_proofs(
 
 def iter_coq_files(data_root: str, callback, show_progress: bool = True, lightmode: bool = False) -> None:
     coq_files = glob(os.path.join(data_root, "**/*.json"), recursive=True)
-    bar = ProgressBar(max_value=len(coq_files))
+    if lightmode:
+        bar = ProgressBar(max_value=300)
+    else:
+        bar = ProgressBar(max_value=len(coq_files))
     for i, f in enumerate(coq_files):
-        if lightmode and i > 100:
+        if lightmode and i > 300:
             break
         file_data = json.load(open(f))
         callback(f, file_data)
