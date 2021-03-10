@@ -19,10 +19,8 @@ class Prover(nn.Module):
         self.goal_embedder = Embedder(self.opts, self.nonterminals)
         self.lc_embedder = Embedder(self.opts, self.nonterminals)
         self.gc_embedder = Embedder(self.opts, self.nonterminals)
-    
 
     def forward(self, batch):
-
         # compute goal embeddings
         goal_asts = batch['goal_ast']
         goal_embeddings = self.goal_embedder(goal_asts)
@@ -49,7 +47,8 @@ class Prover(nn.Module):
         true_tactics = batch['tactic_str']
         true_groups = self.get_groups(true_tactics)
         loss = self.compute_loss(preds, true_groups)
-        return loss
+        pred_groups = self.get_groups_preds(preds)
+        return pred_groups, true_groups, loss
 
     def get_context_asts(self, c):
         asts = []
@@ -79,6 +78,13 @@ class Prover(nn.Module):
                 res.append(self.tactic_groups_reverse[all_actions[0]])
             else:
                 res.append("other")
+        return res
+    
+    def get_groups_preds(self, preds):
+        res = []
+        for pred in preds:
+            current_pred = list(self.tactic_groups.keys())[torch.argmax(pred)]
+            res.append(current_pred)
         return res
     
     def compute_loss(self, groups_pred, groups_true):

@@ -70,7 +70,6 @@ def parse_args():
     np.random.seed(opts.seed)
     random.seed(opts.seed)
 
-    
     if opts.exp_id is None:
         opts.exp_id = str(datetime.now())[:-7].replace(" ", "-")
     opts.log_dir = os.path.join("./runs", opts.exp_id)

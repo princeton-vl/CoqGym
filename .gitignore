@@ -153,10 +153,12 @@ data/*
 projs_split.json
 sexp_cache/*
 */proof_steps/*
+*/proof_steps_mini/*
 
 # Slurm stuff
 *.out
 *.slurm
 
 # Results from runs
-experimental/evaluation/results/*
+*/runs/*
+*/evaluation/*

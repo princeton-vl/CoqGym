@@ -58,10 +58,9 @@ def main():
 
     agent = Agent(model, optimizer, dataloader, opts)
 
-    best_acc = -1.0
     for n_epoch in range(start_epoch, start_epoch + opts.num_epochs):
-        log("EPOCH #%d" % n_epoch)
-        log("\n---------------\n")
+        log("\nEPOCH #%d" % n_epoch)
+        log("---------------")
 
         # training
         loss_train = agent.train(n_epoch)
