@@ -9,6 +9,9 @@ sys.path.append(
 from gallina import traverse_postorder
 from serapi import SerAPI
 
+import os.path as osp
+import importlib
+
 def print_asts():
     arg_parser = argparse.ArgumentParser(
         description="Print Abstract Syntax Tree of a proof step"
@@ -83,5 +86,9 @@ def ser_api():
 
 if __name__ == "__main__":
     #print_asts()
-    ser_api()
+    #ser_api()
+    for library in ['_version', '_scatter', '_segment_csr', '_segment_coo']:
+        print(importlib.machinery.PathFinder().find_spec(library, [osp.dirname(__file__)]))
+    
+    print(os.getenv('BUILD_DOCS', '0'))
     
