@@ -68,7 +68,7 @@ class Prover(nn.Module):
                 context_embedding
             )
             j += size
-        return torch.stack(res)
+        return torch.stack(res).to(self.opts.device)
 
     def get_groups(self, tactics):
         res = []
@@ -89,7 +89,7 @@ class Prover(nn.Module):
     
     def compute_loss(self, groups_pred, groups_true, current_batchsize):
         targets = self.tactic_space_mapping(groups_true, current_batchsize)
-        criterion = nn.CrossEntropyLoss()
+        criterion = nn.CrossEntropyLoss().to(self.opts.device)
         loss = criterion(groups_pred, targets)
         return loss
 
@@ -127,7 +127,7 @@ class Prover(nn.Module):
         # return loss
 
     def tactic_space_mapping(self, actions, current_batchsize):
-        target = torch.empty(current_batchsize, dtype=torch.long)
+        target = torch.empty(current_batchsize, dtype=torch.long).to(self.opts.device)
         for i, action in enumerate(actions):
             index = list(self.tactic_groups.keys()).index("other")
             for group in self.tactic_groups.keys():

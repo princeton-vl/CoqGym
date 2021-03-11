@@ -26,7 +26,7 @@ class Embedder(gnn.MessagePassing):
             if ast != None:
                 edge_index = self.create_edge_index(ast)
                 x = self.one_hot_encode(ast)
-                data = Data(x=x, edge_index=edge_index)
+                data = Data(x=x, edge_index=edge_index).to(self.opts.device)
                 graph_list.append(data)
 
         if graph_list:
@@ -42,7 +42,7 @@ class Embedder(gnn.MessagePassing):
                 embeddings.append(F.relu(current_embeddings.sum(0))) # 'sum(0)' is the readout (e.i, turn into fixed sized vector)
                 j+=node_count
             else:
-                embeddings.append(torch.zeros(self.opts.term_embedding_dim))
+                embeddings.append(torch.zeros(self.opts.term_embedding_dim).to(self.opts.device))
 
         return torch.stack(embeddings)
 

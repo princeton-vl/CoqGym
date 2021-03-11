@@ -154,6 +154,7 @@ projs_split.json
 sexp_cache/*
 */proof_steps/*
 */proof_steps_mini/*
+*/proof_steps_small/*
 
 # Slurm stuff
 *.out

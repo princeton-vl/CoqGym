@@ -5,12 +5,9 @@ from options import parse_args
 from dataloader import create_dataloader
 from utils import log
 from agent import Agent
-import gnn.prover
-import simple_embedding.prover
-import simple_gnn.prover
-import gast_tactic_groups.prover
 import sys
 import pdb
+import gast_tactic_groups.prover
 
 def main():
     # parse the options
