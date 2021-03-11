@@ -15,7 +15,6 @@ import pdb
 def main():
     # parse the options
     opts = parse_args()
-    print(opts)
 
     # create the dataloaders
     dataloader = {

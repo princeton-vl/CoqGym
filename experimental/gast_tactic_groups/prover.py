@@ -46,7 +46,7 @@ class Prover(nn.Module):
         # compute loss
         true_tactics = batch['tactic_str']
         true_groups = self.get_groups(true_tactics)
-        loss = self.compute_loss(preds, true_groups, len(true_tactics))
+        loss = self.compute_loss(preds, true_groups)
         pred_groups = self.get_groups_preds(preds)
         return pred_groups, true_groups, loss
 
@@ -87,8 +87,8 @@ class Prover(nn.Module):
             res.append(current_pred)
         return res
     
-    def compute_loss(self, groups_pred, groups_true, current_batchsize):
-        targets = self.tactic_space_mapping(groups_true, current_batchsize)
+    def compute_loss(self, groups_pred, groups_true):
+        targets = self.tactic_space_mapping(groups_true)
         criterion = nn.CrossEntropyLoss()
         loss = criterion(groups_pred, targets)
         return loss
@@ -126,8 +126,8 @@ class Prover(nn.Module):
         """
         # return loss
 
-    def tactic_space_mapping(self, actions, current_batchsize):
-        target = torch.empty(current_batchsize, dtype=torch.long)
+    def tactic_space_mapping(self, actions):
+        target = torch.empty(self.opts.batchsize, dtype=torch.long)
         for i, action in enumerate(actions):
             index = list(self.tactic_groups.keys()).index("other")
             for group in self.tactic_groups.keys():
