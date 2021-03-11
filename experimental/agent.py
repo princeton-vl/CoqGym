@@ -60,8 +60,8 @@ class Agent:
                     "file_name": data_batch["file"][n],
                     "proof_name": data_batch["proof_name"][n],
                     "n_step": data_batch["n_step"][n],
-                    "true": true[i],
-                    "pred": preds[i],
+                    "true": true[n],
+                    "pred": preds[n],
                 })
             gc.collect()
             bar.update(i)
