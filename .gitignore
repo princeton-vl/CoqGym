@@ -163,3 +163,9 @@ sexp_cache/*
 # Results from runs
 */runs/*
 */evaluation/*
+proof_steps/*
+
+*.ipynb
+*/logs/*
+*/models/*
+

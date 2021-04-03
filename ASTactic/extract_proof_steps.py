@@ -28,7 +28,7 @@ def filter_env(env):
     ]
     for const in toplevel_consts[-10:]:
         ast = sexp_cache[const["sexp"]]
-        filtered_env.append({"qualid": const["qualid"], "text": const["type"], "ast": term_parser.parse(ast)})
+        filtered_env.append({"qualid": const["qualid"], "text": const["type"], "ast": term_parser.parse(ast), "sexpression": ast})
     return filtered_env
 
 def parse_goal(g):
@@ -36,6 +36,7 @@ def parse_goal(g):
         "id": g["id"],
         "text": g["type"],
         "ast": term_parser.parse(sexp_cache[g["sexp"]]),
+        "sexpression": sexp_cache[g["sexp"]]
     }
     local_context = []
     for i, h in enumerate(g["hypotheses"]):
@@ -45,6 +46,7 @@ def parse_goal(g):
                     "ident": ident,
                     "text": h["type"],
                     "ast": term_parser.parse(sexp_cache[h["sexp"]]),
+                    "sexpression": sexp_cache[h["sexp"]]
                 }
             )
     return local_context, goal
