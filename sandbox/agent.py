@@ -94,7 +94,7 @@ class Agent:
     def test(self, proof_env):
         res, graph, script = self.prove_DFS(proof_env)
         print(f"{res}, {script}")
-        return {"proved": res, "graph": graph}
+        return {"proved": res, "graph": graph, "script": script}
         
         
     def prove_DFS(self, proof_env):
@@ -121,7 +121,7 @@ class Agent:
         local_context, goal = local_envs[0]["local_context"], local_envs[0]["goal"]
         
         tactic_probs = self.tacmodel.prove(goal, local_context, global_env)
-        topk, indices = torch.topk(input=tactic_probs, k=self.opts.num_tactics, dim=0, largest=False)
+        topk, indices = torch.topk(input=tactic_probs, k=self.opts.num_tac_candidates, dim=0, largest=False)
         stack = [[self.tactics[index] for index in indices]]
         script = []
         
@@ -149,8 +149,10 @@ class Agent:
             
             if tac == "intro":
                 tac = "intros"
+            if self.opts.tac_on_all_subgoals:
+                tac = f"all: {tac}"
                 
-            state = proof_env.step(f"all: {tac}.")
+            state = proof_env.step(f"{tac}.")
             
             if state["result"] == "SUCCESS":
                 if self.opts.draw:
@@ -185,7 +187,7 @@ class Agent:
                 
                 just_moved = False
                 tactic_probs = self.tacmodel.prove(goal, local_context, global_env)
-                topk, indices = torch.topk(input=tactic_probs, k=self.opts.num_tactics, dim=0, largest=True)
+                topk, indices = torch.topk(input=tactic_probs, k=self.opts.num_tac_candidates, dim=0, largest=True)
                 stack.append([self.tactics[index] for index in indices])
 
         state = proof_env.step("Admitted.")

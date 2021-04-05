@@ -6,6 +6,7 @@ import numpy as np
 import random
 from ffn.tacmodel import FFNTacModel
 from ffn.argmodel import FFNArgModel
+from random_guesser.tacmodel import GuesserTacModel
 from datetime import datetime
 from helpers import setup_loggers, files_on_split
 from eval_env import FileEnv
@@ -26,14 +27,16 @@ if __name__ == "__main__":
     parser.add_argument("--sexp_cache", type=str, default="../sexp_cache")
     parser.add_argument("--run_log", type=str, default="./logs/run.log")
     parser.add_argument("--res_log", type=str, default="./logs/res.log")
+    parser.add_argument("--pngpath", type=str, default="./pngs/")
     
     
     # run env
+    parser.add_argument("--jupyter", type=bool, default=False)
     parser.add_argument("--seed", type=int, default=0)
+    parser.add_argument("--lm", nargs="+", default=[-1, -1])
     parser.add_argument("--num_tac_candidates", type=int, default=10)
     parser.add_argument("--tac_on_all_subgoals", type=bool, default=False)
-    parser.add_argument("--depth_limit", type=int, default=10)
-    parser.add_argument("--lm", type=int, default=-1)
+    parser.add_argument("--depth_limit", type=int, default=50)
     parser.add_argument("--max_num_tacs", type=int, default=300)
     parser.add_argument("--timeout", type=int, default=600)
     parser.add_argument("--draw", type=bool, default=False)
@@ -44,9 +47,11 @@ if __name__ == "__main__":
     opts.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     # set run env
+    """
     torch.manual_seed(opts.seed)
     np.random.seed(opts.seed)
     random.seed(opts.seed)
+    """
     
     # log setup
     run_log, res_log = setup_loggers(opts)
@@ -61,6 +66,9 @@ if __name__ == "__main__":
         tacmodel.load_state_dict(taccheck["state_dict"])
         tacmodel.to(opts.device)
         tacmodel.eval()
+    elif opts.model == "guesser":
+        tacmodel = GuesserTacModel(opts)
+    
     agent = Agent(opts, tacmodel=tacmodel, argmodel=None)
     
     # log
@@ -82,11 +90,12 @@ if __name__ == "__main__":
     total_count = 0
     file_count = 0
     correct = 0
-    last_proj = test_files[0].split("/")[-2]
+    last_proj = test_files[0].split("/")[2]
     proj_count = 0
     proj_correct = 0
+    total_proj_count = 0
     for f in test_files:
-        current_proj = f.split("/")[-2]
+        current_proj = f.split("/")[2]
         if current_proj != last_proj:
             last_proj_count = proj_count
             last_proj_correct = proj_correct
@@ -99,39 +108,42 @@ if __name__ == "__main__":
             for proof_env in file_env:
                 proof_name = proof_env.proof["name"]
                 res = agent.test(proof_env)
+                
                 total_count += 1
                 current_count += 1
             
                 if res["proved"]:
                     current_correct += 1
                     correct += 1
-            
-                if opts.lm <= total_count and opts.lm > -1:
-                    break
                     
-                elapsed_time = datetime.now() - start_time
-                run_log.info(f"{total_count}/{10000} -> {100*(total_count/10000)}% ({elapsed_time})")
-        
+                if opts.draw and not opts.jupyter:
+                    graph = res["graph"]
+                    graph.render(f"{opts.pngpath}/{proof_name}", format="png", cleanup=True)
+            
+                if int(opts.lm[0]) <= current_count and int(opts.lm[0]) > -1:
+                    break
+                            
         file_count += 1
-        
-        
+              
         proj_count += current_count
         proj_correct += current_correct
         if current_proj != last_proj:
+            total_proj_count += 1
             proj_acc = last_proj_correct/last_proj_count
-            res_log.info(f"{last_proj}: \t\t\t {last_proj_correct}/{last_proj_count} \t ({proj_acc})")
+            res_log.info(f"{last_proj}: \t {last_proj_correct}/{last_proj_count} ({proj_acc})".expandtabs(100))
             res_log.info("-----------------")
         
         acc = current_correct/current_count
-        res_log.info(f"{f}: \t\t\t {current_correct}/{current_count} \t ({acc})")
+        res_log.info(f"{f}: \t {current_correct}/{current_count} ({acc})".expandtabs(100))
         
         last_proj = current_proj
-        
-        if opts.lm <= total_count and opts.lm > -1:
+        print(int(opts.lm[1]))
+        print(total_proj_count)
+        if int(opts.lm[1]) <= total_proj_count and int(opts.lm[1]) > -1:
             break
     
-    acc = total_correct/total_count
-    res_log.info(f"Total: \t\t {total_correct}/{total_count} \t ({acc})")
+    acc = correct/total_count
+    res_log.info(f"Total: \t {correct}/{total_count} ({acc})".expandtabs(100))
         
         
     
