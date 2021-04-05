@@ -45,6 +45,8 @@ if __name__ == "__main__":
     parser.add_argument("--dropout", type=str, default=0.0)
     opts = parser.parse_args()
     opts.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    
+    # GAST parameters
 
     # set run env
     """

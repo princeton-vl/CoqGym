@@ -6,7 +6,7 @@ from torch_geometric.nn import global_mean_pool, global_max_pool, global_add_poo
 from torch_geometric.nn.pool import TopKPooling
 from torch_geometric.nn import GCNConv, SGConv, TransformerConv, SAGEConv, GATConv
 from torch_geometric.nn.norm import GraphSizeNorm
-from helpers import traverse_postorder, get_node_count_ast
+from gallina import traverse_postorder
 
 class SGEmbedder(torch.nn.Module):
     def __init__(self, opts, nonterminals):

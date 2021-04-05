@@ -8,9 +8,11 @@ from torch.optim.lr_scheduler import ReduceLROnPlateau
 import numpy as np
 import random
 
-from helpers import ProofStepData, merge, setup_loggers
+from helpers import ProofStepData, merge, setup_loggers, build_csv
 from ffn.tacmodel import FFNTacModel
 from ffn.argmodel import FFNArgModel
+from gast.tacmodel import GASTTacModel
+from gast.tacmodel2 import GASTTacModel2
 from agent import Agent
 
 
@@ -24,13 +26,26 @@ def train(opts):
     run_log, res_log = setup_loggers(opts)
                             
     # agent and provers
-    if opts.prover == "ffn":
+    if opts.model == "ffn":
         if opts.argmodel:
             model = FFNArgModel(opts)
         else:
             model = FFNTacModel(opts)
+    elif opts.model == "gast":
+        if opts.argmodel:
+            model = GASTArgModel(opts)
+        else:
+            model = GASTTacModel(opts)
+    elif opts.model == "gast2":
+        if opts.argmodel:
+            model = GASTArgModel2(opts)
+        else:
+            model = GASTTacModel2(opts)
     
-    agent = Agent(opts, model)
+    if opts.argmodel:
+        agent = Agent(opts, tacmodel=None, argmodel=model)
+    else:
+        agent = Agent(opts, tacmodel=model, argmodel=None)
     
     # dataloaders
     train = DataLoader(ProofStepData(opts, "train"), opts.batchsize, collate_fn=merge, num_workers = opts.num_workers)
@@ -147,6 +162,7 @@ def train(opts):
         res_log.info(f"train accuracy: {acc_train}")
         res_log.info(f"validation accuracy: {acc_valid}")
         res_log.info("###################")
+        build_csv(opts, loss_avg_train, loss_avg_valid, acc_train, acc_valid)
     
         # reduce LR
         scheduler.step(loss_avg_valid)
@@ -166,23 +182,39 @@ if __name__ == "__main__":
     parser.add_argument("--savepath", type=str, default="./models/model")
     parser.add_argument("--run_log", type=str, default="./logs/run.log")
     parser.add_argument("--res_log", type=str, default="./logs/res.log")
+    parser.add_argument("--res_csv", type=str, default="./logs/res.csv")
     
     # run env
     parser.add_argument("--num_workers", type=int, default=0)
     parser.add_argument("--epochs", type=int, default=100)
     parser.add_argument("--batchsize", type=int, default=16)
-    parser.add_argument("--prover", type=str, default="ffn")
+    parser.add_argument("--model", type=str, default="ffn")
     parser.add_argument("--argmodel", type=bool, default=False)
     parser.add_argument("--lm", nargs="+", default=[-1, -1])
     parser.add_argument("--seed", type=int, default=0)
     
-    # optimizer
+    # optimizer    
     parser.add_argument("--lr", type=float, default=1e-3)
     parser.add_argument("--l2", type=float, default=1e-6)
     parser.add_argument("--lr_reduce_patience", type=int, default=3)
+    parser.add_argument("--optimizer", type=str, default="adam")
+    parser.add_argument("--scheduler", type=str, default="plateau")
 
     # model
     parser.add_argument("--dropout", type=float, default=0.5)
+    parser.add_argument("--embedding_info", type=str, default="goal")
+    
+    # gast
+    parser.add_argument("--embedding_dim", type=int, default=256)
+    parser.add_argument("--embedder", type=str, default="sgconv")
+    parser.add_argument("--pooling", type=str, default="mean")
+    parser.add_argument("--node_pooling", type=str, default="none")
+    parser.add_argument("--norm", type=str, default="none")
+    parser.add_argument("--predictor", type=str, default="linear")
+    parser.add_argument("--num_message_layers", type=int, default=1)
+    parser.add_argument("--hops", type=int, default=1)
+    parser.add_argument("--sortk", type=int, default=30)
+    
     opts = parser.parse_args()
     opts.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     

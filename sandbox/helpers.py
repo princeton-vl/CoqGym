@@ -65,9 +65,7 @@ def setup_loggers(opts):
         os.remove(opts.res_log)
     except:
         pass
-    
-    
-                            
+                        
     run_handler = logging.FileHandler(opts.run_log)
     res_handler = logging.FileHandler(opts.res_log)
     
@@ -89,16 +87,16 @@ def setup_loggers(opts):
     return run_logger, res_logger
 
 
-def get_tactic_targets(opts, tactics, batch):
+def get_tactic_targets(opts, tactics_json, batch):
     tactics = get_true_tactics(batch)            
     targets = torch.empty(len(tactics), dtype=torch.long).to(opts.device)
     for i, tactic in enumerate(tactics):
         index = -1
-        if tactic in tactics:
-            index = tactics.index(tactic)
+        if tactic in tactics_json:
+            index = tactics_json.index(tactic)
             targets[i] = index
         else:
-            for j, supported_tactic in enumerate(tactics):
+            for j, supported_tactic in enumerate(tactics_json):
                 if supported_tactic in tactic:
                     index = j
                     targets[i] = index
@@ -136,8 +134,11 @@ def get_pred_tactics(tactics, probs):
     return res
     
     
-    
-    
+def build_csv(opts, train_loss, valid_loss, train_acc, valid_acc):
+    path = opts.res_csv
+    f = open(path, 'a')
+    f.write(f"{train_loss},{valid_loss},{train_acc},{valid_acc}\n")
+    f.close()
     
     
     

@@ -6,7 +6,7 @@ from torch_geometric.nn import global_mean_pool, global_max_pool, global_add_poo
 from torch_geometric.nn.pool import TopKPooling
 from torch_geometric.nn import GCNConv, SGConv, TransformerConv, SAGEConv, GATConv
 from torch_geometric.nn.norm import GraphSizeNorm
-from helpers import traverse_postorder, get_node_count_ast
+from gallina import traverse_postorder
 
 # SAGEConv
 class SAGEEmbedder(torch.nn.Module):
@@ -103,7 +103,6 @@ class SAGEEmbedder(torch.nn.Module):
                 x = global_sort_pool(x, batch.batch, 50)
                 x = self.activation(x)
             elif self.opts.pooling == "set2set":
-                print(x.size())
                 x = self.pooler(x, batch.batch)
                 x = self.activation(x)
             else:

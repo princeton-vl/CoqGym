@@ -4,7 +4,7 @@ from torch import nn
 from torch.nn import Conv1d, MaxPool1d, Linear, Dropout
 from torch_geometric.nn import GCNConv, global_sort_pool
 from torch_geometric.utils import remove_self_loops
-from helpers import traverse_postorder, get_node_count_ast
+from gallina import traverse_postorder
 from torch_geometric.data import Data, Batch
 
 
@@ -14,15 +14,17 @@ class Model(nn.Module):
         self.opts = opts
         self.nonterminals = nonterminals
 
-        self.conv1 = GCNConv(num_features, 32)
-        self.conv2 = GCNConv(32, 32)
-        self.conv3 = GCNConv(32, 32)
-        self.conv4 = GCNConv(32, 1)
-        self.conv5 = Conv1d(1, 16, 97, 97)
-        self.conv6 = Conv1d(16, 32, 5, 1)
+        self.conv1 = GCNConv(num_features, self.opts.embedding_dim)
+        self.conv2 = GCNConv(self.opts.embedding_dim, self.opts.embedding_dim)
+        self.conv3 = GCNConv(self.opts.embedding_dim, self.opts.embedding_dim)
+        self.conv4 = GCNConv(self.opts.embedding_dim, 1)
+        self.conv5 = Conv1d(1, self.opts.embedding_dim//2, 3*self.opts.embedding_dim+1, 3*self.opts.embedding_dim+1)
+        self.conv6 = Conv1d(self.opts.embedding_dim//2, self.opts.embedding_dim, 5, 1)
         self.pool = MaxPool1d(2, 2)
-        self.classifier_1 = Linear(352, 128)
-        self.drop_out = Dropout(0.5)
+        dense_dim = int((self.opts.sortk - 2) / 2 + 1)
+        self.dense_dim = (dense_dim - 5 + 1) * self.opts.embedding_dim
+        self.classifier_1 = Linear(self.dense_dim, 128)
+        self.drop_out = Dropout(self.opts.dropout)
         self.classifier_2 = Linear(128, num_classes)
         self.relu = nn.ReLU(inplace=True)
 
@@ -35,7 +37,7 @@ class Model(nn.Module):
         x_3 = torch.tanh(self.conv3(x_2, edge_index))
         x_4 = torch.tanh(self.conv4(x_3, edge_index))
         x = torch.cat([x_1, x_2, x_3, x_4], dim=-1)
-        x = global_sort_pool(x, batch, k=30)
+        x = global_sort_pool(x, batch, k=self.opts.sortk)
         x = x.view(x.size(0), 1, x.size(-1))
         x = self.relu(self.conv5(x))
         x = self.pool(x)
@@ -43,9 +45,8 @@ class Model(nn.Module):
         x = x.view(x.size(0), -1)
         out = self.relu(self.classifier_1(x))
         out = self.drop_out(out)
-        classes = F.log_softmax(self.classifier_2(out), dim=-1)
-
-        return classes
+        out = self.classifier_2(out)
+        return out
         
         
     def prep_asts(self, asts):

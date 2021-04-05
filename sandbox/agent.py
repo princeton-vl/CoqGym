@@ -79,11 +79,8 @@ class Agent:
     
     '''--- TRAIN AND VALIDATION ---'''
     def train_val(self, batch):
-        if self.opts.argmodel:
-            preds, trues, loss, num_correct, total_count = self.tacmodel(batch)
-            print(num_correct/total_count)
-            print(loss)
-            print(preds)
+        if not self.opts.argmodel:
+            preds, trues, loss = self.tacmodel(batch)
         else:
             preds, trues, loss = self.argmodel(batch)
         return preds, trues, loss
