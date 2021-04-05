@@ -109,6 +109,7 @@ if __name__ == "__main__":
         with FileEnv(f, max_num_tactics=opts.max_num_tacs, timeout=opts.timeout) as file_env:
             for proof_env in file_env:
                 proof_name = proof_env.proof["name"]
+                print(proof_name)
                 res = agent.test(proof_env)
                 
                 total_count += 1
@@ -135,17 +136,13 @@ if __name__ == "__main__":
             res_log.info(f"{last_proj}: \t {last_proj_correct}/{last_proj_count} ({proj_acc})".expandtabs(100))
             res_log.info("-----------------")
         
+        print(file_count/len(test_files))
         acc = current_correct/current_count
         res_log.info(f"{f}: \t {current_correct}/{current_count} ({acc})".expandtabs(100))
         
         last_proj = current_proj
-        print(int(opts.lm[1]))
-        print(total_proj_count)
         if int(opts.lm[1]) <= total_proj_count and int(opts.lm[1]) > -1:
             break
     
     acc = correct/total_count
     res_log.info(f"Total: \t {correct}/{total_count} ({acc})".expandtabs(100))
-        
-        
-    

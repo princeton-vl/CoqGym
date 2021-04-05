@@ -4,8 +4,6 @@ from eval_env import FileEnv
 from utils import SexpCache
 from gallina import GallinaTermParser
 import torch.nn as nn
-from ffn.tacmodel import FFNTacModel
-from ffn.argmodel import FFNArgModel
 from graphviz import Digraph
 from progressbar import ProgressBar
 from hashlib import sha1
@@ -74,23 +72,11 @@ class Agent:
         self.tactics = json.load(open(self.opts.tactics))
         self.tacmodel = tacmodel
         self.argmodel = argmodel
-        self.softmax = nn.Softmax(dim=1)
-    
-    
-    '''--- TRAIN AND VALIDATION ---'''
-    def train_val(self, batch):
-        if not self.opts.argmodel:
-            preds, trues, loss = self.tacmodel(batch)
-        else:
-            preds, trues, loss = self.argmodel(batch)
-        return preds, trues, loss
-    '''-------'''
-        
         
     '''--- TESTING ---''' 
     def test(self, proof_env):
         res, graph, script = self.prove_DFS(proof_env)
-        print(f"{res}, {script}")
+        #print(f"{res}, {script}")
         return {"proved": res, "graph": graph, "script": script}
         
         
@@ -117,7 +103,7 @@ class Agent:
         local_envs = self.process_local_env(state)
         local_context, goal = local_envs[0]["local_context"], local_envs[0]["goal"]
         
-        tactic_probs = self.tacmodel.prove(goal, local_context, global_env)
+        tactic_probs = self.tacmodel.prove()
         topk, indices = torch.topk(input=tactic_probs, k=self.opts.num_tac_candidates, dim=0, largest=False)
         stack = [[self.tactics[index] for index in indices]]
         script = []
@@ -183,7 +169,7 @@ class Agent:
                     graph.edge(str(current_sign), str(sig), tac, color=edge_colors[color_index])
                 
                 just_moved = False
-                tactic_probs = self.tacmodel.prove(goal, local_context, global_env)
+                tactic_probs = self.tacmodel.prove()
                 topk, indices = torch.topk(input=tactic_probs, k=self.opts.num_tac_candidates, dim=0, largest=True)
                 stack.append([self.tactics[index] for index in indices])
 
@@ -220,11 +206,3 @@ class Agent:
                 local_envs.append(local_env)
         
         return local_envs
-    '''-------'''
-
-
-                
-                
-       
-        
-    

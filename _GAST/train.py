@@ -9,29 +9,24 @@ import numpy as np
 import random
 
 from helpers import ProofStepData, merge, setup_loggers, build_csv
-from ffn.tacmodel import FFNTacModel
-from ffn.argmodel import FFNArgModel
-from gast.tacmodel import GASTTacModel
-from gast.tacmodel2 import GASTTacModel2
+from model.tacmodel import GASTTacModel
+from model.tacmodel2 import GASTTacModel2
 from agent import Agent
 
 
 
 def train(opts):
+    
     torch.manual_seed(opts.seed)
     np.random.seed(opts.seed)
     random.seed(opts.seed)
+    
     
     # log setup
     run_log, res_log = setup_loggers(opts)
                             
     # agent and provers
-    if opts.model == "ffn":
-        if opts.argmodel:
-            model = FFNArgModel(opts)
-        else:
-            model = FFNTacModel(opts)
-    elif opts.model == "gast":
+    if opts.model == "gast":
         if opts.argmodel:
             model = GASTArgModel(opts)
         else:
@@ -179,7 +174,7 @@ if __name__ == "__main__":
     parser.add_argument("--args", type=str, default="./jsons/args.json")
     parser.add_argument("--split", type=str, default="../projs_split.json")
     parser.add_argument("--sexp_cache", type=str, default="../sexp_cache")
-    parser.add_argument("--savepath", type=str, default="./models/model")
+    parser.add_argument("--savepath", type=str, default="./models/tac")
     parser.add_argument("--run_log", type=str, default="./logs/run.log")
     parser.add_argument("--res_log", type=str, default="./logs/res.log")
     parser.add_argument("--res_csv", type=str, default="./logs/res.csv")
@@ -188,7 +183,7 @@ if __name__ == "__main__":
     parser.add_argument("--num_workers", type=int, default=0)
     parser.add_argument("--epochs", type=int, default=100)
     parser.add_argument("--batchsize", type=int, default=16)
-    parser.add_argument("--model", type=str, default="ffn")
+    parser.add_argument("--model", type=str, default="gast2")
     parser.add_argument("--argmodel", type=bool, default=False)
     parser.add_argument("--lm", nargs="+", default=[-1, -1])
     parser.add_argument("--seed", type=int, default=0)
