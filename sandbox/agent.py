@@ -1,6 +1,5 @@
 import json, torch
 from glob import glob
-from helpers import files_on_split
 from eval_env import FileEnv
 from utils import SexpCache
 from gallina import GallinaTermParser
@@ -9,192 +8,188 @@ from ffn.tacmodel import FFNTacModel
 from ffn.argmodel import FFNArgModel
 from graphviz import Digraph
 from progressbar import ProgressBar
+from hashlib import sha1
 
+
+def graph_text(obs):
+    if "fg_goals" not in obs:
+        return "NO GOALS"
+    
+    res = ""
+    for g in obs["fg_goals"]:
+        text = g["type"]
+        res = f"{res}{text}\n"
+    return res
+    
+def graph_id(obs):    
+    res = ""
+    for g in obs["fg_goals"]:
+        sign = get_goal_signature(g)
+        res = f"{res}{sign}"
+    return res
+    
+def node_id(obs):
+    res = set()
+    for g in obs["fg_goals"]:
+        sign = get_goal_signature(g)
+        res.add(sign)
+    return frozenset(res)
+    
+    
+def print_single_goal(g):
+    for h in g["hypotheses"]:
+        for ident in h["idents"]:
+            print("\t%s: %s" % (ident, h["type"]))
+    print("---------------")
+    print("\t%s" % g["type"])
+    print("##########")
+
+def print_goals(obs):
+    if "fg_goals" not in obs:
+        print("##########")
+        return
+    print("########## fg_goals ##########")
+    for g in obs["fg_goals"]:
+        print_single_goal(g)
+    print("########## bg_goals ##########")
+    for g in obs["bg_goals"]:
+        print_single_goal(g)
+    print("########## shelved_goals ##########")
+    for g in obs["shelved_goals"]:
+        print_single_goal(g)
+    print("########## given_up_goals ##########")
+    for g in obs["given_up_goals"]:
+        print_single_goal(g)
+        
+def get_goal_signature(goal):
+    sexp = goal["sexp"] + "".join([h["sexp"] for h in goal["hypotheses"]])
+    return sha1(sexp.encode("utf-8")).hexdigest()
 
 class Agent:
-    def __init__(self, opts, model):
+    def __init__(self, opts, tacmodel, argmodel):
         self.opts = opts
         self.split = json.load(open(self.opts.split, "r"))
-        self.train_files, self.valid_files, self.test_files = files_on_split(self.opts.datapath, self.split)
         self.term_parser = GallinaTermParser(caching=True)
         self.sexp_cache = SexpCache(self.opts.sexp_cache, readonly=True)
         self.tactics = json.load(open(self.opts.tactics))
-        self.model = model
+        self.tacmodel = tacmodel
+        self.argmodel = argmodel
         self.softmax = nn.Softmax(dim=1)
     
     
     '''--- TRAIN AND VALIDATION ---'''
     def train_val(self, batch):
         if self.opts.argmodel:
-            preds, trues, loss, num_correct, total_count = self.model(batch)
+            preds, trues, loss, num_correct, total_count = self.tacmodel(batch)
             print(num_correct/total_count)
             print(loss)
             print(preds)
         else:
-            preds, trues, loss = self.model(batch)
+            preds, trues, loss = self.argmodel(batch)
         return preds, trues, loss
     '''-------'''
         
         
-    '''--- TESTING ---'''    
-    def test(self):
+    '''--- TESTING ---''' 
+    def test(self, proof_env):
+        res, graph, script = self.prove_DFS(proof_env)
+        print(f"{res}, {script}")
+        return {"proved": res, "graph": graph}
         
-        # initialize the models
-        if self.opts.model == "ffn":
-            self.tacmodel = FFNTacModel(self.opts)
-            #argmodel = FFNArgModel(self.opts)
-            
-        if self.opts.device.type == "cpu":
-            taccheck = torch.load(self.opts.tacmodel, map_location="cpu")
-            #argcheck = torch.load(self.otps.argmodel, map_location="cpu")
-        else:
-            taccheck = torch.load(self.opts.tacmodel)
-            #argcheck = torch.load(self.opts.argmodel)
         
-        self.tacmodel.load_state_dict(taccheck["state_dict"])
-        #argmodel.load_state_dict(argcheck["state_dict"])
-        self.tacmodel.to(self.opts.device)
-        #argmodel.to(self.opts.device)
-        
-        # loop over all test files
-        counter = 0
-        file_counter = 0
-        bar = ProgressBar(max_value=len(self.test_files))
-        num_correct = 0
-        for f in self.test_files:
-            file_counter += 1
-            file_env = FileEnv(f, max_num_tactics=50, timeout=60000)
-            
-            # loop over all proof envs in each file
-            for proof_env in file_env:
-                # Single proof
-                #print("-------")        
-                proof_name = proof_env.proof["name"]
-                #print(f"Proving: {proof_name} in {f}")
-                res, script = self.prove(proof_env)
-                if res:
-                    num_correct += 1
-                #print(f"Proved: {res}. Script: {script}")
-                #print("-------")
-                
-                counter += 1
-                
-                if self.opts.lm <= counter and self.opts.lm > -1:
-                    break
-                
-            
-            print(f"\nacc: {num_correct/counter}")
-            
-            bar.update(file_counter)
-            if self.opts.lm <= counter and self.opts.lm > -1:
-                break
-            
-            
-    def prove(self, proof_env):
-        # the human proof
-        # print(proof_env.proof["steps"])
-        
-        # start searching for proof of current proof env
+    def prove_DFS(self, proof_env):
         state = proof_env.init()
+        global_env = self.process_global_env(state)
+        node_ids = set() # keep track of all nodes seen so far
+        root_id = graph_id(state)
+        node_ids.add(root_id)
         
         # setup graph
-        #proof_name = proof_env.proof["name"]
-        #current_id = state["fg_goals"][0]["id"]
-        #current_text = state["fg_goals"][0]["type"]
-        #graph = Digraph()
-        #graph.node(str(current_id), current_text)
+        if self.opts.draw:
+            color_index = 0
+            edge_colors = ["red", "green", "yellow", "blue", "brown", "black"]
+            just_moved = False
+            text = graph_text(state)
+            current_sign = graph_id(state)
+            graph = Digraph()
+            graph.node(str(current_sign), text)
+        else:
+            graph = None
+            
+        # initialize the stack
+        local_envs = self.process_local_env(state)
+        local_context, goal = local_envs[0]["local_context"], local_envs[0]["goal"]
         
-        # setup search
-        global_env = self.process_global_env(state)
+        tactic_probs = self.tacmodel.prove(goal, local_context, global_env)
+        topk, indices = torch.topk(input=tactic_probs, k=self.opts.num_tactics, dim=0, largest=False)
+        stack = [[self.tactics[index] for index in indices]]
         script = []
         
-        # each state contains a list of open goals+assumptions -> extracting those here for the current state
-        local_envs = self.process_local_env(state)
-        # keep track of tried tactics
-        prev_tacs = {}
-        prev_evaluated = []
-        while local_envs:
-            ids = [l["goal"]["id"] for l in local_envs]
-            prev_ids = [l["goal"]["id"] for l in prev_evaluated]
-            
-            
-            local_env = local_envs.pop(-1)
-            
-            current_id = local_env["goal"]["id"]
-            current_text = local_env["goal"]["text"]
-            #print(current_text)
-            
-            prev_evaluated.append(local_env)
-            prev_tacs[current_text] = prev_tacs.get(current_text, [])
-            
-            
-            res, tactic, state = self.prove_single_local_env(proof_env, state, local_env, global_env, prev_tacs[local_env["goal"]["text"]]) 
-            
-            
-            prev_tacs[current_text].append(tactic)
-            if len(prev_tacs[current_text]) >= self.opts.num_tactics:
-                prev_evaluated.remove(local_env)
-            
-            
-            if res == "FAILED":
-                if not local_envs and prev_evaluated:
-                    state = proof_env.step(f"Undo.")
-                    prev_evaluated.reverse()
-                    local_envs = prev_evaluated
-                    prev_evaluated = []
-            elif res == "MAX":
-                #print("MAX")
-                #print(prev_tacs)
-                #graph.render(f'logs/{proof_name}', view=False, quiet=True, cleanup=True)
-                return False, []
-            elif res == "SUCCESS":
-                #graph.edge(str(current_id), "DONE", tactic)
-                #graph.render(f'logs/{proof_name}', view=False, quiet=True, cleanup=True)
-                script.append(tactic)
-                return True, script
-            elif res == "PROVING":
-                #update graph                  
-                #for g in state["fg_goals"]:
-                    #graph.node(str(g["id"]), str(g["type"]))
-                    #graph.edge(str(current_id), str(g["id"]), tactic)
-                script.append(tactic)
-                local_envs = self.add_local_envs(local_envs, state)
-             
-        #graph.render(f'logs/{proof_name}', view=False, quiet=True, cleanup=True)
-            
-        print("Tried everyting...")
-        return False, []
-        
-    def prove_single_local_env(self, proof_env, state, local_env, global_env, prev_tacs):
-        tactic_probs = self.tacmodel.prove(local_env["goal"], local_env["local context"], global_env)
-        topk, indices = torch.topk(input=tactic_probs, k=self.opts.num_tactics, dim=0, largest=True)
-        tactic_queue = [self.tactics[index] for index in indices]
-        index = 0
-
-        while tactic_queue:
-            tactic = tactic_queue.pop(index)
-            if tactic in prev_tacs:
-                continue
-            state = proof_env.step(f"{tactic}.")
-            res = state["result"]
-            if res == "ERROR":
-                continue
-            if res == "MAX_NUM_TACTICS_REACHED":
-                return "MAX", None, state
-            if res == "SUCCESS":
-                return "SUCCESS", tactic, state
+        # depth-first search starting from the trace
+        while stack != [[]]:
+            # pick a tactic
+            if stack[-1] == []:  # all candidate have been tried, backtrack
+                stack.pop()
+                script.pop()
+                state = proof_env.step("Undo.")
                 
-            if res == "PROVING":
-                # check if tactic was approved, but didn't drive the search forward
-                goal_texts = [g["type"] for g in state["fg_goals"]]
-                if local_env["goal"]["text"] in goal_texts:
-                    #state = proof_env.step(f"Undo.")
-                    continue
-             
-                return "PROVING", tactic, state
+                if self.opts.draw and not just_moved:
+                    just_moved = True
+                    color_index += 1
+                    if color_index >= len(edge_colors):
+                        color_index = 0
+                        
+                continue
+            else:
+                tac = stack[-1].pop()
+                        
+            if "fg_goals" in state:
+                current_sign = graph_id(state)
+                current_texts = graph_text(state)
             
-        return "FAILED", None, state
-        
+            if tac == "intro":
+                tac = "intros"
+                
+            state = proof_env.step(f"all: {tac}.")
+            
+            if state["result"] == "SUCCESS":
+                if self.opts.draw:
+                    text = graph_text(state)
+                    graph.edge(str(current_sign), text, tac, color=edge_colors[color_index])
+                
+                script.append(tac)
+                return True, graph, script
+            elif state["result"] in ["MAX_NUM_TACTICS_REACHED", "MAX_TIME_REACHED"]:
+                return False, graph, script
+            elif state["result"] in ["ERROR"]:
+                continue
+            else:                
+                assert state["result"] == "PROVING"
+                script.append(tac)
+                sig = graph_id(state)
+
+                if sig in node_ids or len(script) >= self.opts.depth_limit:
+                    state = proof_env.step("Undo.")
+                    script.pop()
+                    continue
+                
+                
+                node_ids.add(sig)
+                local_envs = self.process_local_env(state)
+                local_context, goal = local_envs[0]["local_context"], local_envs[0]["goal"]
+                
+                if self.opts.draw:  
+                    text = graph_text(state)
+                    graph.node(str(sig), text)
+                    graph.edge(str(current_sign), str(sig), tac, color=edge_colors[color_index])
+                
+                just_moved = False
+                tactic_probs = self.tacmodel.prove(goal, local_context, global_env)
+                topk, indices = torch.topk(input=tactic_probs, k=self.opts.num_tactics, dim=0, largest=True)
+                stack.append([self.tactics[index] for index in indices])
+
+        state = proof_env.step("Admitted.")
+        return False, graph, script
     
     def process_global_env(self, state):
         global_env = []
@@ -214,7 +209,7 @@ class Agent:
             for i, h in enumerate(g["hypotheses"]):
                     for ident in h["idents"]:
                         local_context.append({"ident": ident, "text": h["type"], "ast": self.term_parser.parse(h["sexp"])})
-            local_env = {"goal": goal, "local context": local_context}
+            local_env = {"goal": goal, "local_context": local_context}
             local_envs.append(local_env)
         return local_envs
     

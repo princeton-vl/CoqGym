@@ -68,13 +68,19 @@ class ProofEnv:
         self.serapi.push()  # save the state before executing the command
         try:
             ast = sexpdata.dumps(self.serapi.query_ast(command))
-            if "VernacExtend" in ast:  # is a tactic
+            if "VernacExtend" in ast:  # is a tactic 
                 if self.num_tactics_left <= 0:
                     self.serapi.pop()
                     return self.feedback("MAX_NUM_TACTICS_REACHED")
                 self.num_tactics_left -= 1
-                command = "timeout %d (%s)." % (time_left, command[:-1])
+                
+                if "all" in command[:-1]:
+                    command = "all: timeout %d (%s)." % (time_left, command[:-1].replace("all: ", ""))
+                else:
+                    command = "timeout %d (%s)." % (time_left, command[:-1])
+            
             responses, _ = self.serapi.execute(command)
+            
             states_cnt = self.serapi.pull()  # delete the saved state if no error
         except CoqExn as ex:
             self.serapi.pop()  # restore the state
