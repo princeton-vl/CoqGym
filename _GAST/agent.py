@@ -73,19 +73,7 @@ class Agent:
         self.tacmodel = tacmodel
         self.argmodel = argmodel
         self.softmax = nn.Softmax(dim=1)
-    
-    
-    '''--- TRAIN AND VALIDATION ---'''
-    def train_val(self, batch):
-        if not self.opts.argmodel:
-            preds, trues, loss = self.tacmodel(batch)
-        else:
-            preds, trues, loss = self.argmodel(batch)
-        return preds, trues, loss
-    '''-------'''
         
-        
-    '''--- TESTING ---''' 
     def test(self, proof_env):
         res, graph, script = self.prove_DFS(proof_env)
         #print(f"{res}, {script}")
@@ -217,12 +205,4 @@ class Agent:
             if local_env["goal"]["text"] not in texts:
                 local_envs.append(local_env)
         
-        return local_envs
-    '''-------'''
-
-
-                
-                
-       
-        
-    
+        return local_envs    

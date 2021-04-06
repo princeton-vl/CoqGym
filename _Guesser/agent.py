@@ -7,6 +7,7 @@ import torch.nn as nn
 from graphviz import Digraph
 from progressbar import ProgressBar
 from hashlib import sha1
+from sandbox.helpers import prep_tac
 
 
 def graph_text(obs):
@@ -32,7 +33,6 @@ def node_id(obs):
         sign = get_goal_signature(g)
         res.add(sign)
     return frozenset(res)
-    
     
 def print_single_goal(g):
     for h in g["hypotheses"]:
@@ -69,7 +69,8 @@ class Agent:
         self.split = json.load(open(self.opts.split, "r"))
         self.term_parser = GallinaTermParser(caching=True)
         self.sexp_cache = SexpCache(self.opts.sexp_cache, readonly=True)
-        self.tactics = json.load(open(self.opts.tactics))
+        with open(self.opts.tactics) as f: self.tactics = json.load(f)
+        with open(self.opts.args) as f: self.args = json.load(f)
         self.tacmodel = tacmodel
         self.argmodel = argmodel
         
@@ -79,10 +80,10 @@ class Agent:
         #print(f"{res}, {script}")
         return {"proved": res, "graph": graph, "script": script}
         
-        
     def prove_DFS(self, proof_env):
+        #print(proof_env.proof["steps"])
         state = proof_env.init()
-        global_env = self.process_global_env(state)
+        gc = self.process_global_env(state)
         node_ids = set() # keep track of all nodes seen so far
         root_id = graph_id(state)
         node_ids.add(root_id)
@@ -101,11 +102,9 @@ class Agent:
             
         # initialize the stack
         local_envs = self.process_local_env(state)
-        local_context, goal = local_envs[0]["local_context"], local_envs[0]["goal"]
-        
-        tactic_probs = self.tacmodel.prove()
-        topk, indices = torch.topk(input=tactic_probs, k=self.opts.num_tac_candidates, dim=0, largest=False)
-        stack = [[self.tactics[index] for index in indices]]
+        lc, goal = local_envs[0]["local_context"], local_envs[0]["goal"]
+        stack = []
+        stack.append(self.get_candidates(goal, lc, gc))
         script = []
         
         # depth-first search starting from the trace
@@ -129,12 +128,8 @@ class Agent:
             if "fg_goals" in state:
                 current_sign = graph_id(state)
                 current_texts = graph_text(state)
-            
-            if tac == "intro":
-                tac = "intros"
-            if self.opts.tac_on_all_subgoals:
-                tac = f"all: {tac}"
-                
+                        
+            #print(tac)
             state = proof_env.step(f"{tac}.")
             
             if state["result"] == "SUCCESS":
@@ -161,7 +156,7 @@ class Agent:
                 
                 node_ids.add(sig)
                 local_envs = self.process_local_env(state)
-                local_context, goal = local_envs[0]["local_context"], local_envs[0]["goal"]
+                lc, goal = local_envs[0]["local_context"], local_envs[0]["goal"]
                 
                 if self.opts.draw:  
                     text = graph_text(state)
@@ -169,9 +164,7 @@ class Agent:
                     graph.edge(str(current_sign), str(sig), tac, color=edge_colors[color_index])
                 
                 just_moved = False
-                tactic_probs = self.tacmodel.prove()
-                topk, indices = torch.topk(input=tactic_probs, k=self.opts.num_tac_candidates, dim=0, largest=True)
-                stack.append([self.tactics[index] for index in indices])
+                stack.append(self.get_candidates(goal, lc, gc))
 
         state = proof_env.step("Admitted.")
         return False, graph, script
@@ -204,5 +197,42 @@ class Agent:
         for local_env in new_local_envs:
             if local_env["goal"]["text"] not in texts:
                 local_envs.append(local_env)
-        
         return local_envs
+        
+    def get_arg_probs(self, goal, lc, gc):
+        if not self.opts.argmodel:
+            return None
+
+        probs = self.argmodel.prove(goal, lc, gc)
+        lc_ids = [c["ident"] for c in lc]
+        gc_ids = [c["qualid"] for c in gc]
+        
+        res = {"lc": {}, "gc": {}, "generic": {}}
+        for i in range(len(lc)):
+            res["lc"][probs[i]] = lc_ids[i]
+            
+        for i in range(len(gc)):
+            offset = len(lc)
+            res["gc"][probs[offset + i]] = gc_ids[i]
+            
+        for i in range(len(self.args)):
+            offset = len(lc) + len(gc)
+            res["generic"][probs[offset + i]] = self.args[i]
+        
+        return res
+            
+    def get_candidates(self, goal, lc, gc):
+        tactic_probs = self.tacmodel.prove(goal, lc, gc)
+        topk, indices = torch.topk(input=tactic_probs, k=self.opts.num_tac_candidates, dim=0, largest=False)
+        
+        arg_probs = self.get_arg_probs(goal, lc, gc)
+
+        res = []
+        for index in indices:
+            tac = self.tactics[index]
+            tac = prep_tac(self.opts, tac, arg_probs)
+            res.append(tac)
+
+        return res
+        
+    

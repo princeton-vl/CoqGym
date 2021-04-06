@@ -7,9 +7,9 @@ import torch.nn.functional as F
 class GuesserTacModel():
     def __init__(self, opts):
         self.opts = opts
-        self.tactics = json.load(open(self.opts.tactics))
+        with open(self.opts.tactics) as f: self.tactics = json.load(f)
     
-    def prove(self):
+    def prove(self, goal, lc, gc):
         guesses = torch.rand(len(self.tactics))
         probs = F.softmax(guesses, dim=0)
         return probs

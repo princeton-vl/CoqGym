@@ -140,7 +140,48 @@ def build_csv(opts, train_loss, valid_loss, train_acc, valid_acc):
     f.write(f"{train_loss},{valid_loss},{train_acc},{valid_acc}\n")
     f.close()
     
-    
-    
-    
-    
+
+def prep_tac(opts, tactic, arg_probs):
+            
+        if not opts.argmodel:
+            return tactic
+
+        generic_arg = arg_probs["generic"][max(arg_probs["generic"].keys())]
+
+        # intro
+        if tactic == "intro":
+            return "intros"
+
+        if len(arg_probs["gc"]) != 0 and len(arg_probs["lc"]) != 0:
+            gc_arg = arg_probs["gc"][max(arg_probs["gc"].keys())]
+            lc_arg = arg_probs["lc"][max(arg_probs["lc"].keys())]
+            # specialize
+            if tactic == "specialize":
+                return f"specialize ({lc_arg} {gc_arg})"
+
+        if len(arg_probs["gc"]) != 0:
+            gc_arg = arg_probs["gc"][max(arg_probs["gc"].keys())]
+            # froced theorem
+            if tactic in ["apply", "rewrite", "unfold", "destruct", "elim", "case", "generalize", "exact"]:
+                tactic = f"{tactic} {gc_arg}"
+            # optional theorem
+            elif tactic in ["auto", "simple_induction", "eauto"]:
+                tactic = tactic
+
+        if len(arg_probs["lc"]) != 0:
+            lc_arg = arg_probs["lc"][max(arg_probs["lc"].keys())]
+            # forced assumption
+            if tactic in ["induction", "exists", "revert", "inversion_clear", "injection", "contradict"]:
+                tactic = f"{tactic} {lc_arg}"
+            # optional assumption
+            elif tactic in ["apply", "rewrite", "simpl", "unfold", "clear", "subst", "red", "discriminate", "inversion", "hnf", "contradiction"]:
+                tactic = tactic
+
+        # hind db
+        if tactic in ["auto", "eauto"]:
+            tactic = f"{tactic} with *"
+
+        if opts.all:
+            tactic = f"all: {tactic}"
+            
+        return tactic

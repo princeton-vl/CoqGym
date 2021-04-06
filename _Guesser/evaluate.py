@@ -5,8 +5,9 @@ from agent import Agent
 import numpy as np
 import random
 from model.tacmodel import GuesserTacModel
+from model.argmodel import GuesserArgModel
 from datetime import datetime
-from helpers import setup_loggers, files_on_split
+from sandbox.helpers import setup_loggers, files_on_split
 from eval_env import FileEnv
 
 
@@ -16,7 +17,8 @@ if __name__ == "__main__":
     
     # paths
     parser.add_argument("--datapath", type=str, default="../data")
-    parser.add_argument("--tactics", type=str, default="./jsons/tactics.json")
+    parser.add_argument("--tactics", type=str, default="../jsons/tactics.json")
+    parser.add_argument("--args", type=str, default="../jsons/args.json")
     parser.add_argument("--split", type=str, default="../projs_split.json")
     parser.add_argument("--sexp_cache", type=str, default="../sexp_cache")
     parser.add_argument("--run_log", type=str, default="./logs/run.log")
@@ -27,11 +29,12 @@ if __name__ == "__main__":
     parser.add_argument("--jupyter", type=bool, default=False)
     parser.add_argument("--lm", nargs="+", default=[-1, -1])
     parser.add_argument("--num_tac_candidates", type=int, default=10)
-    parser.add_argument("--tac_on_all_subgoals", type=bool, default=False)
+    parser.add_argument("--all", type=bool, default=False)
     parser.add_argument("--depth_limit", type=int, default=50)
     parser.add_argument("--max_num_tacs", type=int, default=300)
     parser.add_argument("--timeout", type=int, default=600)
     parser.add_argument("--draw", type=bool, default=False)
+    parser.add_argument("--argmodel", type=bool, default=False)
     
     # model parameters
     opts = parser.parse_args()
@@ -42,7 +45,8 @@ if __name__ == "__main__":
                      
     # models and agent
     tacmodel = GuesserTacModel(opts)
-    agent = Agent(opts, tacmodel=tacmodel, argmodel=None)
+    argmodel = GuesserArgModel(opts) if opts.argmodel else None
+    agent = Agent(opts, tacmodel=tacmodel, argmodel=argmodel)
     
     # log
     if str(opts.device) == "cpu":
@@ -82,6 +86,7 @@ if __name__ == "__main__":
                 proof_name = proof_env.proof["name"]
                 print(proof_name)
                 res = agent.test(proof_env)
+                print(res)
                 
                 total_count += 1
                 current_count += 1
@@ -114,6 +119,7 @@ if __name__ == "__main__":
         last_proj = current_proj
         if int(opts.lm[1]) <= total_proj_count and int(opts.lm[1]) > -1:
             break
+        
     
     acc = correct/total_count
     res_log.info(f"Total: \t {correct}/{total_count} ({acc})".expandtabs(100))

@@ -1,0 +1,4 @@
+{
+	"gc": ["apply", "rewrite", "unfold", "destruct", "elim", "case", "generalize", "exact"],
+	"lc": ["induction", "exists", "revert", "inversion_clear", "injection", "contradict"]
+}

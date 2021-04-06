@@ -33,7 +33,6 @@ def node_id(obs):
         res.add(sign)
     return frozenset(res)
     
-    
 def print_single_goal(g):
     for h in g["hypotheses"]:
         for ident in h["idents"]:
@@ -66,10 +65,11 @@ def get_goal_signature(goal):
 class Agent:
     def __init__(self, opts, tacmodel, argmodel):
         self.opts = opts
-        self.split = json.load(open(self.opts.split, "r"))
+        with open(self.opts.split, "r") as f: self.split = json.load(f)
+        with open(self.opts.tactics) as f : self.tactics = json.load(f)
         self.term_parser = GallinaTermParser(caching=True)
         self.sexp_cache = SexpCache(self.opts.sexp_cache, readonly=True)
-        self.tactics = json.load(open(self.opts.tactics))
+        
         self.tacmodel = tacmodel
         self.argmodel = argmodel
         self.softmax = nn.Softmax(dim=1)
@@ -80,7 +80,9 @@ class Agent:
         if not self.opts.argmodel:
             preds, trues, loss = self.tacmodel(batch)
         else:
-            preds, trues, loss = self.argmodel(batch)
+            preds, trues, loss, num_correct, total_count = self.argmodel(batch)
+            print(preds)
+            print(loss)
         return preds, trues, loss
     '''-------'''
         

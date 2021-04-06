@@ -11,10 +11,9 @@ class FFNArgModel(nn.Module):
     def __init__(self, opts):
         super(FFNArgModel, self).__init__()
         self.opts = opts
-        
-        self.nonterminals = json.load(open(self.opts.nonterminals))
-        self.args = json.load(open(self.opts.args))
-        
+        with open(self.opts.args) as f: self.args = json.load(f)
+        with open(self.opts.nonterminals) as f: self.nonterminals = json.load(f)
+                
         self.input = nn.Linear(2*len(self.nonterminals), len(self.nonterminals))
         self.hidden = nn.Linear(len(self.nonterminals), len(self.nonterminals))
 
@@ -24,7 +23,6 @@ class FFNArgModel(nn.Module):
         self.dropout = nn.Dropout(self.opts.dropout)
         self.sigmoid = nn.Sigmoid()
         class_weights = torch.tensor([1])
-        print(class_weights)
         self.bce_loss = nn.BCEWithLogitsLoss(pos_weight=class_weights).to(self.opts.device)
         
     def forward(self, batch):
@@ -140,8 +138,6 @@ class FFNArgModel(nn.Module):
             targets.append(target)
 
         return encodings, targets, preds
-            
-            
                     
     def ast_encodings(self, asts):
         num_asts = len(asts)
@@ -153,8 +149,7 @@ class FFNArgModel(nn.Module):
         if not encodings:
             return []
         return torch.stack(encodings).to(self.opts.device)
-    
-        
+
     def ast_encode(self, ast):
         res = [0.0]*len(self.nonterminals)
         
@@ -164,7 +159,6 @@ class FFNArgModel(nn.Module):
 
         traverse_postorder(ast, callbck)
         return torch.tensor(res).to(self.opts.device)
-    
         
     def prove(self, goal, local_context, global_context):
         goal_ast = goal['ast']
@@ -175,10 +169,5 @@ class FFNArgModel(nn.Module):
         x = self.activation(x)
         logits = self.output(x)
         probs = F.softmax(logits, dim=0)
-        #return self.tactics[torch.argmax(probs)]
-        return "auto"
-        
-        
-        
-        
+        return probs
         
