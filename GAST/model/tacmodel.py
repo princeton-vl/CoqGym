@@ -8,11 +8,11 @@ import torch.nn.functional as F
 from torch_geometric.nn import GCNConv, global_sort_pool
 from torch_geometric.utils import remove_self_loops
 
-from helpers import get_tactic_targets, get_true_tactics, get_true_args, get_pred_tactics, prep_asts, get_gc_targets, get_pred_gc
+from helpers import get_tactic_targets, get_true_tactics, get_true_args, get_pred_tactics, prep_asts
 
-class GASTGCModel(nn.Module):
+class GASTTacModel(nn.Module):
     def __init__(self, opts):
-        super(GASTGCModel, self).__init__()
+        super(GASTTacModel, self).__init__()
         self.opts = opts
         self.nonterminals = json.load(open(self.opts.nonterminals))
         self.tactics = json.load(open(self.opts.tactics))
@@ -26,9 +26,9 @@ class GASTGCModel(nn.Module):
         self.pool = MaxPool1d(2, 2)
         dense_dim = int((self.opts.sortk - 2) / 2 + 1)
         self.dense_dim = (dense_dim - 5 + 1) * self.opts.embedding_dim
-        self.classifier_1 = Linear(11*self.dense_dim, 128)
+        self.classifier_1 = Linear(self.dense_dim, 128)
         self.drop_out = Dropout(self.opts.dropout)
-        self.classifier_2 = Linear(128, 10)
+        self.classifier_2 = Linear(128, len(self.tactics))
         self.relu = nn.ReLU(inplace=True)
         self.tanh = nn.Tanh()
             
@@ -37,49 +37,51 @@ class GASTGCModel(nn.Module):
         
 
     def forward(self, batch):
-        goal_asts = [g["ast"] for g in batch["goal"]]
-        x_goal, edge_index_goal, gnn_batch = prep_asts(self.opts, goal_asts, len(goal_asts))
-        edge_index_goal, _ = remove_self_loops(edge_index_goal)
-        edge_index_goal.to(self.opts.device)
-        goal_embeddings = self.embeddings(x_goal, edge_index_goal, gnn_batch)
-
-        gc_asts = [[c["ast"] for c in gc] for gc in batch["env"]]
-        gc_asts = gc_asts[0]
-        x_gc, edge_index_gc, gnn_batch = prep_asts(self.opts, gc_asts, len(goal_asts)*10)
-        edge_index_gc, _ = remove_self_loops(edge_index_gc)
-        edge_index_gc.to(self.opts.device)
-        gc_embeddings = self.embeddings(x_gc, edge_index_gc, gnn_batch)
+        asts = [goal['ast'] for goal in batch['goal']]
+        x, edge_index, gnn_batch = prep_asts(self.opts, asts, len(asts))
+        edge_index, _ = remove_self_loops(edge_index)
+        edge_index.to(self.opts.device)
         
-        embeddings = torch.cat((goal_embeddings, gc_embeddings))
-        embeddings = torch.flatten(embeddings)
-
-        out = self.relu(self.classifier_1(embeddings))
-        out = self.drop_out(out)
-        logits = self.classifier_2(out)
-        logits = logits.view(-1, len(logits))
-
-        targets, trues = get_gc_targets(self.opts, batch)
-
-        loss = self.criterion(logits, targets)
-
-        probs = self.softmax(logits)
-
-        preds = get_pred_gc(self.opts, batch, probs)
-        return preds, trues, loss
-
-    def embeddings(self, x, edge_index, batch):
-        x = x.to(self.opts.device)
-        edge_index = edge_index.to(self.opts.device)
-        x_1 = self.conv1(x, edge_index)
-        x_1 = self.tanh(x_1)
+        x_1 = self.tanh(self.conv1(x, edge_index))
         x_2 = self.tanh(self.conv2(x_1, edge_index))
         x_3 = self.tanh(self.conv3(x_2, edge_index))
         x_4 = self.tanh(self.conv4(x_3, edge_index))
         x = torch.cat([x_1, x_2, x_3, x_4], dim=-1)
-        x = global_sort_pool(x, batch, k=self.opts.sortk)
+        x = global_sort_pool(x, gnn_batch, k=self.opts.sortk)
         x = x.view(x.size(0), 1, x.size(-1))
         x = self.relu(self.conv5(x))
         x = self.pool(x)
         x = self.relu(self.conv6(x))
         x = x.view(x.size(0), -1)
-        return x
+        out = self.relu(self.classifier_1(x))
+        out = self.drop_out(out)
+        logits = self.classifier_2(out)
+
+        targets = get_tactic_targets(self.opts, self.tactics, batch)
+        loss = self.criterion(logits, targets)
+        trues = get_true_tactics(batch)
+        probs = self.softmax(logits)
+        preds = get_pred_tactics(self.tactics, probs)
+        return preds, trues, loss
+
+    def prove(self, goal, lc, gc):
+        asts = [goal["ast"]]
+        x, edge_index, gnn_batch = prep_asts(self.opts, asts, len(asts))
+        edge_index, _ = remove_self_loops(edge_index)
+        
+        x_1 = self.tanh(self.conv1(x, edge_index))
+        x_2 = self.tanh(self.conv2(x_1, edge_index))
+        x_3 = self.tanh(self.conv3(x_2, edge_index))
+        x_4 = self.tanh(self.conv4(x_3, edge_index))
+        x = torch.cat([x_1, x_2, x_3, x_4], dim=-1)
+        x = global_sort_pool(x, gnn_batch, k=self.opts.sortk)
+        x = x.view(x.size(0), 1, x.size(-1))
+        x = self.relu(self.conv5(x))
+        x = self.pool(x)
+        x = self.relu(self.conv6(x))
+        x = x.view(x.size(0), -1)
+        out = self.relu(self.classifier_1(x))
+        out = self.drop_out(out)
+        logits = self.classifier_2(out)
+        probs = self.softmax(logits)
+        return probs[0]

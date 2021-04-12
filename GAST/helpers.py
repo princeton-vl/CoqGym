@@ -163,24 +163,25 @@ def prep_single_batch_asts(opts, asts):
     batch = Batch().from_data_list(graph_list)
     return batch.x, batch.edge_index, batch.batch
 
-
 def prep_asts(opts, asts, length):
     with open(opts.nonterminals) as f: nonterminals = json.load(f)
-
     graph_list = []
     for i, ast in enumerate(asts):
         if ast != None:
             edge_index = create_edge_index(ast)
+            if edge_index.size()[0] != 2:
+                edge_index = torch.empty(2, 0, dtype=torch.long)
+
             x = one_hot_encode(ast, nonterminals)
             data = Data(x=x, edge_index=edge_index).to(opts.device)
             graph_list.append(data)
         
-        if i > length:
+        if i >= length-1:
             break
-    
+
     while len(graph_list) < length:
-        x = torch.tensor([[0]*len(nonterminals)])
-        edge_index = torch.tensor([], dtype=torch.long).t().contiguous()
+        x = torch.empty(1, len(nonterminals), dtype=torch.long)
+        edge_index = torch.empty(2, 0, dtype=torch.long)
         data = Data(x=x, edge_index=edge_index).to(opts.device)
         graph_list.append(data)
 
@@ -215,7 +216,6 @@ def one_hot_encode(ast, nonterminals):
         target.append(temp)
     traverse_postorder(ast, callbck)
     return torch.tensor(target)
-
 
 def find_gc_arg(opts, tactic_application, lc_ids):
     with open(opts.generic_args) as f: generic_args = json.load(f)
@@ -303,3 +303,41 @@ def get_pred_lc(opts, batch, probs):
         preds.append(lc_ids[index])
 
     return preds
+
+
+def prep_tac(opts, tactic, arg_probs):
+    gc_arg = arg_probs["gc"][max(arg_probs["gc"].keys())]
+    lc_arg = arg_probs["lc"][max(arg_probs["lc"].keys())]      
+
+    # intro
+    if tactic == "intro":
+        return "intros"
+
+    # specialize
+    if tactic == "specialize":
+        return f"specialize ({lc_arg} {gc_arg})"
+
+    # froced theorem
+    if tactic in ["apply", "rewrite", "unfold", "destruct", "elim", "case", "generalize", "exact"]:
+        tactic = f"{tactic} {gc_arg}"
+    # optional theorem
+    elif tactic in ["auto", "simple_induction", "eauto"]:
+        tactic = tactic
+
+    # forced assumption
+    if tactic in ["induction", "exists", "revert", "inversion_clear", "injection", "contradict"]:
+        tactic = f"{tactic} {lc_arg}"
+    # optional assumption
+    elif tactic in ["apply", "rewrite", "simpl", "unfold", "clear", "subst", "red", "discriminate", "inversion", "hnf", "contradiction"]:
+        tactic = tactic
+
+    # hind db
+    if tactic in ["auto", "eauto"]:
+        tactic = f"{tactic} with *"
+
+    """
+    if opts.all:
+        tactic = f"all: {tactic}"
+    """
+
+    return tactic

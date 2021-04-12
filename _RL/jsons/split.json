@@ -1,0 +1,8 @@
+{
+    "projs_train": 
+    ["constructive-geometry", "higman-s", "int-map", "coq-ext-lib", "amm11262", "system", "bellantonicook", "area-method", "hedges", "mini-compiler", "propcalc", "rem", "miniml", "maths", "bdds", "GeoCoq", "generic-environments", "Categories", "ramsey", "cours-de-coq", "axiomatic-abp", "coq", "railroad-crossing", "pts", "exceptions", "smc", "group-theory", "otway-rees", "float", "lambda", "three-gap", "izf", "groups", "ipc", "InfSeqExt", "StructTact", "fcsl-pcm", "hardware", "qarith-stern-brocot", "dictionaries", "automata", "corespec", "qarith", "twoSquare", "QuickChick", "CompCert", "regexp", "domain-theory", "tarski-geometry", "ieee754", "ctltctl", "bigenough", "subst", "lazy-pcf", "ruler-compass-geometry", "search-trees", "finmap", "quicksort-complexity", "math-comp", "pocklington", "algebra", "schroeder", "euler-formula", "shuffle", "bbv", "lemma-overloading", "fssec-model", "tortoise-hare-algorithm", "zf", "metalib"], 
+    "projs_test": 
+    ["weak-up-to", "buchberger", "jordan-curve-theorem", "dblib", "disel", "zchinese", "zfc", "dep-map", "chinese", "UnifySL", "hoare-tut", "huffman", "PolTac", "angles", "coq-procrastination", "coq-library-undecidability", "tree-automata", "coquelicot", "fermat4", "demos", "coqoban", "goedel", "verdi-raft", "verdi", "zorns-lemma", "coqrel", "fundamental-arithmetics"], 
+    "projs_valid": 
+    ["lesniewski-mereology", "graphs", "additions", "ChargeCore", "rsa", "cheerios", "circuits", "mod-red", "traversable-fincontainer", "topology", "checker", "cecoa", "VST", "coq-list-string", "markov", "GeometricAlgebra", "ails", "idxassoc", "param-pi", "SCEV-coq", "higman-cf", "distributed-reference-counting", "lin-alg", "orb-stab", "free-groups", "concat", "zsearch-trees"]
+}

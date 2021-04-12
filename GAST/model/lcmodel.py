@@ -80,3 +80,23 @@ class GASTLCModel(nn.Module):
         x = self.relu(self.conv6(x))
         x = x.view(x.size(0), -1)
         return x
+
+    def prove(self, goal, lc, gc):
+        goal_asts = [goal["ast"]]
+        lc_asts = [c["ast"] for c in lc]
+        asts = goal_asts + lc_asts
+
+        x, edge_index, batch = prep_asts(self.opts, asts, 11)
+        edge_index, _ = remove_self_loops(edge_index)
+            
+        embeddings = self.embeddings(x, edge_index, batch)
+        embeddings = torch.flatten(embeddings)
+
+        out = self.relu(self.classifier_1(embeddings))
+        out = self.drop_out(out)
+        logits = self.classifier_2(out)
+        logits = logits.view(-1, len(logits))
+        probs = self.softmax(logits)
+
+        return probs[0]
+

@@ -7,12 +7,11 @@ from torch.utils.data import DataLoader
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 import numpy as np
 import random
+from torch_geometric.utils import remove_self_loops
 
-from helpers import ProofStepData, merge, setup_loggers, build_csv
-from model.tacmodel import GASTTacModel
+from helpers import ProofStepData, merge, setup_loggers, build_csv, find_lc_arg, prep_asts
+from model.lcmodel import TransLCModel
 from agent import Agent
-
-
 
 def train(opts):
     
@@ -24,7 +23,7 @@ def train(opts):
     run_log, res_log = setup_loggers(opts)
                             
     # agent and provers
-    model = GASTTacModel(opts)
+    model = TransLCModel(opts)
     model.to(opts.device)
     
     # dataloaders
@@ -52,7 +51,6 @@ def train(opts):
     res_log.info(f"valid size -> {len(valid)}")
     res_log.info(model)
     
-    
     # epochs
     for n in range(opts.epochs):
         run_log.info(f"epoch: {n}")
@@ -60,15 +58,22 @@ def train(opts):
         # training stats
         loss_avg_train = 0
         num_correct_train = 0
-        pred_freq_train = {}
+        #pred_freq_train = {}
         
         # training loop
         model.train()
         proof_counter = 0
         batch_counter = 0
         for i, batch in enumerate(train):
+            
+            if not check_args(opts, batch):
+                continue
+
+            if not check_goals(opts, batch):
+                continue
+            
             preds, true, loss = model(batch)
-    
+
             loss.backward()
             optimizer.step()
             optimizer.zero_grad()
@@ -80,10 +85,11 @@ def train(opts):
             # update stats
             loss_avg_train += loss.item()    
             for j in range(len(batch["goal"])):
-                if preds[j] == true[j]:
-                    num_correct_train += 1
-                pred_freq_train[preds[j]] = pred_freq_train.get(preds[j], 0) + 1
+                if true[j] == preds[j]:
+                    num_correct_train += 1   
+                #pred_freq_train[preds[j]] = pred_freq_train.get(preds[j], 0) + 1
                 proof_counter += 1
+            
             batch_counter += 1
             
             if int(opts.lm[0]) != -1 and proof_counter >= int(opts.lm[0]):
@@ -102,7 +108,7 @@ def train(opts):
         # validation stats
         loss_avg_valid = 0
         num_correct_valid = 0
-        pred_freq_valid = {}
+        #pred_freq_valid = {}
         
         # validation loop
         run_log.info("validation...")
@@ -112,15 +118,21 @@ def train(opts):
         for i, batch in enumerate(valid):
             if int(opts.lm[1]) != -1 and proof_counter >= int(opts.lm[1]):
                 break
+
+            if not check_args(opts, batch):
+                continue
+
+            if not check_goals(opts, batch):
+                continue
                 
             preds, true, loss = model(batch)
             
             # update validation stats
             loss_avg_valid += loss.item()
             for j in range(len(batch["goal"])):
-                if preds[j] == true[j]:
+                if true[j] == preds[j]:
                     num_correct_valid += 1
-                pred_freq_valid[preds[j]] = pred_freq_valid.get(preds[j], 0) + 1
+                #pred_freq_valid[preds[j]] = pred_freq_valid.get(preds[j], 0) + 1
                 proof_counter += 1
             batch_counter += 1  
                           
@@ -132,8 +144,8 @@ def train(opts):
         
         # log results
         res_log.info(f"####### epoch: {n} #######")
-        res_log.info(f"train guesses: {pred_freq_train}")
-        res_log.info(f"validation guesses: {pred_freq_valid}")
+        #res_log.info(f"train guesses: {pred_freq_train}")
+        #res_log.info(f"validation guesses: {pred_freq_valid}")
         res_log.info(f"train losses: {loss_avg_train}")
         res_log.info(f"validation losses: {loss_avg_valid}")
         res_log.info(f"train accuracy: {acc_train}")
@@ -143,7 +155,36 @@ def train(opts):
     
         # reduce LR
         scheduler.step(loss_avg_valid)
-        
+
+def check_args(opts, batch):
+    tactic_applications = [t["text"] for t in batch["tactic"]]
+    gc_ids = [[c["qualid"]for c in gc] for gc in batch["env"]]
+    lc_ids = [[c["ident"] for c in lc] for lc in batch["local_context"]]
+    
+    for i, tactic_application in enumerate(tactic_applications):
+        if len(lc_ids[i]) > 10:
+            return False
+
+        lc_arg = find_lc_arg(opts, tactic_application, lc_ids[i])
+
+        if lc_arg not in lc_ids[i]:
+            return False
+
+    return True
+
+def check_goals(opts, batch):
+    asts = [g["ast"] for g in batch["goal"]]
+    tactic_applications = [t["text"] for t in batch["tactic"]]
+
+    _, edge_index, _ = prep_asts(opts, asts, len(asts))
+    try:
+        edge_index, _ = remove_self_loops(edge_index)
+    except:
+        print([g["text"] for g in batch["goal"]])
+        print(tactic_applications)
+        return False
+    return True
+
 
 if __name__ == "__main__":
     
@@ -151,27 +192,28 @@ if __name__ == "__main__":
     
     # paths
     parser.add_argument("--datapath", type=str, default="../proof_steps")
-    parser.add_argument("--nonterminals", type=str, default="./jsons/nonterminals.json")
-    parser.add_argument("--tactics", type=str, default="./jsons/tactics.json")
+    parser.add_argument("--nonterminals", type=str, default="../jsons/nonterminals.json")
+    parser.add_argument("--tactics", type=str, default="../jsons/tactics.json")
+    parser.add_argument("--generic_args", type=str, default="../jsons/generic_args.json")
     parser.add_argument("--args", type=str, default="./jsons/args.json")
     parser.add_argument("--split", type=str, default="../projs_split.json")
     parser.add_argument("--sexp_cache", type=str, default="../sexp_cache")
-    parser.add_argument("--savepath", type=str, default="./models/tac")
-    parser.add_argument("--run_log", type=str, default="./logs/run_tac.log")
-    parser.add_argument("--res_log", type=str, default="./logs/res_tac.log")
-    parser.add_argument("--res_csv", type=str, default="./logs/res_tac.csv")
+    parser.add_argument("--savepath", type=str, default="./models/lc")
+    parser.add_argument("--run_log", type=str, default="./logs/run_lc.log")
+    parser.add_argument("--res_log", type=str, default="./logs/res_lc.log")
+    parser.add_argument("--res_csv", type=str, default="./logs/res_lc.csv")
     
     # run env
     parser.add_argument("--num_workers", type=int, default=0)
     parser.add_argument("--epochs", type=int, default=100)
-    parser.add_argument("--batchsize", type=int, default=16)
+    parser.add_argument("--batchsize", type=int, default=1)
     parser.add_argument("--model", type=str, default="gast2")
     parser.add_argument("--argmodel", type=bool, default=False)
     parser.add_argument("--lm", nargs="+", default=[-1, -1])
     parser.add_argument("--seed", type=int, default=0)
     
     # optimizer    
-    parser.add_argument("--lr", type=float, default=1e-3)
+    parser.add_argument("--lr", type=float, default=1e-6)
     parser.add_argument("--l2", type=float, default=1e-6)
     parser.add_argument("--lr_reduce_patience", type=int, default=3)
     parser.add_argument("--optimizer", type=str, default="adam")
@@ -181,12 +223,12 @@ if __name__ == "__main__":
     parser.add_argument("--dropout", type=float, default=0.5)
     parser.add_argument("--embedding_info", type=str, default="goal")
     
-    # gast
-    parser.add_argument("--embedding_dim", type=int, default=256)
-    parser.add_argument("--sortk", type=int, default=30)
+    parser.add_argument("--embedding_dim", type=int, default=512)
+    parser.add_argument("--num_hidden", type=int, default=6)
+    parser.add_argument("--num_attention", type=int, default=6)
+    parser.add_argument("--tokenizer_length", type=int, default=512)
     
     opts = parser.parse_args()
     opts.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     
     train(opts)
-       
