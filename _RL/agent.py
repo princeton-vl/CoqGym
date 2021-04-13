@@ -1,107 +1,157 @@
 import torch, random, math
 from datetime import datetime
 
-from _RL.estimators.sarsa import SARSA
+from _RL.estimators.q import Q
 
 import helpers
 
+class ReplayMemory(object):
+    def __init__(self):
+        self.memory = []
+        
+    def push(self, pred, target, reward):
+        self.memory.append((pred, target, reward))
+
+    def sample(self, batch_size):
+        return random.sample(self.memory, batch_size)
+
+    def clear(self):
+        self.memory = []
+
+    def __len__(self):
+        return len(self.memory)
 
 class Agent:
     def __init__(self, opts):
         self.opts = opts
-        self.q_function = SARSA(self.opts)
-        self.steps_done = 0
+
+        ''' statistics '''
+        self.num_steps = 0
+        self.error_count = 0
+        self.tot_reward = 0
+
+        ''' record valid search '''
+        self.script = []
+
+        ''' replay exprience used for training '''
+        self.replay = ReplayMemory()
+
+        ''' deep Q networks '''
+        self.Q = Q(self.opts)
+        self.target_Q = Q(self.opts) # added for more robust/stable training
+
+        ''' environment and state '''
+        self.proof_env = None
+        self.state = None # triplet -> (goal, local context, global context)
+
+
+    def reset(self, proof_env):
+        self.num_steps = 0
+        self.error_count = 0
+        self.tot_reward = 0
+        self.script = []
+
+        self.replay.clear()
+        self.proof_env = proof_env
+
+        local_state = proof_env.init()
+        goal, lc = helpers.process_local_env(local_state)
+        gc = helpers.process_global_context(local_state)
+        self.state = (goal, lc, gc)
+
+
+    def update_state(self, local_state):
+        gc = self.state[2]
+        goal, lc = helpers.process_local_env(local_state)
+        self.state = (goal, lc, gc)
+
+
+    def update_target_Q(self):
+        self.target_Q.load_state_dict(self.Q.state_dict())
+
+
+    def make_action(self, action):
+        prev_state = self.state
+        local_state = self.proof_env.step(f'{action}.')
+        result = local_state['result']
+        if result == 'ERROR':
+            self.state = prev_state
+            self.error_count += 1
+        else:
+            print(result) # TODO: handle MAX here
+            self.update_state(local_state)
+            self.script.append(action)
+
+        reward = helpers.get_reward(self.opts, result)
+        return reward, result
 
 
     def train(self, proof_env):
-        if not self.q_function.training:
-            self.q_function.train()
-
-        state_actions = []
-        eligibilities = {}
+        if not self.Q.training: self.Q.train()
+        if not self.target_Q.training: self.target_Q.train()
         
-        state = proof_env.init()
-        gc = helpers.process_global_context(state)
-    
-        script = []
-        error_action_count = 0
-        tot_reward = 0
+        ''' get ready for new proof search '''
+        self.reset(proof_env)
 
+        ''' begin search '''
         while True:
-            
-            ''' get Q value and policy action for current state '''
-            state_id = helpers.state_id(state)
-            q_values, actions = self.q_function(state, gc), helpers.get_actions(self.opts, state, gc)
-            action, q = self.pick_action(actions, q_values)
-            if len(state_actions) > 10:
-                state_actions.pop(0)            
-            state_actions.append((state_id, action))
+            ''' get Q value and eps-greedy action for current state '''
+            q_values = self.Q(self.state)
+            actions = helpers.get_actions(self.opts, self.state)
+            action, q = self.eps_greedy_action(actions, q_values)
 
-            ''' make action, get reward '''
-            prev_state = state
-            state = proof_env.step(f'{action}.')
-            r = helpers.get_reward(self.opts, state)
-            tot_reward += r
-            if state['result'] == 'ERROR':
-                state = prev_state
-                error_action_count += 1
+
+            ''' make action -> update state and get reward '''
+            reward, result = self.make_action(action)
+            self.tot_reward += reward
+
+
+            ''' calc targets and update replay '''
+            if result in ['MAX_NUM_TACTICS_REACHED', 'MAX_TIME_REACHED']:
+                _q = -self.opts.reward
+            elif result == 'SUCCESS':
+                _q = self.opts.reward
             else:
-                script.append(action)
+                _q_values = self.target_Q(self.state)
+                _q = max(_q_values)
 
-            ''' calc temporal difference '''
-            if state['result'] in ['MAX_NUM_TACTICS_REACHED', 'MAX_TIME_REACHED']:
-                next_q = -self.opts.reward
-            elif state['result'] == 'SUCCESS':
-                next_q = self.opts.reward
-            else:
-                next_q_values, next_actions = self.q_function(state, gc), helpers.get_actions(self.opts, state, gc)
-                next_action, next_q = self.pick_best_action(next_actions, next_q_values)
-            #print(q)
-            #print(next_q)
-            td = r + self.opts.discount*next_q - q
-            #print(td)
-
-            '''  set eligibility '''
-            eligibilities[(state_id, action)] = 1
-
-            ''' update network '''
-            for sap in state_actions:
-                # Q(s,a) <- Q(s,a) + α*δ*e(s,a)
-                with torch.no_grad():
-                    for p in self.q_function.parameters():
-                        # wi ← wi +α*δ*e(s, a)
-                        new_val = p + self.opts.lr*td*eligibilities[sap]
-                        p.copy_(new_val)                        
-                # e(s,a) <- γ*λ*e(s,a)
-                eligibilities[sap] = self.opts.discount*self.opts.eligibility*eligibilities[sap]
-
+            self.replay.push(q, _q, reward)
             
+
             ''' search is over '''
-            if state['result'] in ['MAX_NUM_TACTICS_REACHED', 'MAX_TIME_REACHED']:
-                return {'res': False, 'script': script, 'error_count': error_action_count, 'rewards': tot_reward}
-            elif state['result'] == 'SUCCESS':
-                return {'res': True, 'script': script, 'error_count': error_action_count, 'rewards': tot_reward}
+            if result in ['MAX_NUM_TACTICS_REACHED', 'MAX_TIME_REACHED', 'SUCCESS']:
+                valid_proof = True if result == 'SUCCESS' else False
+                out = {
+                    'res': valid_proof,
+                    'replay': self.replay,
+                    'script': self.script,
+                    'error_count': self.error_count,
+                    'rewards': self.tot_reward
+                }
+                return out
         
         return "This should never be reached..."
 
-    def pick_action(self, actions, q_values):
+
+    def eps_greedy_action(self, actions, q_values):
         sample = random.random()
         eps_tresh = self.opts.epsilon_end + (self.opts.epsilon_start - self.opts.epsilon_end) \
-                    * math.exp(-1. * self.steps_done / self.opts.epsilon_decay)
-        self.steps_done += 1
-        #print(eps_tresh)
+                    * math.exp(-1. * self.num_steps / self.opts.epsilon_decay)
+        self.num_steps += 1
         if  sample > eps_tresh:
-            return self.pick_best_action(actions, q_values)
+            return self.best_action(actions, q_values)
         else:
             index = random.randint(0, len(actions)-1)
             q = q_values[index]
             action = actions[index]
             return action, q
     
-    def pick_best_action(self, actions, q_values):
+
+    def best_action(self, actions, q_values):
         q = max(q_values)
         action = actions[torch.argmax(q_values)]
         return action, q
+
 
     def test(self, proof_env):
         pass

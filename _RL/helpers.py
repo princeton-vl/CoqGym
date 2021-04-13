@@ -54,10 +54,8 @@ def setup_loggers(opts):
 sexp_cache = SexpCache('../sexp_cache', readonly=True)
 term_parser = GallinaTermParser(caching=True)
 
-def get_actions(opts, state, gc):
-    goals, local_contexts = process_local_env(state)
-    goal, lc = goals[0], local_contexts[0]
-        
+def get_actions(opts, state):
+    goal, lc, gc = state[0], state[1], state[2]        
     with open(opts.tactics_sorted) as f: tactics_sorted = json.load(f)
     non_args = tactics_sorted['non_args']
     gc_args = tactics_sorted['gc_args']
@@ -93,7 +91,7 @@ def process_local_env(state):
     for i, lc in enumerate(local_contexts):
         local_contexts[i] = padd_context(lc)
 
-    return goals, local_contexts
+    return goals[0], local_contexts[0]
 
 def process_global_context(state):
     global_context = []
@@ -198,8 +196,7 @@ def state_id(state):
     sexp = goal["sexp"] + "".join([h["sexp"] for h in goal["hypotheses"]])
     return sha1(sexp.encode("utf-8")).hexdigest()
 
-def get_reward(opts, state):
-    res = state['result']
+def get_reward(opts, res):
     if res == 'ERROR':
         r = -opts.reward/2
     elif res in ['MAX_NUM_TACTICS_REACHED', 'MAX_TIME_REACHED']:

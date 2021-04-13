@@ -69,9 +69,7 @@ def train(opts):
                 continue
             
             preds, true, loss = model(batch)
-            print(preds)
-            print(true)
-
+            
             loss.backward()
             optimizer.step()
             optimizer.zero_grad()

@@ -10,9 +10,9 @@ from torch_geometric.utils import remove_self_loops
 from gallina import traverse_postorder
 import helpers
 
-class SARSA(nn.Module):
+class Q(nn.Module):
     def __init__(self, opts):
-        super(SARSA, self).__init__()
+        super(Q, self).__init__()
         self.opts = opts
         with open(opts.nonterminals) as f: self.nonterminals = json.load(f)
         self.action_space = self.opts.action_space
@@ -40,9 +40,8 @@ class SARSA(nn.Module):
         self.tanh = nn.Tanh()
 
     
-    def forward(self, state, gc):
-        goals, local_contexts = helpers.process_local_env(state)
-        goal, lc = goals[0], local_contexts[0]
+    def forward(self, state):
+        goal, lc, gc = state[0], state[1], state[2]
         goal_ast, lc_asts, gc_asts = goal['ast'], [c['ast'] for c in lc], [c['ast'] for c in gc]
         asts = [goal_ast] + lc_asts + gc_asts
 
@@ -58,7 +57,7 @@ class SARSA(nn.Module):
 
             ''' embedd '''
             x_1 = self.tanh(self.conv1(x, edge_index))
-            print(x_1)
+            #print(x_1)
             x_2 = self.tanh(self.conv2(x_1, edge_index))
             x_3 = self.tanh(self.conv3(x_2, edge_index))
             x_4 = self.tanh(self.conv4(x_3, edge_index))

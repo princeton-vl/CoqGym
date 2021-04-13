@@ -24,6 +24,7 @@ parser.add_argument('--res', type=str, default='./logs/res_train.log')
 
 # run
 parser.add_argument('--epochs', type=int, default=1)
+parser.add_argument('--batchsize', type=int, default=4)
 parser.add_argument('--episodes', type=int, default=100)
 
 # proof search
@@ -35,14 +36,14 @@ parser.add_argument('--action_space', type=int, default=175)
 # GNN and RL
 parser.add_argument('--embedding_dim', type=int, default=128)
 parser.add_argument('--sortk', type=int, default=10)
-parser.add_argument('--lr', type=float, default=1e-1)
+parser.add_argument('--lr', type=float, default=1e-3)
 parser.add_argument('--dropout', type=float, default=0.1)
 parser.add_argument('--reward', type=float, default=1)
 #parser.add_argument('--punishment', type=float, default=-1)
-parser.add_argument('--epsilon_start', type=float, default=0.7)
+parser.add_argument('--epsilon_start', type=float, default=0.6)
 parser.add_argument('--epsilon_end', type=float, default=0.05)
 parser.add_argument('--epsilon_decay', type=float, default=1e3)
-parser.add_argument('--discount', type=float, default=0.9)
+parser.add_argument('--discount', type=float, default=0.5)
 parser.add_argument('--eligibility', type=float, default=0.5)
 
 opts = parser.parse_args()
@@ -57,7 +58,8 @@ train_files = test_files
 
 # agent
 agent = Agent(opts)
-res_log.info(agent.q_function)
+res_log.info(agent.Q)
+optimizer = torch.optim.RMSprop(agent.Q.parameters())
 #optimizer = torch.optim.Adam(agent.policy.parameters(), lr=opts.lr)
 #criterion = nn.MSELoss()
 
@@ -83,18 +85,10 @@ for n in range(opts.epochs):
 
                     res = agent.train(proof_env)
 
-                    #print(f"{res['res']}, {res['script']}")
                     print(f"{name}: {res}\n")
 
-                    #expected_rewards = torch.tensor(res['expected_rewards'], requires_grad=True)
-                    #true_reward = torch.tensor([res['reward']]*len(expected_rewards))
-                    #loss = criterion(expected_rewards, true_reward)
-                    #print(loss)
-                    #optimizer.zero_grad()
-                    #loss.backward()
-                    #optimizer.step()
+                    optimize_model(res['replay'])
 
-                    
                     total += 1
                     if res['res']:
                         num_correct += 1
@@ -102,7 +96,30 @@ for n in range(opts.epochs):
                     proof_count += 1
                     if proof_count > 0:
                         break
+            
+            agent.update_target_Q()
             acc = num_correct/total
             res_log.info(f"{f}: \t {num_correct}/{total} ({acc})".expandtabs(80))
         break
 
+
+def optimize_model(replay_buffer):
+
+    batch = replay_buffer.sample(opts.batchsize)
+
+    q_batch = torch.tensor([b[0] for b in batch])
+    _q_batch = torch.cat([b[1] for b in batch])
+    r_batch = torch.cat([b[2] for b in batch])
+    
+    # add discount and reward
+    targets = (_q_batch * opts.discount) + r_batch
+
+    # Compute Huber loss
+    loss = F.smooth_l1_loss(q_batch, targets)
+
+    # Optimize the agent's Q
+    optimizer.zero_grad()
+    loss.backward()
+    for param in agent.Q.parameters():
+        param.grad.data.clamp_(-1, 1)
+    optimizer.step()

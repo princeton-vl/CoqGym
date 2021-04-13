@@ -25,12 +25,6 @@ def train(opts):
                             
     # agent and provers
     model = GASTTacModel(opts)
-    if opts.device.type == "cpu" and opts.modelpath != "":
-        taccheck = torch.load(opts.modelpath, map_location="cpu")
-    elif opts.modelpath != "":
-        taccheck = torch.load(opts.modelpath)
-
-    model.load_state_dict(taccheck["state_dict"])
     model.to(opts.device)
     
     # dataloaders
