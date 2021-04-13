@@ -69,6 +69,8 @@ def train(opts):
                 continue
             
             preds, true, loss = model(batch)
+            print(preds)
+            print(true)
 
             loss.backward()
             optimizer.step()
@@ -122,6 +124,7 @@ def train(opts):
                 continue
                 
             preds, true, loss = model(batch)
+            
             
             # update validation stats
             loss_avg_valid += loss.item()

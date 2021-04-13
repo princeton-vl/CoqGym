@@ -14,7 +14,7 @@ class TransGCModel(nn.Module):
         self.tokenizer = BertTokenizer.from_pretrained("bert-base-cased")
         self.config = BertConfig(hidden_dropout_prob=self.opts.dropout, 
                                  attention_probs_dropout_prob=self.opts.dropout,
-                                 num_labels = len(self.tactics),
+                                 num_labels = 10,
                                  num_hidden_layers=self.opts.num_hidden,
                                  num_attention_heads=self.opts.num_attention,
                                  vocab_size = len(self.tokenizer))
@@ -35,6 +35,7 @@ class TransGCModel(nn.Module):
             if txt == None:
                 gc_texts[i] = "None"
 
+
         texts = goal_texts + gc_texts
         bert_input = texts[0]
         for text in texts[1:]:
@@ -45,7 +46,7 @@ class TransGCModel(nn.Module):
         logits, loss = self.go_bert([bert_input], targets)
         
         probs = self.softmax(logits)
-        preds = get_pred_gc(self.tactics,  batch, probs)
+        preds = get_pred_gc(self.tactics, batch, probs)
         return preds, trues, loss
 
     def go_bert(self, texts, labels):
