@@ -56,6 +56,10 @@ class ProofEnv:
             Undo - to backtrack one step
             other valid Coq commands
         """
+        self.num_tactics_left -= 1
+        if command == 'Undo.':
+            self.success = False
+
         if self.success:
             return self.feedback("ALREADY_SUCCEEDED")
         if self.failure:
@@ -72,7 +76,7 @@ class ProofEnv:
                 if self.num_tactics_left <= 0:
                     self.serapi.pop()
                     return self.feedback("MAX_NUM_TACTICS_REACHED")
-                self.num_tactics_left -= 1
+                #self.num_tactics_left -= 1
                 
                 if "all" in command[:-1]:
                     command = "all: timeout %d (%s)." % (time_left, command[:-1].replace("all: ", ""))

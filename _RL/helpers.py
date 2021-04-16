@@ -1,10 +1,52 @@
-import os, logging, json, torch
+import os, logging, json, torch, pickle, random
 from glob import glob
 from utils import SexpCache
 from gallina import GallinaTermParser, traverse_postorder
 from hashlib import sha1
 from torch_geometric.data import Data, Batch
+from torch.utils.data import Dataset
 from lark import Tree
+
+
+class ProofStepData(Dataset):
+    def __init__(self, opts, split):
+        super().__init__()
+        self.opts = opts
+        self.split = split
+        self.datapath = self.opts.proof_steps
+        self.filepath = f"{self.datapath}/{self.split}"
+        self.files = os.listdir(self.filepath)
+        for i, file_name in enumerate(self.files):
+            self.files[i] = f"{self.filepath}/{file_name}"
+        random.shuffle(self.files)
+        self.size = len(self.files)
+
+    def __len__(self):
+        return self.size
+    
+    def __getitem__(self, idx):
+        return pickle.load(open(self.files[idx], "rb"))
+
+
+def merge(batch):
+        fields = [
+            "file",
+            "proof_name",
+            "n_step",
+            "env",
+            "local_context",
+            "goal",
+            "is_synthetic",
+            "tactic",
+        ]
+        data_batch = {key: [] for key in fields}
+        for example in batch:
+            for key, value in example.items():
+                if key not in fields:
+                    continue
+                data_batch[key].append(value)
+        return data_batch
+
 
 def files_on_split(opts):
     root = opts.data
@@ -79,11 +121,11 @@ def process_local_env(state):
     goals = []
     local_contexts = []
     for g in state['fg_goals']:
-        goal = {'id': g['id'], 'text': g['type'], 'ast': term_parser.parse(g['sexp'])}
+        goal = {'id': g['id'], 'text': g['type'], 'ast': term_parser.parse(g['sexp']), 'sexp': g['sexp']}
         local_context = []
         for i, h in enumerate(g['hypotheses']):
             for ident in h['idents']:
-                local_context.append({'ident': ident, 'text': h['type'], 'ast': term_parser.parse(h['sexp'])})
+                local_context.append({'ident': ident, 'text': h['type'], 'ast': term_parser.parse(h['sexp']), 'sexp': h['sexp']})
 
         goals.append(goal)
         local_contexts.append(local_context)
@@ -99,7 +141,7 @@ def process_global_context(state):
 
     for const in toplevel_consts[-10:]:
         ast = sexp_cache[const['sexp']]
-        global_context.append({'ident': const['qualid'], 'text': const['type'], 'ast': term_parser.parse(ast)})
+        global_context.append({'ident': const['qualid'], 'text': const['type'], 'ast': term_parser.parse(ast), 'sexp': const['sexp']})
     
     return padd_context(global_context)
 
@@ -108,7 +150,7 @@ def padd_context(c):
         return c[0:10]
         
     while len(c) < 10:
-        empty = {'ident': '', 'text': '', 'ast': Tree(data=None, children=None)}
+        empty = {'ident': '', 'text': '', 'ast': Tree(data=None, children=None), 'sexp': ''}
         c.append(empty)
 
     return c
@@ -192,20 +234,64 @@ def one_hot_encode(ast, nonterminals):
     return torch.tensor(target)
 
 def state_id(state):
-    goal = state['fg_goals'][0]
-    sexp = goal["sexp"] + "".join([h["sexp"] for h in goal["hypotheses"]])
+    goal = state[0]
+    sexp = goal["sexp"] + "".join([c["sexp"] for c in state[1]])
     return sha1(sexp.encode("utf-8")).hexdigest()
 
 def get_reward(opts, res):
     if res == 'ERROR':
-        r = -opts.reward/2
+        r = opts.error_punishment
     elif res in ['MAX_NUM_TACTICS_REACHED', 'MAX_TIME_REACHED']:
-        r = -opts.reward
+        r = opts.error_punishment
     elif res == 'SUCCESS':
-        r = opts.reward
+        r = opts.success_reward
     else:
-        r = 0
+        r = opts.neutral_reward
     return r
+
 
 def proof_end(state):
     return state['result'] in ['MAX_NUM_TACTICS_REACHED', 'MAX_TIME_REACHED', 'SUCCESS']
+
+
+def is_equivalent(opts, tac, action, state):
+    goal, lc, gc = state[0], state[1], state[2]
+    lc_ids = [c['ident'] for c in lc]
+    gc_arg = find_gc_arg(opts, tac, lc_ids)
+    lc_arg = find_lc_arg(opts, tac, lc_ids)
+
+    if gc_arg == None and lc_arg == None:
+        return tac == action
+    elif lc_arg == None:
+        tac_elements = tac.split(' ')
+        for tac_element in tac_elements:
+            if tac_element not in action:
+                return False
+        return True
+    elif gc_arg == None:
+        return tac == action
+
+    return False
+
+def find_gc_arg(opts, tactic_application, lc_ids):
+    with open(opts.generic_args) as f: generic_args = json.load(f)
+    with open(opts.tactics) as f: tactics = json.load(f)
+    all_actions = tactic_application.split(" ")
+    args = all_actions[1:]
+    for arg in args:
+        if arg in generic_args:
+            continue
+        if arg in tactics:
+            continue
+        if arg in lc_ids:
+            continue
+        return arg
+    return None
+
+def find_lc_arg(opts, tactic_application, lc_ids):
+    all_actions = tactic_application.split(" ")
+    args = all_actions[1:]
+    for arg in args:
+        if arg in lc_ids:
+            return arg
+    return None
