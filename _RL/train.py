@@ -54,8 +54,6 @@ def sl_train(dataloader):
             sl_optimizer.zero_grad()
             loss.backward()
             sl_optimizer.step()
-
-            #print(loss)
         
             count += 1
 
@@ -103,11 +101,14 @@ parser.add_argument('--generic_args', type=str, default='./jsons/generic_args.js
 parser.add_argument('--nonterminals', type=str, default='./jsons/nonterminals.json')
 parser.add_argument('--run', type=str, default='./logs/run_train.log')
 parser.add_argument('--res', type=str, default='./logs/res_train.log')
+parser.add_argument('--savepath', type=str, default='./models/Q')
+parser.add_argument('--savepath_target', type=str, default='./models/target_Q')
 
 # run
 parser.add_argument('--epochs', type=int, default=100)
 parser.add_argument('--replay_batchsize', type=int, default=256)
 parser.add_argument('--sl_batchsize', type=int, default=256)
+parser.add_argument('--imitation', type=bool, default=False)
 parser.add_argument('--episodes', type=int, default=1)
 
 # proof search
@@ -117,8 +118,8 @@ parser.add_argument('--timeout', type=int, default=600)
 parser.add_argument('--action_space', type=int, default=175)
 
 # GNN
-parser.add_argument('--embedding_dim', type=int, default=256)
-parser.add_argument('--sortk', type=int, default=30)
+parser.add_argument('--embedding_dim', type=int, default=16)
+parser.add_argument('--sortk', type=int, default=10)
 parser.add_argument('--lr', type=float, default=1e-3)
 parser.add_argument('--lr_sl', type=float, default=1e-3)
 parser.add_argument('--dropout', type=float, default=0.5)
@@ -148,18 +149,21 @@ sl_optimizer = torch.optim.Adam(agent.Q.parameters(), lr=opts.lr_sl)
 
 # dataset
 train_files, valid_files, test_files = files_on_split(opts)
-proof_steps = DataLoader(ProofStepData(opts, "train"), 1, collate_fn=merge, num_workers=2)
+proof_steps = DataLoader(ProofStepData(opts, "train"), 1, collate_fn=merge, num_workers=0)
 
 # epochs
 for n in range(opts.epochs):
     res_log.info(f'EPOCH: {n}')
     file_count = 0
+    save_count = 0
+    total_proofs_count = 0
     # proof files
     for f in train_files:
         agent.num_steps = 0
         agent.update_target_Q()
-
-        # sl_train(proof_steps)
+        
+        if opts.imitation:
+            sl_train(proof_steps)
 
         for i in range(opts.episodes):
             eps_start = agent.get_eps_tresh()
@@ -179,6 +183,8 @@ for n in range(opts.epochs):
 
                     res = agent.train(proof_env)
 
+                    print(res)
+
                     error_count += res['error_count']
 
                     total += 1
@@ -191,10 +197,21 @@ for n in range(opts.epochs):
                     if len(agent.replay) >= opts.replay_batchsize:
                         replay_train(agent.replay)
                         agent.replay.clear()
+
+                    run_log.info(f'Seen {total_proofs_count/43844} % of proofs')
             
             acc = num_correct/total
             eps_end = agent.get_eps_tresh()
             res_log.info(f'{f}: \t {num_correct}/{total} ({acc})'.expandtabs(80))
-            res_log.info(f'(episode {i}) eps: {eps_start} -> {eps_end}, errors: {error_count}')
+            res_log.info(f'(episode {i}) eps: {eps_start} -> {eps_end}, errors: {error_count}\n')
             file_count += 1
-            run_log.info(f'Seen {file_count/len(train_files)} % of files')
+        
+
+        if file_count % 50 == 0:
+            # save model
+            torch.save({'state_dict': agent.Q.state_dict()},
+                        f"{opts.savepath}%03d.pth" % save_count)
+
+            torch.save({'state_dict': agent.Q.state_dict()},
+                        f"{opts.savepath_target}%03d.pth" % save_count)
+            save_count += 1
