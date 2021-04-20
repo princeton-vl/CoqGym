@@ -66,3 +66,24 @@ class TransGCModel(nn.Module):
         output = self.bert(**input, output_hidden_states=True, output_attentions=True)
         
         return output.logits, output.loss
+
+    def prove(self, goal, lc, gc):
+        goal_text = goal['text']
+        if goal_text == None:
+            goal_texts[i] = "None"
+
+        gc_texts = [c["text"] for c in gc]
+        for i, txt in enumerate(gc_texts):
+            if txt == None:
+                gc_texts[i] = "None"
+
+        texts = goal_text + gc_texts
+        bert_input = texts[0]
+        for text in texts[1:]:
+            bert_input = f"{bert_input}. AND. {text}"
+
+        logits, _ = self.go_bert([bert_input], None)
+
+        probs = self.softmax(logits)
+
+        return probs

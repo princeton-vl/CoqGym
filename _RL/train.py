@@ -198,6 +198,7 @@ for n in range(opts.epochs):
                         replay_train(agent.replay)
                         agent.replay.clear()
 
+                    total_proofs_count += 1
                     run_log.info(f'Seen {total_proofs_count/43844} % of proofs')
             
             acc = num_correct/total

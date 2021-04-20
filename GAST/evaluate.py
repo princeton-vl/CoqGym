@@ -6,6 +6,9 @@ from agent import Agent
 from model.tacmodel import GASTTacModel
 from model.lcmodel import GASTLCModel
 from model.gcmodel import GASTGCModel
+from _TransTactic.model.tacmodel import TransTacModel
+from _TransTactic.model.lcmodel import TransLCModel
+from _TransTactic.model.gcmodel import TransGCModel
 
 from datetime import datetime
 from helpers import setup_loggers, files_on_split
@@ -42,8 +45,13 @@ if __name__ == "__main__":
     
     # model parameters
     parser.add_argument("--dropout", type=str, default=0.0)
+    # GAST
     parser.add_argument("--embedding_dim", type=int, default=256)
     parser.add_argument("--sortk", type=int, default=30)
+    # TRANS
+    parser.add_argument("--num_hidden", type=int, default=6)
+    parser.add_argument("--num_attention", type=int, default=6)
+    parser.add_argument("--tokenizer_length", type=int, default=512)
 
     opts = parser.parse_args()
     opts.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -52,9 +60,21 @@ if __name__ == "__main__":
     run_log, res_log = setup_loggers(opts)
                      
     # models and agent
-    tacmodel = GASTTacModel(opts)
-    lcmodel = GASTLCModel(opts)
-    gcmodel = GASTGCModel(opts)
+    if ".." in opts.tacmodel:
+        tacmodel = TransTacModel(opts)
+    else:
+        tacmodel = GASTTacModel(opts)
+
+    if ".." in opts.lcmodel:
+        lcmodel = TransLCModel(opts)
+    else:
+        lcmodel = GASTLCModel(opts)
+
+    if ".." in opts.gcmodel:
+        gcmodel = TransGCModel(opts)
+    else:
+        gcmodel = GASTGCModel(opts)
+
     if opts.device.type == "cpu":
         taccheck = torch.load(opts.tacmodel, map_location="cpu")
         lccheck = torch.load(opts.lcmodel, map_location="cpu")
@@ -63,6 +83,7 @@ if __name__ == "__main__":
         taccheck = torch.load(opts.tacmodel)
         lccheck = torch.load(opts.lcmodel)
         gccheck = torch.load(opts.gcmodel)
+        
     tacmodel.load_state_dict(taccheck["state_dict"])
     lcmodel.load_state_dict(lccheck["state_dict"])
     gcmodel.load_state_dict(gccheck["state_dict"])
@@ -92,7 +113,6 @@ if __name__ == "__main__":
     
     # testing
     train_files, valid_files, test_files = files_on_split(opts.datapath, json.load(open(opts.split, "r")))
-    test_files = test_files[252:]
 
     total_count = 0
     file_count = 0

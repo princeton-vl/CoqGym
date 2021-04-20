@@ -54,3 +54,14 @@ class TransTacModel(nn.Module):
         output = self.bert(**input, output_hidden_states=True, output_attentions=True)
         
         return output.logits, output.loss
+
+    def prove(self, goal, lc, gc):
+        goal_text = goal['text']
+        if goal_text == None:
+            goal_texts[i] = "None"
+
+        logits, _ = self.go_bert([goal_text], None)
+
+        probs = self.softmax(logits)
+
+        return probs

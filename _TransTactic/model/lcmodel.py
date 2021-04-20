@@ -67,3 +67,24 @@ class TransLCModel(nn.Module):
         output = self.bert(**input, output_hidden_states=True, output_attentions=True)
         
         return output.logits, output.loss
+
+    def prove(self, goal, lc, gc):
+        goal_text = goal['text']
+        if goal_text == None:
+            goal_texts[i] = "None"
+
+        lc_texts = [c["text"] for c in lc]
+        for i, txt in enumerate(lc_texts):
+            if txt == None:
+                lc_texts[i] = "None"
+
+        texts = goal_text + lc_texts
+        bert_input = texts[0]
+        for text in texts[1:]:
+            bert_input = f"{bert_input}. AND. {text}"
+
+        logits, _ = self.go_bert([bert_input], None)
+
+        probs = self.softmax(logits)
+
+        return probs
