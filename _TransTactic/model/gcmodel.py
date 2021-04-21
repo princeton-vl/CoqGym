@@ -77,7 +77,7 @@ class TransGCModel(nn.Module):
             if txt == None:
                 gc_texts[i] = "None"
 
-        texts = goal_text + gc_texts
+        texts = [goal_text] + gc_texts
         bert_input = texts[0]
         for text in texts[1:]:
             bert_input = f"{bert_input}. AND. {text}"
@@ -86,4 +86,4 @@ class TransGCModel(nn.Module):
 
         probs = self.softmax(logits)
 
-        return probs
+        return probs[0]

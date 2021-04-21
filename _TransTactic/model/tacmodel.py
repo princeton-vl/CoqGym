@@ -63,5 +63,5 @@ class TransTacModel(nn.Module):
         logits, _ = self.go_bert([goal_text], None)
 
         probs = self.softmax(logits)
-
-        return probs
+        
+        return probs[0]

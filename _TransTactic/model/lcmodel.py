@@ -78,7 +78,7 @@ class TransLCModel(nn.Module):
             if txt == None:
                 lc_texts[i] = "None"
 
-        texts = goal_text + lc_texts
+        texts = [goal_text] + lc_texts
         bert_input = texts[0]
         for text in texts[1:]:
             bert_input = f"{bert_input}. AND. {text}"
@@ -87,4 +87,4 @@ class TransLCModel(nn.Module):
 
         probs = self.softmax(logits)
 
-        return probs
+        return probs[0]
