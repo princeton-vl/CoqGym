@@ -58,7 +58,7 @@ class TransTacModel(nn.Module):
     def prove(self, goal, lc, gc):
         goal_text = goal['text']
         if goal_text == None:
-            goal_texts[i] = "None"
+            goal_text[i] = "None"
 
         logits, _ = self.go_bert([goal_text], None)
 
