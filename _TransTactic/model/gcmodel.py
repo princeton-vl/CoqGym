@@ -70,7 +70,7 @@ class TransGCModel(nn.Module):
     def prove(self, goal, lc, gc):
         goal_text = goal['text']
         if goal_text == None:
-            goal_texts[i] = "None"
+            goal_text[i] = "None"
 
         gc_texts = [c["text"] for c in gc]
         for i, txt in enumerate(gc_texts):
