@@ -132,30 +132,34 @@ if __name__ == "__main__":
         
         current_count = 0
         current_correct = 0
-        with FileEnv(f, max_num_tactics=opts.max_num_tacs, timeout=opts.timeout) as file_env:
-            for proof_env in file_env:
-                proof_name = proof_env.proof["name"]
-                print(proof_name)
+        try:
+            with FileEnv(f, max_num_tactics=opts.max_num_tacs, timeout=opts.timeout) as file_env:
+                for proof_env in file_env:
+                    proof_name = proof_env.proof["name"]
+                    print(proof_name)
 
-                try:
-                    res = agent.test(proof_env)
-                except:
-                    skipped += 1
-                    continue
                 
-                total_count += 1
-                current_count += 1
+                    res = agent.test(proof_env)
+
+                
+                    total_count += 1
+                    current_count += 1
             
-                if res["proved"]:
-                    current_correct += 1
-                    correct += 1
+                    if res["proved"]:
+                        current_correct += 1
+                        correct += 1
                     
-                if opts.draw:
-                    graph = res["graph"]
-                    graph.render(f"{opts.pngpath}/{proof_name}", format="png", cleanup=True)
+                    if opts.draw:
+                        graph = res["graph"]
+                        graph.render(f"{opts.pngpath}/{proof_name}", format="png", cleanup=True)
             
-                if int(opts.lm[0]) <= current_count and int(opts.lm[0]) > -1:
-                    break
+                    if int(opts.lm[0]) <= current_count and int(opts.lm[0]) > -1:
+                        break
+
+        except:
+            res_log.info(f"Skipped {f}")
+            skipped += 1
+            continue
                             
         file_count += 1
               
@@ -179,5 +183,5 @@ if __name__ == "__main__":
     
     acc = correct/total_count
     res_log.info(f"Total: \t {correct}/{total_count} ({acc})".expandtabs(100))
-    res_log.info(f"Skipped {skipped} proofs.")
+    res_log.info(f"Skipped {skipped} files.")
 
