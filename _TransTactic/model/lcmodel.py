@@ -71,7 +71,7 @@ class TransLCModel(nn.Module):
     def prove(self, goal, lc, gc):
         goal_text = goal['text']
         if goal_text == None:
-            goal_text[i] = "None"
+            goal_text = "None"
 
         lc_texts = [c["text"] for c in lc]
         for i, txt in enumerate(lc_texts):
