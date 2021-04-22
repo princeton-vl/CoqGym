@@ -118,6 +118,7 @@ if __name__ == "__main__":
     file_count = 0
     proj_count = 0
     total_proj_count = 0
+    skipped = 0
     correct = 0
     proj_correct = 0
     last_proj = test_files[0].split("/")[2]
@@ -136,7 +137,11 @@ if __name__ == "__main__":
                 proof_name = proof_env.proof["name"]
                 print(proof_name)
 
-                res = agent.test(proof_env)
+                try:
+                    res = agent.test(proof_env)
+                except:
+                    skipped += 1
+                    continue
                 
                 total_count += 1
                 current_count += 1
@@ -174,4 +179,5 @@ if __name__ == "__main__":
     
     acc = correct/total_count
     res_log.info(f"Total: \t {correct}/{total_count} ({acc})".expandtabs(100))
+    res_log.info(f"Skipped {skipped} proofs.")
 
