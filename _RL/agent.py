@@ -253,4 +253,75 @@ class Agent:
 
 
     def test(self, proof_env):
-        pass
+        res, script = self.prove_DFS(proof_env)
+        print(f"{res}, {script}")
+        return {"proved": res, "script": script}
+        
+    def prove_DFS(self, proof_env):
+        state = proof_env.init()
+        gc = helpers.process_global_context(state)
+        node_ids = set() # keep track of all nodes seen so far
+        root_id = helpers.state_id(state)
+        node_ids.add(root_id)
+
+        goal, lc = helpers.process_local_env(state)
+            
+        # initialize the stack
+        stack = []
+        stack.append(self.get_candidates(goal, lc, gc))
+        script = []
+
+        
+        # depth-first search starting from the trace
+        while stack != [[]]:
+            # pick a tactic
+            if stack[-1] == []:  # all candidate have been tried, backtrack
+                stack.pop()
+                script.pop()
+                state = proof_env.step("Undo.")
+                continue
+            else:
+                tac = stack[-1].pop(0)
+                        
+            if "fg_goals" in state:
+                current_sign = helpers.state_id(state)
+            
+            state = proof_env.step(f"{tac}.")
+            
+            if state["result"] == "SUCCESS":                
+                script.append(tac)
+                return True, script
+            elif state["result"] in ["MAX_NUM_TACTICS_REACHED", "MAX_TIME_REACHED"]:
+                return False, script
+            elif state["result"] in ["ERROR"]:
+                continue
+            else:                
+                assert state["result"] == "PROVING"
+                script.append(tac)
+                sig = helpers.state_id(state)
+
+                if sig in node_ids or len(script) >= self.opts.depth_limit:
+                    state = proof_env.step("Undo.")
+                    script.pop()
+                    continue
+
+                node_ids.add(sig)
+                goal, lc = helpers.process_local_env(state)
+                
+                just_moved = False
+                stack.append(self.get_candidates(goal, lc, gc))
+
+        state = proof_env.step("Admitted.")
+        return False, script
+
+    def get_candidates(self, goal, lc, gc):
+        state = (goal, lc, gc)
+        actions = helpers.get_actions(self.opts, state)
+        q_values = self.Q(state)
+
+        topk, indices = torch.topk(input=q_values, k=10, dim=0, largest=True)
+        candidates = []
+        for i in indices:
+            candidates.append(actions[i])
+
+        return candidates

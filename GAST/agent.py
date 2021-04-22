@@ -75,7 +75,7 @@ class Agent:
         self.lcmodel = lcmodel
         self.gcmodel = gcmodel
         self.softmax = nn.Softmax(dim=1)
-        self.greylist = ["induction", "apply", "generalize", "destruct", "elim", "rewrite", "inversion_clear"]
+        #self.greylist = ["induction", "apply", "generalize", "destruct", "elim", "rewrite", "inversion_clear"]
         
     def test(self, proof_env):
         res, graph, script = self.prove_DFS(proof_env)
@@ -83,7 +83,7 @@ class Agent:
         return {"proved": res, "graph": graph, "script": script}
         
     def prove_DFS(self, proof_env):
-        used_tacs = set()
+        #used_tacs = set()
         state = proof_env.init()
         gc = self.process_global_env(state)
         node_ids = set() # keep track of all nodes seen so far
@@ -132,11 +132,10 @@ class Agent:
                 current_sign = graph_id(state)
                 current_texts = graph_text(state)
 
-            if tac in used_tacs:
-                continue
-            if script.count("intros") > 6 or script.count("split") > 6:
-                continue
-            
+            #if tac in used_tacs:
+                #continue
+            #if script.count("intros") > 6 or script.count("split") > 6:
+                #continue
             
             state = proof_env.step(f"{tac}.")
             
@@ -161,8 +160,8 @@ class Agent:
                     script.pop()
                     continue
                 
-                if tac.split(" ")[0] in self.greylist:
-                    used_tacs.add(tac)
+                #if tac.split(" ")[0] in self.greylist:
+                    #used_tacs.add(tac)
 
                 node_ids.add(sig)
                 local_envs = self.process_local_env(state)

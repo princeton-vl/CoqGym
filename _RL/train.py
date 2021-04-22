@@ -181,47 +181,49 @@ for n in range(opts.epochs):
             num_correct = 0
             total = 0
             # load FileEnv
-            with FileEnv(f, max_num_tactics=opts.max_num_tacs, timeout=opts.timeout) as file_env:
+            try:
+                with FileEnv(f, max_num_tactics=opts.max_num_tacs, timeout=opts.timeout) as file_env:
                 
-                proof_count = 0
-                # ProofEnv in FileEnv
-                for proof_env in file_env:
-                    ''' train agent on current ProofEnv '''
-                    name = proof_env.proof['name']
-                    human_proof = [step['command'][0] for step in proof_env.proof['steps']]
+                    proof_count = 0
+                    # ProofEnv in FileEnv
+                    for proof_env in file_env:
+                        ''' train agent on current ProofEnv '''
+                        name = proof_env.proof['name']
+                        human_proof = [step['command'][0] for step in proof_env.proof['steps']]
                     
-                    try:
                         res = agent.train(proof_env)
-                    except:
-                        skipped += 1
-                        continue
+      
+                        #print(res)
 
-                    #print(res)
+                        error_count += res['error_count']
 
-                    error_count += res['error_count']
-
-                    total += 1
-                    if res['res']:
-                        num_correct += 1
+                        total += 1
+                        if res['res']:
+                            num_correct += 1
                     
-                    proof_count += 1
+                        proof_count += 1
 
-                    # replay expriences and supervised training
-                    if len(agent.replay) >= opts.replay_batchsize:
-                        replay_train(agent.replay)
-                        agent.replay.clear()
+                        # replay expriences and supervised training
+                        if len(agent.replay) >= opts.replay_batchsize:
+                            replay_train(agent.replay)
+                            agent.replay.clear()
 
-                    total_proofs_count += 1
-                    run_log.info(f'Seen {total_proofs_count/43844} % of proofs')
+                        total_proofs_count += 1
+                        run_log.info(f'Seen {total_proofs_count} ({total_proofs_count/43844} %) of proofs')
             
-            acc = num_correct/max(total, 1)
-            eps_end = agent.get_eps_tresh()
-            res_log.info(f'{f}: \t {num_correct}/{total} ({acc})'.expandtabs(80))
-            res_log.info(f'(episode {i}) eps: {eps_start} -> {eps_end}, errors: {error_count}, skipped: {skipped}\n')
-            file_count += 1
+                acc = num_correct/max(total, 1)
+                eps_end = agent.get_eps_tresh()
+                res_log.info(f'{f}: \t {num_correct}/{total} ({acc})'.expandtabs(80))
+                res_log.info(f'(episode {i}) eps: {eps_start} -> {eps_end}, errors: {error_count}, skipped: {skipped}\n')
+                file_count += 1
+
+            except:
+                skipped += 1
+                res_log.info(f'skipped {f}')
+                continue
         
 
-        if file_count % 100 == 0:
+        if file_count % 10000 == 0:
             # save model
             torch.save({'state_dict': agent.Q.state_dict()},
                         f"{opts.savepath}%03d.pth" % save_count)
@@ -229,6 +231,42 @@ for n in range(opts.epochs):
             torch.save({'state_dict': agent.Q.state_dict()},
                         f"{opts.savepath_target}%03d.pth" % save_count)
             save_count += 1
+
+            ''' evaluate '''
+            for valid_f in valid_files:
+                with FileEnv(valid_f, max_num_tactics=300, timeout=opts.timeout) as file_env:
+                
+                    # ProofEnv in FileEnv
+                    for proof_env in file_env:
+                        name = proof_env.proof['name']
+                        human_proof = [step['command'][0] for step in proof_env.proof['steps']]
+                    
+                        res = agent.test(proof_env)
+      
+                        #print(res)
+
+                        error_count += res['error_count']
+
+                        total += 1
+                        if res['res']:
+                            num_correct += 1
+                    
+                        proof_count += 1
+
+                        # replay expriences and supervised training
+                        if len(agent.replay) >= opts.replay_batchsize:
+                            replay_train(agent.replay)
+                            agent.replay.clear()
+
+                        total_proofs_count += 1
+                        run_log.info(f'Seen {total_proofs_count} ({total_proofs_count/43844} %) of proofs')
+            
+                acc = num_correct/max(total, 1)
+                eps_end = agent.get_eps_tresh()
+                res_log.info(f'{f}: \t {num_correct}/{total} ({acc})'.expandtabs(80))
+                res_log.info(f'(episode {i}) eps: {eps_start} -> {eps_end}, errors: {error_count}, skipped: {skipped}\n')
+                file_count += 1
+
     
     # save final model
     torch.save({'state_dict': agent.Q.state_dict()},
