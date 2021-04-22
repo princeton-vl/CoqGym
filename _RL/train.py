@@ -208,7 +208,7 @@ for n in range(opts.epochs):
             file_count += 1
         
 
-        if file_count % 50 == 0:
+        if file_count % 100 == 0:
             # save model
             torch.save({'state_dict': agent.Q.state_dict()},
                         f"{opts.savepath}%03d.pth" % save_count)
@@ -216,3 +216,12 @@ for n in range(opts.epochs):
             torch.save({'state_dict': agent.Q.state_dict()},
                         f"{opts.savepath_target}%03d.pth" % save_count)
             save_count += 1
+    
+    # save final model
+    torch.save({'state_dict': agent.Q.state_dict()},
+                f"{opts.savepath}%03d.pth" % save_count)
+
+    torch.save({'state_dict': agent.Q.state_dict()},
+                f"{opts.savepath_target}%03d.pth" % save_count)
+    save_count += 1
+    
