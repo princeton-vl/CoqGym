@@ -8,7 +8,7 @@ from torch.optim.lr_scheduler import ReduceLROnPlateau
 import numpy as np
 import random
 
-from helpers import ProofStepData, merge, setup_loggers, build_csv
+from helpers import ProofStepData, merge, setup_loggers, build_csv, is_s
 from model.tacmodel import GASTTacModel
 from agent import Agent
 
@@ -112,6 +112,14 @@ def train(opts):
         for i, batch in enumerate(valid):
             if int(opts.lm[1]) != -1 and proof_counter >= int(opts.lm[1]):
                 break
+
+            if opts.proof_type == "synthetic":
+                if not is_s(batch):
+                    continue
+            elif opts.proof_type == "human":
+                if is_s(batch):
+                    continue
+
                 
             preds, true, loss = model(batch)
             
@@ -165,12 +173,13 @@ if __name__ == "__main__":
     # run env
     parser.add_argument("--num_workers", type=int, default=0)
     parser.add_argument("--epochs", type=int, default=100)
-    parser.add_argument("--batchsize", type=int, default=16)
+    parser.add_argument("--batchsize", type=int, default=1)
     parser.add_argument("--model", type=str, default="gast2")
     parser.add_argument("--argmodel", type=bool, default=False)
     parser.add_argument("--lm", nargs="+", default=[-1, -1])
     parser.add_argument("--seed", type=int, default=0)
-    
+    parser.add_argument("--step_types", type=str, default="human")
+
     # optimizer    
     parser.add_argument("--lr", type=float, default=1e-3)
     parser.add_argument("--l2", type=float, default=1e-6)

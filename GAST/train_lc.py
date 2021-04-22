@@ -9,7 +9,7 @@ import numpy as np
 import random
 from torch_geometric.utils import remove_self_loops
 
-from helpers import ProofStepData, merge, setup_loggers, build_csv, find_lc_arg, prep_asts
+from helpers import ProofStepData, merge, setup_loggers, build_csv, find_lc_arg, prep_asts, is_s
 from model.lcmodel import GASTLCModel
 from agent import Agent
 
@@ -65,6 +65,13 @@ def train(opts):
         proof_counter = 0
         batch_counter = 0
         for i, batch in enumerate(train):
+
+            if opts.proof_type == "synthetic":
+                if not is_s(batch):
+                    continue
+            elif opts.proof_type == "human":
+                if is_s(batch):
+                    continue
             
             if not check_args(opts, batch):
                 continue
@@ -211,6 +218,7 @@ if __name__ == "__main__":
     parser.add_argument("--argmodel", type=bool, default=False)
     parser.add_argument("--lm", nargs="+", default=[-1, -1])
     parser.add_argument("--seed", type=int, default=0)
+    parser.add_argument("--step_types", type=str, default="human")
     
     # optimizer    
     parser.add_argument("--lr", type=float, default=1e-3)

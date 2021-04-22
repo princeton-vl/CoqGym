@@ -162,7 +162,7 @@ if __name__ == "__main__":
     print(args)
 
     iter_proofs(
-        args.data_root, process_proof, include_synthetic=False, show_progress=True, lightmode = args.lightmode
+        args.data_root, process_proof, include_synthetic=True, show_progress=True, lightmode = args.lightmode
     )
 
     for category in ["train", "valid", "test"]:
