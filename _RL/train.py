@@ -20,42 +20,47 @@ def sl_train(dataloader):
             continue
         if count >= opts.sl_batchsize:
             proof_step_index += count
-            res_log.info(f'trained supervised learning on {count} human proof steps')
+            res_log.info(f'trained supervised learning on {count} proof steps')
             return
 
-        goal = batch['goal'][0]
-        lc = batch['local_context'][0]
-        gc = batch['env'][0]
+        for j in range(len(batch['goal'])):
+            goal = batch['goal'][j]
+            lc = batch['local_context'][j]
+            gc = batch['env'][j]
+
+            if opts.step_type == 'synthetic':
+                if not batch['is_synthetic'][j]:
+                    continue
+
+            for c in gc:
+                c['ident'] = c.pop('qualid')
+
+            lc = padd_context(lc)
+            gc = padd_context(gc)
+
+            state = (goal, lc, gc)
+
+            actions = get_actions(opts, state)
+            tac = batch['tactic'][0]['text']
+
+            valid_example = False
+            for action in actions:
+                if is_equivalent(opts, tac, action, state):
+                    valid_example = True
+                    tac = action
+
+            if valid_example:
         
-        for c in gc:
-            c['ident'] = c.pop('qualid')
+                label = torch.tensor(actions.index(tac))
+                pred = agent.Q(state)
 
-        lc = padd_context(lc)
-        gc = padd_context(gc)
+                loss = F.cross_entropy(pred.view(1, len(pred)), label.view(1))
 
-        state = (goal, lc, gc)
-
-        actions = get_actions(opts, state)
-        tac = batch['tactic'][0]['text']
-
-        valid_example = False
-        for action in actions:
-            if is_equivalent(opts, tac, action, state):
-                valid_example = True
-                tac = action
-
-        if valid_example:
+                sl_optimizer.zero_grad()
+                loss.backward()
+                sl_optimizer.step()
         
-            label = torch.tensor(actions.index(tac))
-            pred = agent.Q(state)
-
-            loss = F.cross_entropy(pred.view(1, len(pred)), label.view(1))
-
-            sl_optimizer.zero_grad()
-            loss.backward()
-            sl_optimizer.step()
-        
-            count += 1
+                count += 1
 
 
 def replay_train(replay_buffer):
@@ -109,6 +114,7 @@ parser.add_argument('--epochs', type=int, default=100)
 parser.add_argument('--replay_batchsize', type=int, default=256)
 parser.add_argument('--sl_batchsize', type=int, default=256)
 parser.add_argument('--imitation', type=bool, default=False)
+parser.add_argument('--step_type', type=str, default='synthetic')
 parser.add_argument('--episodes', type=int, default=1)
 
 # proof search
