@@ -140,6 +140,7 @@ opts.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # loggers
 run_log, res_log = setup_loggers(opts)
+res_log.info(opts)
 
 # agent
 agent = Agent(opts)
@@ -157,6 +158,7 @@ for n in range(opts.epochs):
     file_count = 0
     save_count = 0
     total_proofs_count = 0
+    
     # proof files
     for f in train_files:
         agent.num_steps = 0
@@ -168,6 +170,7 @@ for n in range(opts.epochs):
         for i in range(opts.episodes):
             eps_start = agent.get_eps_tresh()
             error_count = 0
+            skipped = 0
             num_correct = 0
             total = 0
             # load FileEnv
@@ -180,8 +183,11 @@ for n in range(opts.epochs):
                     name = proof_env.proof['name']
                     human_proof = [step['command'][0] for step in proof_env.proof['steps']]
                     
-
-                    res = agent.train(proof_env)
+                    try:
+                        res = agent.train(proof_env)
+                    except:
+                        skipped += 1
+                        continue
 
                     print(res)
 
@@ -204,7 +210,7 @@ for n in range(opts.epochs):
             acc = num_correct/total
             eps_end = agent.get_eps_tresh()
             res_log.info(f'{f}: \t {num_correct}/{total} ({acc})'.expandtabs(80))
-            res_log.info(f'(episode {i}) eps: {eps_start} -> {eps_end}, errors: {error_count}\n')
+            res_log.info(f'(episode {i}) eps: {eps_start} -> {eps_end}, errors: {error_count}, skipped: {skipped}\n')
             file_count += 1
         
 
