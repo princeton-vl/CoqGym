@@ -20,10 +20,11 @@ def sl_train(dataloader):
             continue
         if count >= opts.sl_batchsize:
             proof_step_index += count
-            res_log.info(f'trained supervised learning on {count} proof steps')
+            res_log.info(f'trained supervised learning on {count} {opts.step_type} proof steps')
             return
 
         for j in range(len(batch['goal'])):
+            
             goal = batch['goal'][j]
             lc = batch['local_context'][j]
             gc = batch['env'][j]
@@ -41,7 +42,7 @@ def sl_train(dataloader):
             state = (goal, lc, gc)
 
             actions = get_actions(opts, state)
-            tac = batch['tactic'][0]['text']
+            tac = batch['tactic'][j]['text']
 
             valid_example = False
             for action in actions:
@@ -49,8 +50,7 @@ def sl_train(dataloader):
                     valid_example = True
                     tac = action
 
-            if valid_example:
-        
+            if valid_example:        
                 label = torch.tensor(actions.index(tac))
                 pred = agent.Q(state)
 
@@ -61,6 +61,7 @@ def sl_train(dataloader):
                 sl_optimizer.step()
         
                 count += 1
+    res_log.info(f'trained supervised learning on {count} {opts.step_type} proof steps')
 
 
 def replay_train(replay_buffer):
@@ -114,7 +115,7 @@ parser.add_argument('--epochs', type=int, default=100)
 parser.add_argument('--replay_batchsize', type=int, default=256)
 parser.add_argument('--sl_batchsize', type=int, default=256)
 parser.add_argument('--imitation', type=bool, default=False)
-parser.add_argument('--step_type', type=str, default='synthetic')
+parser.add_argument('--step_type', type=str, default='')
 parser.add_argument('--episodes', type=int, default=1)
 
 # proof search

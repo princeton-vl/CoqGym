@@ -346,6 +346,6 @@ def prep_tac(opts, tactic, arg_probs):
 def is_s(batch):
     steps = batch["is_synthetic"]
     for step in steps:
-        if step:
+        if not step:
             return False
     return True

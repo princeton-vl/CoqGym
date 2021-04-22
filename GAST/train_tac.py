@@ -67,6 +67,14 @@ def train(opts):
         proof_counter = 0
         batch_counter = 0
         for i, batch in enumerate(train):
+
+            if opts.step_type == "synthetic":
+                if not is_s(batch):
+                    continue
+            elif opts.step_type == "human":
+                if is_s(batch):
+                    continue
+
             preds, true, loss = model(batch)
     
             loss.backward()
@@ -113,14 +121,6 @@ def train(opts):
             if int(opts.lm[1]) != -1 and proof_counter >= int(opts.lm[1]):
                 break
 
-            if opts.proof_type == "synthetic":
-                if not is_s(batch):
-                    continue
-            elif opts.proof_type == "human":
-                if is_s(batch):
-                    continue
-
-                
             preds, true, loss = model(batch)
             
             # update validation stats
@@ -158,13 +158,13 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     
     # paths
-    parser.add_argument("--datapath", type=str, default="../proof_steps")
+    parser.add_argument("--datapath", type=str, default=".proof_steps")
     parser.add_argument("--nonterminals", type=str, default="./jsons/nonterminals.json")
     parser.add_argument("--tactics", type=str, default="./jsons/tactics.json")
     parser.add_argument("--args", type=str, default="./jsons/args.json")
     parser.add_argument("--split", type=str, default="../projs_split.json")
     parser.add_argument("--sexp_cache", type=str, default="../sexp_cache")
-    parser.add_argument("--savepath", type=str, default="./models/tac2")
+    parser.add_argument("--savepath", type=str, default="./models/stac")
     parser.add_argument("--run_log", type=str, default="./logs/run_tac.log")
     parser.add_argument("--res_log", type=str, default="./logs/res_tac.log")
     parser.add_argument("--res_csv", type=str, default="./logs/res_tac.csv")
@@ -178,7 +178,7 @@ if __name__ == "__main__":
     parser.add_argument("--argmodel", type=bool, default=False)
     parser.add_argument("--lm", nargs="+", default=[-1, -1])
     parser.add_argument("--seed", type=int, default=0)
-    parser.add_argument("--step_types", type=str, default="human")
+    parser.add_argument("--step_type", type=str, default="human")
 
     # optimizer    
     parser.add_argument("--lr", type=float, default=1e-3)
