@@ -136,8 +136,6 @@ if __name__ == "__main__":
             with FileEnv(f, max_num_tactics=opts.max_num_tacs, timeout=opts.timeout) as file_env:
                 for proof_env in file_env:
                     proof_name = proof_env.proof["name"]
-                    print(proof_name)
-
                 
                     res = agent.test(proof_env)
 
@@ -160,7 +158,7 @@ if __name__ == "__main__":
             res_log.info(f"Skipped {f}")
             skipped += 1
             continue
-                            
+
         file_count += 1
               
         proj_count += current_count

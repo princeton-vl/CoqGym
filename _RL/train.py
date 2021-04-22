@@ -11,6 +11,69 @@ from agent import Agent
 from helpers import setup_loggers, files_on_split, ProofStepData, merge, get_actions, is_equivalent, padd_context
 from eval_env import FileEnv
 
+
+def validate():
+    res_log.info('-----VALIDATION----')
+    total_count = 0
+    file_count = 0
+    proj_count = 0
+    total_proj_count = 0
+    skipped = 0
+    correct = 0
+    proj_correct = 0
+    last_proj = valid_files[0].split("/")[2]
+    for f in valid_files:
+        current_proj = f.split("/")[2]
+        if current_proj != last_proj:
+            last_proj_count = proj_count
+            last_proj_correct = proj_correct
+            proj_count = 0
+            proj_correct = 0    
+        
+        current_count = 0
+        current_correct = 0
+        try:
+            with FileEnv(f, max_num_tactics=300, timeout=30) as file_env:
+                for proof_env in file_env:
+                    proof_name = proof_env.proof["name"]
+                    print(proof_name)
+                
+                    res = agent.test(proof_env)
+                    total_count += 1
+                    current_count += 1
+            
+                    if res["proved"]:
+                        current_correct += 1
+                        correct += 1
+
+        except:
+            res_log.info(f"Skipped {f}")
+            skipped += 1
+            continue
+                            
+        file_count += 1
+              
+        proj_count += current_count
+        proj_correct += current_correct
+
+        if current_proj != last_proj:
+            total_proj_count += 1
+            proj_acc = last_proj_correct/last_proj_count
+            res_log.info(f"{last_proj}: \t {last_proj_correct}/{last_proj_count} ({proj_acc})".expandtabs(100))
+            res_log.info("-----------------")
+        
+        
+        acc = current_correct/current_count
+        res_log.info(f"{f}: \t {current_correct}/{current_count} ({acc})".expandtabs(100))
+        run_log.info(file_count/len(test_files))
+        
+        last_proj = current_proj
+    
+    acc = correct/total_count
+    res_log.info(f"Total: \t {correct}/{total_count} ({acc})".expandtabs(100))
+    res_log.info(f"Skipped {skipped} files.")
+    res_log.info('-----VALIDATION END----')
+
 proof_step_index = 0
 def sl_train(dataloader):
     global proof_step_index
@@ -165,6 +228,8 @@ for n in range(opts.epochs):
     file_count = 0
     save_count = 0
     total_proofs_count = 0
+
+    validate()
     
     # proof files
     for f in train_files:
@@ -232,40 +297,8 @@ for n in range(opts.epochs):
                         f"{opts.savepath_target}%03d.pth" % save_count)
             save_count += 1
 
-            ''' evaluate '''
-            for valid_f in valid_files:
-                with FileEnv(valid_f, max_num_tactics=300, timeout=opts.timeout) as file_env:
-                
-                    # ProofEnv in FileEnv
-                    for proof_env in file_env:
-                        name = proof_env.proof['name']
-                        human_proof = [step['command'][0] for step in proof_env.proof['steps']]
-                    
-                        res = agent.test(proof_env)
-      
-                        #print(res)
-
-                        error_count += res['error_count']
-
-                        total += 1
-                        if res['res']:
-                            num_correct += 1
-                    
-                        proof_count += 1
-
-                        # replay expriences and supervised training
-                        if len(agent.replay) >= opts.replay_batchsize:
-                            replay_train(agent.replay)
-                            agent.replay.clear()
-
-                        total_proofs_count += 1
-                        run_log.info(f'Seen {total_proofs_count} ({total_proofs_count/43844} %) of proofs')
+            validate()
             
-                acc = num_correct/max(total, 1)
-                eps_end = agent.get_eps_tresh()
-                res_log.info(f'{f}: \t {num_correct}/{total} ({acc})'.expandtabs(80))
-                res_log.info(f'(episode {i}) eps: {eps_start} -> {eps_end}, errors: {error_count}, skipped: {skipped}\n')
-                file_count += 1
 
     
     # save final model
