@@ -153,7 +153,6 @@ class Agent:
             if result in ['PROVING']:
                 _q_values = self.target_Q(self.state)
                 _q = max(_q_values)
-                print(_q)
             else:
                 _q = 0
 

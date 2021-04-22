@@ -113,8 +113,8 @@ parser.add_argument('--episodes', type=int, default=1)
 
 # proof search
 parser.add_argument('--depth_limit', type=int, default=50)
-parser.add_argument('--max_num_tacs', type=int, default=30)
-parser.add_argument('--timeout', type=int, default=600)
+parser.add_argument('--max_num_tacs', type=int, default=50)
+parser.add_argument('--timeout', type=int, default=30)
 parser.add_argument('--action_space', type=int, default=175)
 
 # GNN
@@ -189,7 +189,7 @@ for n in range(opts.epochs):
                         skipped += 1
                         continue
 
-                    print(res)
+                    #print(res)
 
                     error_count += res['error_count']
 
@@ -207,7 +207,7 @@ for n in range(opts.epochs):
                     total_proofs_count += 1
                     run_log.info(f'Seen {total_proofs_count/43844} % of proofs')
             
-            acc = num_correct/total
+            acc = num_correct/max(total, 1)
             eps_end = agent.get_eps_tresh()
             res_log.info(f'{f}: \t {num_correct}/{total} ({acc})'.expandtabs(80))
             res_log.info(f'(episode {i}) eps: {eps_start} -> {eps_end}, errors: {error_count}, skipped: {skipped}\n')
