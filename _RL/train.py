@@ -144,54 +144,61 @@ skipped = 0
 total = 0
 last_hundred = []
 for f in train_files:
-    correct = 0
-    count = 0
-    eps_start = agent.get_eps_tresh()
+    res_log.info('')
     if 'im' in opts.model_type:
         sl_train(proof_steps)
-    try:
-        with FileEnv(f, max_num_tactics=opts.max_num_tacs, timeout=opts.timeout) as file_env:
-            for proof_env in file_env:
-                name = proof_env.proof['name'] 
+    for n in range(opts.episodes):
+        
+        res_log.info(f'Episode: {n}')
+        correct = 0
+        count = 0
+        eps_start = agent.get_eps_tresh()
 
-                res = agent.train(proof_env)
-                #print(res)
-                count += 1
-                total += 1
-                agent.num_steps += 1
-                if res['res']:
-                    if len(last_hundred) < 1000:
-                        last_hundred.append(1)
+        try:
+            with FileEnv(f, max_num_tactics=opts.max_num_tacs, timeout=opts.timeout) as file_env:
+                for proof_env in file_env:
+                    name = proof_env.proof['name'] 
+
+                    res = agent.train(proof_env)
+                    #print(res)
+                    count += 1
+                    total += 1
+                    agent.num_steps += 1
+                    if res['res']:
+                        if len(last_hundred) < 1000:
+                            last_hundred.append(1)
+                        else:
+                            last_hundred = last_hundred[1:]
+                            last_hundred.append(1)
+                        correct += 1
                     else:
-                        last_hundred = last_hundred[1:]
-                        last_hundred.append(1)
-                    correct += 1
-                else:
-                    if len(last_hundred) < 1000:
-                        last_hundred.append(0)
-                    else:
-                        last_hundred = last_hundred[1:]
-                        last_hundred.append(0)
+                        if len(last_hundred) < 1000:
+                            last_hundred.append(0)
+                        else:
+                            last_hundred = last_hundred[1:]
+                            last_hundred.append(0)
 
-                if len(agent.replay) >= opts.replay_batchsize:
-                    replay_train(agent.replay)
-                    agent.replay.clear()
+                    if len(agent.replay) >= opts.replay_batchsize:
+                        replay_train(agent.replay)
+                        agent.replay.clear()
 
-                run_log.info(f'Seen {total} ({round(total/57719, 8)} %) of proofs')
+                    run_log.info(f'Seen {total} ({round(total/opts.episodes*57719, 8)} %) of proofs')
             
-        acc = round(correct/count, 8)
-        eps_end = agent.get_eps_tresh()
-        res_log.info(f'{f}: \t {correct}/{count} ({acc})'.expandtabs(80))
-        if len(last_hundred) == 1000:
-            res_log.info(f'eps: {eps_start} -> {eps_end}, trail: {sum(last_hundred)}\n')
-        else:
-            res_log.info(f'eps: {eps_start} -> {eps_end}, trail: N/A\n')
-    except KeyboardInterrupt:
-        exit()
-    except Exception as e:
-        skipped += 1
-        traceback.print_exc()
-        pass
+            acc = round(correct/count, 8)
+            eps_end = agent.get_eps_tresh()
+            res_log.info(f'{f}: \t {correct}/{count} ({acc})'.expandtabs(80))
+            if len(last_hundred) == 1000:
+                res_log.info(f'eps: {eps_start} -> {eps_end}, trail: {sum(last_hundred)}')
+            else:
+                res_log.info(f'eps: {eps_start} -> {eps_end}, trail: N/A')
+
+        except KeyboardInterrupt:
+            exit()
+        except Exception as e:
+            skipped += 1
+            traceback.print_exc()
+            res_log.info(f'skipped {f}')
+            pass
     
     if total in save_points:
         torch.save({'state_dict': agent.Q.state_dict()}, f"{opts.savepath}_q%03d.pth" % save_count)
