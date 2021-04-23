@@ -75,7 +75,7 @@ class Agent:
         self.lcmodel = lcmodel
         self.gcmodel = gcmodel
         self.softmax = nn.Softmax(dim=1)
-        #self.greylist = ["induction", "apply", "generalize", "destruct", "elim", "rewrite", "inversion_clear"]
+        self.greylist = ["induction", "apply", "generalize", "destruct", "elim", "rewrite", "inversion_clear"]
         
     def test(self, proof_env):
         res, graph, script = self.prove_DFS(proof_env)

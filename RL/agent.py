@@ -315,5 +315,4 @@ class Agent:
         candidates = []
         for i in indices:
             candidates.append(actions[i])
-
         return candidates

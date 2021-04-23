@@ -36,8 +36,7 @@ def validate():
             with FileEnv(f, max_num_tactics=300, timeout=30) as file_env:
                 for proof_env in file_env:
                     proof_name = proof_env.proof["name"]
-                    print(proof_name)
-                
+                    #print(proof_name)
                     res = agent.test(proof_env)
                     total_count += 1
                     current_count += 1
