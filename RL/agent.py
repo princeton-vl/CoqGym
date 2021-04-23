@@ -274,7 +274,8 @@ class Agent:
             if stack[-1] == []:  # all candidate have been tried, backtrack
                 stack.pop()
                 script.pop()
-                self.proof_env.step("Undo.")
+                local_state = self.proof_env.step("Undo.")
+                self.update_state(self.state, local_state)
                 continue
             else:
                 tac = stack[-1].pop(0)
@@ -297,7 +298,8 @@ class Agent:
                 sig = helpers.state_id(self.state)
 
                 if sig in node_ids or len(script) >= self.opts.depth_limit:
-                    self.proof_env.step("Undo.")
+                    local_state = self.proof_env.step("Undo.")
+                    self.update_state(self.state, local_state)
                     script.pop()
                     continue
 

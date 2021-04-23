@@ -41,10 +41,10 @@ parser.add_argument("--sexp_cache", type=str, default="../sexp_cache")
 # run env
 parser.add_argument("--num_workers", type=int, default=0)
 parser.add_argument("--epochs", type=int, default=100)
-parser.add_argument("--batchsize", type=int, default=1)
+parser.add_argument("--batchsize", type=int, default=8)
 
 # data
-parser.add_argument("--datapath", type=str, default="../ASTactic/proof_steps")
+parser.add_argument("--datapath", type=str, default="../proof_steps")
 parser.add_argument("--proof_type", type=str, default="all")
 
 # optimizer    
