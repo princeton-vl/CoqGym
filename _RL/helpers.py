@@ -8,6 +8,47 @@ from torch.utils.data import Dataset
 from lark import Tree
 
 
+def filter_f(opts, path):
+    with open(path, 'rb') as f:
+        example = pickle.load(f)
+        is_synthetic = example['is_synthetic']
+        if opts.proof_type == 'synthetic' and not is_synthetic:
+            return False
+        elif opts.proof_type == 'human' and is_synthetic:
+            return False
+        
+        goal = example['goal']
+        lc = example['local_context']
+        gc = example['env']
+        for c in gc:
+            c['ident'] = c.pop('qualid')
+
+        lc = padd_lc(lc)
+        gc = padd_gc(gc)
+        state = (goal, lc, gc)
+        actions = get_actions(opts, state)
+        tac = example['tactic']['text']
+        for action in actions:
+            if is_equivalent(opts, tac, action, state):
+                return True
+                    
+    return False
+            
+
+def get_files(opts, split, log):
+    datapath = opts.proof_steps
+    filepath = f"{datapath}/{split}"
+    files = os.listdir(filepath)
+    res = []
+    for i, file_name in enumerate(files):
+        log.info(f"{i} -> {i/len(files)}")
+        current_file_path = f"{filepath}/{file_name}"
+        if filter_f(opts, current_file_path):
+            res.append(current_file_path)
+
+    return res
+
+
 def get_core_path(opts):
     if opts.model_type == 'rl':
         path = "rl"
@@ -52,15 +93,9 @@ def setup_loggers(opts):
 
 
 class ProofStepData(Dataset):
-    def __init__(self, opts, split):
+    def __init__(self, files):
         super().__init__()
-        self.opts = opts
-        self.split = split
-        self.datapath = self.opts.proof_steps
-        self.filepath = f"{self.datapath}/{self.split}"
-        self.files = os.listdir(self.filepath)
-        for i, file_name in enumerate(self.files):
-            self.files[i] = f"{self.filepath}/{file_name}"
+        self.files = files
         random.shuffle(self.files)
         self.size = len(self.files)
 
@@ -146,7 +181,7 @@ def process_local_env(state):
         local_contexts.append(local_context)
     
     for i, lc in enumerate(local_contexts):
-        local_contexts[i] = padd_context(lc)
+        local_contexts[i] = padd_lc(lc)
 
     return goals[0], local_contexts[0]
 
@@ -158,13 +193,23 @@ def process_global_context(state):
         ast = sexp_cache[const['sexp']]
         global_context.append({'ident': const['qualid'], 'text': const['type'], 'ast': term_parser.parse(ast), 'sexp': const['sexp']})
     
-    return padd_context(global_context)
+    return padd_gc(global_context)
 
-def padd_context(c):
+def padd_gc(c):
     if len(c) > 10:
         return c[0:10]
         
     while len(c) < 10:
+        empty = {'ident': '', 'text': '', 'ast': Tree(data=None, children=None), 'sexp': ''}
+        c.append(empty)
+
+    return c
+
+def padd_lc(c):
+    if len(c) > 50:
+        return c[0:50]
+        
+    while len(c) < 50:
         empty = {'ident': '', 'text': '', 'ast': Tree(data=None, children=None), 'sexp': ''}
         c.append(empty)
 
@@ -196,7 +241,7 @@ def prep_tac(tactic, lc, gc):
     # forced assumption
     elif tactic in ['induction', 'exists', 'revert', 'inversion_clear', 'injection', 'contradict']:
         i = 0
-        while len(res) < 10:
+        while len(res) < 50:
             if i < len(lc):
                 res.append(f"{tactic} {lc[i]['ident']}")
             else:

@@ -31,8 +31,8 @@ class Q(nn.Module):
         ''' prediction network '''
         dense_dim = int((self.opts.sortk - 2) / 2 + 1)
         self.dense_dim = (dense_dim - 5 + 1) * self.opts.embedding_dim
-        self.classifier_1 = Linear(self.dense_dim*21, self.dense_dim*10)
-        self.classifier_2 = Linear(self.dense_dim*10, self.opts.action_space)
+        self.classifier_1 = Linear(self.dense_dim*61, self.dense_dim*30)
+        self.classifier_2 = Linear(self.dense_dim*30, self.opts.action_space)
 
         ''' dropout and activation'''
         self.dropout = nn.Dropout(self.opts.dropout)

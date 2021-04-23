@@ -1,7 +1,7 @@
 import torch, random, math
 from datetime import datetime
 
-from _RL.estimators.q import Q
+from _RL.nn_model.q import Q
 
 import helpers
 
@@ -41,7 +41,6 @@ class Agent:
         self.num_steps = 0
         self.error_count = 0
         self.tot_reward = 0
-        self.legal_count = 0
 
         ''' record valid search '''
         self.script = []
@@ -66,7 +65,6 @@ class Agent:
     def reset(self, proof_env):
         
         self.error_count = 0
-        self.legal_count = 0
         self.tot_reward = 0
 
         self.script = []
@@ -102,11 +100,9 @@ class Agent:
         if result not in ['SUCCESS', 'MAX_NUM_TACTICS_REACHED', 'MAX_TIME_REACHED']:
             assert result != 'ERROR'
             assert not self.is_loop(prev_state, local_state)
-            self.legal_count += 1
             self.update_state(prev_state, local_state)
 
         self.script.append(action)
-        self.num_steps += 1
 
         reward = helpers.get_reward(self.opts, result)
         return reward, result
@@ -133,19 +129,19 @@ class Agent:
                               self.opts.success_reward: len([e for e in self.replay.memory if e[2] == self.opts.success_reward])}
                 out = {
                     'res': valid_proof,
-                    'legal_moves': self.legal_count,
                     'error_count': self.error_count,
                     'rewards': self.tot_reward,
                     'replay': (len(self.replay.memory), replay_stats),
                     'script': self.script
                 }
                 return out
-
+            
             if not self.check_legality(action):
                 continue
 
             ''' make action -> update state and get reward '''
             reward, result = self.make_action(action)
+            
             self.tot_reward += reward
 
 
@@ -167,7 +163,6 @@ class Agent:
                               self.opts.success_reward: len([e for e in self.replay.memory if e[2] == self.opts.success_reward])}
                 out = {
                     'res': valid_proof,
-                    'legal_moves': self.legal_count,
                     'error_count': self.error_count,
                     'rewards': self.tot_reward,
                     'replay': (len(self.replay.memory), replay_stats),
@@ -250,71 +245,3 @@ class Agent:
         old_id = helpers.state_id(prev_state)
         new_id = helpers.state_id(new_state)
         return old_id == new_id
-
-
-    def test(self, proof_env):
-        res, script = self.prove_DFS(proof_env)
-        return {"proved": res, "script": script}
-        
-    def prove_DFS(self, proof_env):
-        self.reset(proof_env)
-        node_ids = set() # keep track of all nodes seen so far
-        root_id = helpers.state_id(self.state)
-        node_ids.add(root_id)
-        
-        # initialize the stack
-        stack = []
-        stack.append(self.get_candidates())
-        script = []
-
-        
-        # depth-first search starting from the trace
-        while stack != [[]]:
-            # pick a tactic
-            if stack[-1] == []:  # all candidate have been tried, backtrack
-                stack.pop()
-                script.pop()
-                local_state = self.proof_env.step("Undo.")
-                self.update_state(self.state, local_state)
-                continue
-            else:
-                tac = stack[-1].pop(0)
-            if not self.check_legality(tac):
-                self.proof_env.num_tactics_left -= 1
-                continue
-            
-            _, result = self.make_action(tac)
-
-            if result == "SUCCESS":            
-                script.append(tac)
-                return True, script
-            elif result in ["MAX_NUM_TACTICS_REACHED", "MAX_TIME_REACHED"]:
-                return False, script
-            elif result in ["ERROR"]:
-                continue
-            else:                
-                assert result == "PROVING"
-                script.append(tac)
-                sig = helpers.state_id(self.state)
-
-                if sig in node_ids or len(script) >= self.opts.depth_limit:
-                    local_state = self.proof_env.step("Undo.")
-                    self.update_state(self.state, local_state)
-                    script.pop()
-                    continue
-
-                node_ids.add(sig)
-                stack.append(self.get_candidates())
-
-        state = proof_env.step("Admitted.")
-        return False, script
-
-    def get_candidates(self):
-        actions = helpers.get_actions(self.opts, self.state)
-        q_values = self.Q(self.state)
-
-        topk, indices = torch.topk(input=q_values, k=10, dim=0, largest=True)
-        candidates = []
-        for i in indices:
-            candidates.append(actions[i])
-        return candidates
