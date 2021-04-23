@@ -90,7 +90,7 @@ def check_lc(opts, example):
     tactic_app = example['tactic']['text']
     lc_ids = [c['ident'] for c in example['local_context']]
     lc_arg, index = find_lc_arg(opts, tactic_app, lc_ids)
-    if lc_arg == None or index >= 50:
+    if index <= -1 or index >= 50:
         return False
     return True
 
@@ -316,16 +316,12 @@ def get_lc_targets(opts, batch):
 
     for i in range(len(tactic_applications)):
         tactic_application = tactic_applications[i]
+        
         lc_ids = lc_ids_s[i]
-        target, _ = find_lc_arg(opts, tactic_application, lc_ids)
-        index = 0
-        true = None
-        for j, lc_id in enumerate(lc_ids):
-            if target in lc_id:
-                index = j
-                true = target
+        target, index = find_lc_arg(opts, tactic_application, lc_ids)
         res[i] = index
-        trues.append(true)
+        trues.append(target)
+        
     return res, trues
 
 def get_gc_pred(opts, batch, probs):
