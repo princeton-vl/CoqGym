@@ -41,10 +41,10 @@ parser.add_argument("--sexp_cache", type=str, default="../sexp_cache")
 # run env
 parser.add_argument("--num_workers", type=int, default=0)
 parser.add_argument("--epochs", type=int, default=100)
-parser.add_argument("--batchsize", type=int, default=8)
+parser.add_argument("--batchsize", type=int, default=4)
 
 # data
-parser.add_argument("--datapath", type=str, default="../ASTactic/proof_steps") # ../ASTactic/proof_steps
+parser.add_argument("--datapath", type=str, default="../proof_steps") # ../ASTactic/proof_steps
 parser.add_argument("--proof_type", type=str, default="all")
 
 # optimizer    
@@ -77,7 +77,7 @@ run_log, res_log = helpers.setup_loggers(opts)
 
 train_files = helpers.get_files(opts, "train", run_log)
 valid_files = helpers.get_files(opts, "valid", run_log)
-train = DataLoader(helpers.ProofStepData(valid_files), opts.batchsize, collate_fn=helpers.merge, num_workers = opts.num_workers) # valid_files
+train = DataLoader(helpers.ProofStepData(train_files), opts.batchsize, collate_fn=helpers.merge, num_workers = opts.num_workers) # valid_files
 valid = DataLoader(helpers.ProofStepData(valid_files), opts.batchsize, collate_fn=helpers.merge, num_workers = opts.num_workers)
 
 model = pick_model(opts)
@@ -130,12 +130,12 @@ for n in range(opts.epochs):
     loss_avg_train /= batch_counter
     acc_train = round(num_correct_train/proof_counter, 8)
 
-    """
+    
     torch.save({"state_dict": model.state_dict(), 
                 "n_epoch": n, 
                 "optimizer": optimizer.state_dict()},
                 f"{opts.savepath}%03d.pth" % n)
-    """
+    
 
     run_log.info("validation...")
     loss_avg_valid = 0
