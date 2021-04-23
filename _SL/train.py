@@ -47,7 +47,7 @@ parser.add_argument("--batchsize", type=int, default=4)
 parser.add_argument("--datapath", type=str, default="../proof_steps") # ../ASTactic/proof_steps
 parser.add_argument("--proof_type", type=str, default="all")
 
-# optimizer    
+# optimizer
 parser.add_argument("--lr", type=float, default=1e-3)
 parser.add_argument("--l2", type=float, default=1e-6)
 parser.add_argument("--lr_reduce_patience", type=int, default=3)

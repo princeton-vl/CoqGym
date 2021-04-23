@@ -1,10 +1,10 @@
 
+import helpers
 
-class Agent:
-    def __init__(self, opts, model):
+class Agent(ABC):
+    def __init__(self, opts):
         self.opts = opts
         self.script = []
-        self.model = model
 
         ''' environment and state '''
         self.proof_env = None
@@ -27,7 +27,7 @@ class Agent:
         self.state = (goal, lc, gc)
 
 
-    def test(self, proof_env):
+    def prove(self, proof_env):
         res, script = self.prove_DFS(proof_env)
         return {"proved": res, "script": script} 
 
@@ -84,12 +84,7 @@ class Agent:
         state = proof_env.step("Admitted.")
         return False, script
 
-    def get_candidates(self):
-        actions = helpers.get_actions(self.opts, self.state)
-        q_values = self.Q(self.state)
 
-        topk, indices = torch.topk(input=q_values, k=10, dim=0, largest=True)
-        candidates = []
-        for i in indices:
-            candidates.append(actions[i])
-        return candidates
+    @abstractmethod
+    def get_candidates(self):
+        pass
