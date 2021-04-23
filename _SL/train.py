@@ -75,8 +75,8 @@ opts = helpers.tweak_opts(opts)
 
 run_log, res_log = helpers.setup_loggers(opts)
 
-train_files = helpers.get_files(opts, "train")
-valid_files = helpers.get_files(opts, "valid")
+train_files = helpers.get_files(opts, "train", run_log)
+valid_files = helpers.get_files(opts, "valid", run_log)
 train = DataLoader(helpers.ProofStepData(train_files), opts.batchsize, collate_fn=helpers.merge, num_workers = opts.num_workers)
 valid = DataLoader(helpers.ProofStepData(valid_files), opts.batchsize, collate_fn=helpers.merge, num_workers = opts.num_workers)
 

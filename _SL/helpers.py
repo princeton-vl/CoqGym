@@ -85,8 +85,6 @@ def find_gc_arg(opts, tactic_application, lc_ids):
         return arg
     return None
 
-
-
                     
 def check_lc(opts, example):
     tactic_app = example['tactic']['text']
@@ -126,12 +124,13 @@ def filter_f(opts, path):
     return True
             
 
-def get_files(opts, split):
+def get_files(opts, split, log):
     datapath = opts.datapath
     filepath = f"{datapath}/{split}"
     files = os.listdir(filepath)
     res = []
     for i, file_name in enumerate(files):
+        log.info(f"{i} -> {i/len(files)}")
         current_file_path = f"{filepath}/{file_name}"
         if filter_f(opts, current_file_path):
             res.append(current_file_path)

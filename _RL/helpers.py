@@ -8,6 +8,49 @@ from torch.utils.data import Dataset
 from lark import Tree
 
 
+def get_core_path(opts):
+    if opts.model_type == 'rl':
+        path = "rl"
+    elif opts.model_type == 'rl-im':
+        if opts.proof_type == 'human':
+            path = 'im_h'
+        elif opts.proof_type == 'synthetic':
+            path = 'im_s'
+        elif opts.proof_type == 'all':
+            path = 'im_a'
+    return path
+
+def setup_loggers(opts):
+    core = get_core_path(opts)
+    run_path, res_path = f"./logs/{core}_run.log", f"./logs/{core}_res.log"
+
+    try:
+        os.remove(run_path)
+        os.remove(res_path)
+    except:
+        pass
+
+    run_handler = logging.FileHandler(run_path)
+    res_handler = logging.FileHandler(res_path)
+    
+    run_handler.setFormatter(logging.Formatter('%(asctime)s:\t%(message)s'))
+    res_handler.setFormatter(logging.Formatter('%(asctime)s:\t%(message)s'))
+    
+    run_logger = logging.getLogger("run log")
+    res_logger = logging.getLogger("test log")
+    
+    run_logger.addHandler(run_handler)
+    res_logger.addHandler(res_handler)
+    
+    run_logger.setLevel(logging.INFO)
+    res_logger.setLevel(logging.INFO)
+    
+    run_logger.propagate = False
+    res_logger.propagate = False
+    
+    return run_logger, res_logger
+
+
 class ProofStepData(Dataset):
     def __init__(self, opts, split):
         super().__init__()
@@ -64,34 +107,6 @@ def files_on_split(opts):
         test_files.extend(glob(os.path.join(root, f'{proj}/**/*.json'), recursive=True))
     
     return train_files, valid_files, test_files
-
-def setup_loggers(opts):
-    try:
-        os.remove(opts.run)
-        os.remove(opts.res)
-    except:
-        pass
-                        
-    run_handler = logging.FileHandler(opts.run)
-    res_handler = logging.FileHandler(opts.res)
-    
-    run_handler.setFormatter(logging.Formatter('%(asctime)s:\t%(message)s'))
-    res_handler.setFormatter(logging.Formatter('%(asctime)s:\t%(message)s'))
-    
-    run_logger = logging.getLogger('run log')
-    res_logger = logging.getLogger('test log')
-    
-    run_logger.addHandler(run_handler)
-    res_logger.addHandler(res_handler)
-    
-    run_logger.setLevel(logging.INFO)
-    res_logger.setLevel(logging.INFO)
-    
-    run_logger.propagate = False
-    res_logger.propagate = False
-    
-    return run_logger, res_logger
-
 
 sexp_cache = SexpCache('../sexp_cache', readonly=True)
 term_parser = GallinaTermParser(caching=True)
