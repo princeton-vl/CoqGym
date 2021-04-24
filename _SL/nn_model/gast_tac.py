@@ -26,9 +26,9 @@ class GastTac(nn.Module):
         self.pool = MaxPool1d(2, 2)
         dense_dim = int((self.opts.sortk - 2) / 2 + 1)
         self.dense_dim = (dense_dim - 5 + 1) * self.opts.embedding_dim
-        self.classifier_1 = Linear(self.dense_dim, self.opts.embedding_dim//2)
+        self.classifier_1 = Linear(self.dense_dim, self.opts.embedding_dim)
         self.drop_out = Dropout(self.opts.dropout)
-        self.classifier_2 = Linear(self.opts.embedding_dim//2, len(self.tactics))
+        self.classifier_2 = Linear(self.opts.embedding_dim, len(self.tactics))
         self.relu = nn.ReLU(inplace=True)
         self.tanh = nn.Tanh()
             
