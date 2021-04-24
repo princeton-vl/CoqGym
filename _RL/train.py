@@ -147,6 +147,10 @@ for f in train_files:
     res_log.info('')
     if 'im' in opts.model_type:
         sl_train(proof_steps)
+
+    if opts.episodes > 1:
+        agent.num_steps = 0
+
     for n in range(opts.episodes):
         
         res_log.info(f'Episode: {n}')
@@ -182,7 +186,7 @@ for f in train_files:
                         replay_train(agent.replay)
                         agent.replay.clear()
 
-                    run_log.info(f'Seen {total} ({round(total/opts.episodes*57719, 8)} %) of proofs')
+                    run_log.info(f'Seen {total} ({round(total/(opts.episodes*57719), 8)} %) of proofs')
             
             acc = round(correct/count, 8)
             eps_end = agent.get_eps_tresh()
@@ -199,6 +203,10 @@ for f in train_files:
             traceback.print_exc()
             res_log.info(f'skipped {f}')
             pass
+    
+    if total > 60000:
+        res_log.info("Reached 60000 proofs, ending it here.")
+        break
     
     if total in save_points:
         torch.save({'state_dict': agent.Q.state_dict()}, f"{opts.savepath}_q%03d.pth" % save_count)

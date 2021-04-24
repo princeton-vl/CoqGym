@@ -59,6 +59,9 @@ def get_core_path(opts):
             path = 'im_s'
         elif opts.proof_type == 'all':
             path = 'im_a'
+    
+    if opts.episodes > 1:
+        path = f"{path}_ep{opts.episodes}"
     return path
 
 def setup_loggers(opts):
@@ -164,7 +167,6 @@ def get_actions(opts, state):
         tmp = prep_tac(tactic, lc, gc)
         res += tmp
 
-    assert len(res) == opts.action_space
     return res
 
 def process_local_env(state):
