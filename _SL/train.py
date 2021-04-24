@@ -59,7 +59,7 @@ parser.add_argument('--model_type', type=str, default='gast_tac')
 parser.add_argument("--dropout", type=float, default=0.5)
     
 # gast
-parser.add_argument("--embedding_dim", type=int, default=512)
+parser.add_argument("--embedding_dim", type=int, default=256)
 parser.add_argument("--sortk", type=int, default=30)
 
 # trans
@@ -145,6 +145,8 @@ for n in range(opts.epochs):
     model.eval()
     for i, batch in enumerate(valid):
         preds, true, loss = model(batch)
+
+        gc.collect()
 
         loss_avg_valid += loss.item()
         batch_counter += 1 

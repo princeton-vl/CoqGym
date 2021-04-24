@@ -202,10 +202,8 @@ for f in train_files:
     
     if total in save_points:
         torch.save({'state_dict': agent.Q.state_dict()}, f"{opts.savepath}_q%03d.pth" % save_count)
-        torch.save({'state_dict': agent.Q.state_dict()}, f"{opts.savepath}_target_q%03d.pth" % save_count)
         save_count += 1
 
 torch.save({'state_dict': agent.Q.state_dict()}, f"{opts.savepath}_q%03d.pth" % save_count)
-torch.save({'state_dict': agent.Q.state_dict()}, f"{opts.savepath}_target_q%03d.pth" % save_count)
 
 
