@@ -17,7 +17,7 @@ def sl_train(dataloader):
     global proof_step_index
     count = 0
     for i, batch in enumerate(dataloader):
-        proof_steps_index += 1
+        proof_step_index += 1
         if i < proof_step_index:
             continue
         if count >= opts.sl_batchsize:
@@ -96,7 +96,7 @@ parser.add_argument('--timeout', type=int, default=10)
 parser.add_argument('--action_space', type=int, default=415)
 
 # GNN
-parser.add_argument('--embedding_dim', type=int, default=512)
+parser.add_argument('--embedding_dim', type=int, default=256)
 parser.add_argument('--sortk', type=int, default=30)
 parser.add_argument('--lr', type=float, default=1e-3)
 parser.add_argument('--lr_sl', type=float, default=1e-3)

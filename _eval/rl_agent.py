@@ -78,7 +78,7 @@ class RLAgent(Agent):
         # forced assumption
         elif tactic in ['induction', 'exists', 'revert', 'inversion_clear', 'injection', 'contradict']:
             i = 0
-            while len(res) < 50:
+            while len(res) < 20:
                 if i < len(lc):
                     res.append(f"{tactic} {lc[i]['ident']}")
                 else:
