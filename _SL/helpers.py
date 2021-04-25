@@ -176,7 +176,7 @@ def merge(batch):
 
 def tweak_opts(opts):
     if 'trans' in opts.model_type:
-        opts.lr = 1e-5
+        opts.lr = 1e-6
 
     return opts
 
