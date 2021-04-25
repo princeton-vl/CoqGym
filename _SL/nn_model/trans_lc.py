@@ -42,6 +42,7 @@ class TransLC(nn.Module):
                 count += 1
             while count < 21:
                 bert_input = f"{bert_input}. none"
+                count += 1
             
             bert_inputs.append(bert_input)
 
