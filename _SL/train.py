@@ -39,7 +39,7 @@ parser.add_argument("--split", type=str, default="../projs_split.json")
 parser.add_argument("--sexp_cache", type=str, default="../sexp_cache")
     
 # run env
-parser.add_argument("--num_workers", type=int, default=0)
+parser.add_argument("--num_workers", type=int, default=2)
 parser.add_argument("--epochs", type=int, default=100)
 parser.add_argument("--batchsize", type=int, default=4)
 

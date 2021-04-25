@@ -22,6 +22,9 @@ def get_core_path(opts):
     else:
         path = f"{path}/gc"
 
+    if opts.dropout == 0.7:
+        path = f"{path}_reg"
+
     return path
 
 def setup_loggers(opts):
