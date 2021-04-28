@@ -105,7 +105,7 @@ class GastGC(nn.Module):
         embeddings = torch.flatten(embeddings)
 
         out = self.relu(self.classifier_1(embeddings))
-        out = self.drop_out(out)
+        
         logits = self.classifier_2(out)
         logits = logits.view(-1, len(logits))
 

@@ -84,8 +84,15 @@ class TransLC(nn.Module):
 
         texts = [goal_text] + lc_texts
         bert_input = texts[0]
+
+        count = 1
         for text in texts[1:]:
+            count += 1
             bert_input = f"{bert_input}. {text}"
+
+        while count < 21:
+            bert_input = f"{bert_input}. none"
+            count += 1
 
         logits, _ = self.go_bert([bert_input], None)
 

@@ -85,7 +85,16 @@ class TransGC(nn.Module):
         texts = [goal_text] + gc_texts
         bert_input = texts[0]
         for text in texts[1:]:
-            bert_input = f"{bert_input}. AND. {text}"
+            bert_input = f"{bert_input}. {text}"
+
+        count = 1
+        for text in texts[1:]:
+            count += 1
+            bert_input = f"{bert_input}. {text}"
+
+        while count < 11:
+            bert_input = f"{bert_input}. none"
+            count += 1
 
         logits, _ = self.go_bert([bert_input], None)
 

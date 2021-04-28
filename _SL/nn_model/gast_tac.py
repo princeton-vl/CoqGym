@@ -81,7 +81,6 @@ class GastTac(nn.Module):
         x = self.relu(self.conv6(x))
         x = x.view(x.size(0), -1)
         out = self.relu(self.classifier_1(x))
-        out = self.drop_out(out)
         logits = self.classifier_2(out)
         probs = self.softmax(logits)
         return probs[0]
