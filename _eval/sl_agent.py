@@ -19,45 +19,72 @@ class RLAgent(Agent):
             self.tacmodel = GastTac(opts)
             self.lcmodel = GastLC(opts)
             self.gcmodel = GastGC(opts)
-
             if "human" in opts.slmodel:
-                tacmodel_path = "../_SL/models/gast/human/tac000.pth"
-                lcmodel_path = "../_SL/models/gast/human/lc000.pth"
-                gcmodel_path = "../_SL/models/gast/human/gc000.pth"
+                tacmodel_path = "../_SL/models/best/acc/human/gast_tac.pth"
+                lcmodel_path = "../_SL/models/best/acc/human/gast_lc.pth"
+                gcmodel_path = "../_SL/models/best/acc/human/gast_gc.pth"
             elif "all" in opts.slmodel:
-                tacmodel_path = "../_SL/models/gast/all/tac000.pth"
-                lcmodel_path = "../_SL/models/gast/all/lc000.pth"
-                gcmodel_path = "../_SL/models/gast/all/gc000.pth"
+                tacmodel_path = "../_SL/models/best/acc/all/gast_tac.pth"
+                lcmodel_path = "../_SL/models/best/acc/all/gast_lc.pth"
+                gcmodel_path = "../_SL/models/best/acc/all/gast_gc.pth"
             elif "synthetic" in opts.slmodel:
-                tacmodel_path = "../_SL/models/gast/synthetic/tac000.pth"
-                lcmodel_path = "../_SL/models/gast/synthetic/lc000.pth"
-                gcmodel_path = "../_SL/models/gast/synthetic/gc000.pth"
+                tacmodel_path = "../_SL/models/best/acc/synthetic/gast_tac.pth"
+                lcmodel_path = "../_SL/models/best/acc/synthetic/gast_lc.pth"
+                gcmodel_path = "../_SL/models/best/acc/synthetic/gast_gc.pth"
+            elif "overall" in opts.slmodel:
+                tacmodel_path = "../_SL/models/best/acc/synthetic/gast_tac.pth"
+                lcmodel_path = "../_SL/models/best/acc/synthetic/gast_lc.pth"
+                gcmodel_path = "../_SL/models/best/acc/synthetic/gast_gc.pth"
 
         elif "trans" in opts.slmodel:
             self.tacmodel = TransTac(opts)
             self.lcmodel = TransLC(opts)
             self.gcmodel = TransGC(opts)
-
             if "human" in opts.slmodel:
-                tacmodel_path = "../_SL/models/trans/human/tac000.pth"
-                lcmodel_path = "../_SL/models/trans/human/lc000.pth"
-                gcmodel_path = "../_SL/models/trans/human/gc000.pth"
+                tacmodel_path = "../_SL/models/best/acc/human/trans_tac.pth"
+                lcmodel_path = "../_SL/models/best/acc/human/trans_lc.pth"
+                gcmodel_path = "../_SL/models/best/acc/human/trans_gc.pth"
             elif "all" in opts.slmodel:
-                tacmodel_path = "../_SL/models/trans/all/tac000.pth"
-                lcmodel_path = "../_SL/models/trans/all/lc000.pth"
-                gcmodel_path = "../_SL/models/trans/all/gc000.pth"
+                tacmodel_path = "../_SL/models/best/acc/all/trans_tac.pth"
+                lcmodel_path = "../_SL/models/best/acc/all/trans_lc.pth"
+                gcmodel_path = "../_SL/models/best/acc/all/trans_gc.pth"
             elif "synthetic" in opts.slmodel:
-                tacmodel_path = "../_SL/models/trans/synthetic/tac000.pth"
-                lcmodel_path = "../_SL/models/trans/synthetic/lc000.pth"
-                gcmodel_path = "../_SL/models/trans/synthetic/gc000.pth"
+                tacmodel_path = "../_SL/models/best/acc/synthetic/trans_tac.pth"
+                lcmodel_path = "../_SL/models/best/acc/synthetic/trans_lc.pth"
+                gcmodel_path = "../_SL/models/best/acc/synthetic/trans_gc.pth"
+            elif "overall" in opts.slmodel:
+                tacmodel_path = "../_SL/models/best/acc/synthetic/trans_tac.pth"
+                lcmodel_path = "../_SL/models/best/acc/synthetic/trans_lc.pth"
+                gcmodel_path = "../_SL/models/best/acc/synthetic/trans_gc.pth"
 
-        elif "optimal" in opts.slmodel:
+        elif "best_human" in opts.slmodel:
             self.tacmodel = TransTac(opts)
             self.lcmodel = GastLC(opts)
             self.gcmodel = GastGC(opts)
-            tacmodel_path = "../_SL/models/trans/synthetic/tac000.pth"
-            lcmodel_path = "../_SL/models/gast/synthetic/lc000.pth"
-            gcmodel_path = "../_SL/models/gast/synthetic/gc000.pth"
+            tacmodel_path = "../_SL/models/best/acc/human/trans_tac.pth"
+            lcmodel_path = "../_SL/models/best/acc/human/gast_lc.pth"
+            gcmodel_path = "../_SL/models/best/acc/human/gast_gc.pth"
+        elif "best_all" in opts.slmodel:
+            self.tacmodel = TransTac(opts)
+            self.lcmodel = GastLC(opts)
+            self.gcmodel = GastGC(opts)
+            tacmodel_path = "../_SL/models/best/acc/all/trans_tac.pth"
+            lcmodel_path = "../_SL/models/best/acc/all/gast_lc.pth"
+            gcmodel_path = "../_SL/models/best/acc/all/gast_gc.pth"
+        elif "best_synthetic" in opts.slmodel:
+            self.tacmodel = TransTac(opts)
+            self.lcmodel = GastLC(opts)
+            self.gcmodel = GastGC(opts)
+            tacmodel_path = "../_SL/models/best/acc/synthetic/trans_tac.pth"
+            lcmodel_path = "../_SL/models/best/acc/synthetic/gast_lc.pth"
+            gcmodel_path = "../_SL/models/best/acc/synthetic/gast_gc.pth"
+        elif "best_overall" in opts.slmodel:
+            self.tacmodel = TransTac(opts)
+            self.lcmodel = GastLC(opts)
+            self.gcmodel = GastGC(opts)
+            tacmodel_path = "../_SL/models/best/acc/synthetic/trans_tac.pth"
+            lcmodel_path = "../_SL/models/best/acc/human/gast_lc.pth"
+            gcmodel_path = "../_SL/models/best/acc/synthetic/gast_gc.pth"
         
         log.info(self.tacmodel)
         log.info(self.lcmodel)
@@ -109,15 +136,16 @@ class RLAgent(Agent):
         
         res = {"lc": {}, "gc": {}}
         for i in range(10):
+            if i >= len(gc_ids):
+                res["gc"][gcprobs[i]] = ""
+            else:
+                res["gc"][gcprobs[i]] = gc_ids[i]
+
+        for i in range(20):
             if i >= len(lc_ids):
                 res["lc"][lcprobs[i]] = ""
             else:
                 res["lc"][lcprobs[i]] = lc_ids[i]
-
-            if i >= len(gc_ids):
-                res["gc"][gcprobs[i]] = ""
-            else:
-                res["gc"][gcprobs[i]] = gc_ids[i]   
                    
         return res
 

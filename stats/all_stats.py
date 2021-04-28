@@ -49,5 +49,9 @@ def tactic_freq():
     print(f'{valid_freq}, {valid_count}')
 
 
+def average_lc():
+    train = f'{proof_steps}/train'
+    train_files = os.listdir(train)
+
 if __name__ == "__main__":
     freq = tactic_freq()
