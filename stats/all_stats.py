@@ -50,19 +50,29 @@ def tactic_freq():
 
 
 def average_lc():
+    lc_lengths_synthetic = {}
+    lc_lengths_human = {}
+
     train = f'{proof_steps}/train'
     files = os.listdir(train)
+
     for i, file_name in enumerate(files):
         current_file_path = f"{train}/{file_name}"
         with open(current_file_path, 'rb') as f:
             print(i)
             example = pickle.load(f)
             is_synthetic = example['is_synthetic']
-            if is_synthetic:
-                continue
-
-            tactic = example['tactic']['text']
+            tactic_app = example['tactic']['text']
             lc_ids = [lc['ident'] for lc in example['local_context']]
+            length = len(lc_ids)
+
+            if is_synthetic:
+                lc_lengths_synthetic[length] = lc_lengths_synthetic.get(length, 0) + 1
+            else:
+                lc_lengths_human[length] = lc_lengths_human.get(length, 0) + 1
+        
+    print(lc_lengths_synthetic)
+    print(lc_lengths_human)
 
 
 def number_of_args():
@@ -122,4 +132,4 @@ def find_gc_args(tactic_application, lc_ids):
     return res
 
 if __name__ == "__main__":
-    number_of_args()
+    average_lc()

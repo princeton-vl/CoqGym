@@ -28,7 +28,7 @@ class TransLC(nn.Module):
             if txt == None:
                 goal_texts[i] = "none"
 
-        lc_texts_s = [[c["text"] for c in lc] for lc in batch["local_context"]]
+        lc_texts_s = [[f'{c["ident"]} points to {c["text"]}' for c in lc] for lc in batch["local_context"]]
         
         bert_inputs = []
         for i, lc_texts in enumerate(lc_texts_s):
