@@ -14,7 +14,7 @@ class TransLC(nn.Module):
         self.tokenizer = BertTokenizer.from_pretrained("bert-base-cased")
         self.config = BertConfig(hidden_dropout_prob=self.opts.dropout, 
                                  attention_probs_dropout_prob=self.opts.dropout,
-                                 num_labels = 20,
+                                 num_labels = 10,
                                  num_hidden_layers=self.opts.num_hidden,
                                  num_attention_heads=self.opts.num_attention,
                                  vocab_size = len(self.tokenizer))
@@ -40,7 +40,7 @@ class TransLC(nn.Module):
                 
                 bert_input = f"{bert_input}. {lc_text}"
                 count += 1
-            while count < 21:
+            while count < 11:
                 bert_input = f"{bert_input}. none"
                 count += 1
             
@@ -90,7 +90,7 @@ class TransLC(nn.Module):
             count += 1
             bert_input = f"{bert_input}. {text}"
 
-        while count < 21:
+        while count < 11:
             bert_input = f"{bert_input}. none"
             count += 1
 

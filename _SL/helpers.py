@@ -93,7 +93,7 @@ def check_lc(opts, example):
     tactic_app = example['tactic']['text']
     lc_ids = [c['ident'] for c in example['local_context']]
     lc_arg, index = find_lc_arg(opts, tactic_app, lc_ids)
-    if index <= -1 or index >= 20:
+    if index <= -1 or index >= 10:
         return False
     return True
 

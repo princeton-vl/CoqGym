@@ -26,9 +26,9 @@ class GastLC(nn.Module):
         self.pool = MaxPool1d(2, 2)
         dense_dim = int((self.opts.sortk - 2) / 2 + 1)
         self.dense_dim = (dense_dim - 5 + 1) * self.opts.embedding_dim
-        self.classifier_1 = Linear(21*self.dense_dim, self.opts.embedding_dim)
+        self.classifier_1 = Linear(11*self.dense_dim, self.opts.embedding_dim)
         self.drop_out = Dropout(self.opts.dropout)
-        self.classifier_2 = Linear(self.opts.embedding_dim, 20)
+        self.classifier_2 = Linear(self.opts.embedding_dim, 10)
         self.relu = nn.ReLU(inplace=True)
         self.tanh = nn.Tanh()
             
@@ -49,7 +49,7 @@ class GastLC(nn.Module):
         lc_asts_s = [[c["ast"] for c in lc] for lc in batch["local_context"]]
         lc_embs = []
         for lc_asts in lc_asts_s:
-            x_lc, edge_index_lc, gnn_batch = prep_asts(self.opts, lc_asts, 20)
+            x_lc, edge_index_lc, gnn_batch = prep_asts(self.opts, lc_asts, 10)
             edge_index_lc, _ = remove_self_loops(edge_index_lc)
             edge_index_lc.to(self.opts.device)
 
@@ -95,7 +95,7 @@ class GastLC(nn.Module):
         lc_asts = [c["ast"] for c in lc]
         asts = goal_asts + lc_asts
 
-        x, edge_index, batch = prep_asts(self.opts, asts, 21)
+        x, edge_index, batch = prep_asts(self.opts, asts, 11)
         edge_index, _ = remove_self_loops(edge_index)
             
         embeddings = self.embeddings(x, edge_index, batch)
