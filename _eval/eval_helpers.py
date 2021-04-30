@@ -21,7 +21,7 @@ def process_local_env(state):
                 local_context.append({'ident': ident, 'text': h['type'], 'ast': term_parser.parse(h['sexp']), 'sexp': h['sexp']})
 
         goals.append(goal)
-        local_contexts.append(padd_lc(local_context))
+        local_contexts.append(local_context)
 
     return goals[0], local_contexts[0]
 
@@ -33,7 +33,7 @@ def process_global_context(state):
         ast = sexp_cache[const['sexp']]
         global_context.append({'qualid': const['qualid'], 'text': const['type'], 'ast': term_parser.parse(ast), 'sexp': const['sexp']})
     
-    return padd_gc(global_context)
+    return global_context
 
 def padd_gc(c):
     if len(c) > 10:
