@@ -4,27 +4,31 @@ import helpers
 class Agent(ABC):
     def __init__(self, opts):
         self.opts = opts
-        self.script = []
-
+        
         ''' environment and state '''
         self.proof_env = None
         self.state = None # triplet -> (goal, local context, global context)        
 
 
     def reset(self, proof_env):
-        self.script = []
         self.proof_env = proof_env
-
         local_state = proof_env.init()
         goal, lc = helpers.process_local_env(local_state)
         gc = helpers.process_global_context(local_state)
         self.state = (goal, lc, gc)
 
 
-    def update_state(self, prev_state, local_state):
+    def update_state(self, local_state):
         gc = self.state[2]
         goal, lc = helpers.process_local_env(local_state)
         self.state = (goal, lc, gc)
+        
+        
+    def make_action(self, action):
+        local_state = self.proof_env.step(f'{action}.')
+        result = local_state['result']
+        self.update_state(local_state)
+        return result
 
 
     def prove(self, proof_env):
@@ -50,15 +54,12 @@ class Agent(ABC):
                 stack.pop()
                 script.pop()
                 local_state = self.proof_env.step("Undo.")
-                self.update_state(self.state, local_state)
+                self.update_state(local_state)
                 continue
             else:
                 tac = stack[-1].pop(0)
-            if not self.check_legality(tac):
-                self.proof_env.num_tactics_left -= 1
-                continue
             
-            _, result = self.make_action(tac)
+            result = self.make_action(tac)
 
             if result == "SUCCESS":            
                 script.append(tac)
@@ -74,7 +75,7 @@ class Agent(ABC):
 
                 if sig in node_ids or len(script) >= self.opts.depth_limit:
                     local_state = self.proof_env.step("Undo.")
-                    self.update_state(self.state, local_state)
+                    self.update_state(local_state)
                     script.pop()
                     continue
 
