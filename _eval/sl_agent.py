@@ -141,7 +141,7 @@ class RLAgent(Agent):
             else:
                 res["gc"][gcprobs[i]] = gc_ids[i]
 
-        for i in range(20):
+        for i in range(10):
             if i >= len(lc_ids):
                 res["lc"][lcprobs[i]] = ""
             else:
