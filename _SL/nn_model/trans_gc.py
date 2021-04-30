@@ -1,6 +1,6 @@
 import json, torch
 import torch.nn as nn
-from helpers import get_gc_targets, get_gc_pred
+from _SL.helpers import get_gc_targets, get_gc_pred
 from transformers import BertConfig, BertForSequenceClassification
 from transformers import BertTokenizer, BasicTokenizer, PreTrainedTokenizer
 
