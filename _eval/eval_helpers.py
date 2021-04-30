@@ -21,7 +21,9 @@ def process_local_env(state):
                 local_context.append({'ident': ident, 'text': h['type'], 'ast': term_parser.parse(h['sexp']), 'sexp': h['sexp']})
 
         goals.append(goal)
-        local_contexts.append(local_context)
+        local_contexts.append(padd_lc(local_context))
+
+    return goals[0], local_contexts[0]
 
 def process_global_context(state):
     global_context = []
