@@ -21,8 +21,9 @@ parser.add_argument("--timeout", type=int, default=600)
 parser.add_argument("--dropout", type=str, default=0.0)
 
 # gast
-parser.add_argument("--embedding_dim", type=int, default=512)
+parser.add_argument("--embedding_dim", type=int, default=256)
 parser.add_argument("--sortk", type=int, default=30)
+
 # trans
 parser.add_argument("--num_hidden", type=int, default=6)
 parser.add_argument("--num_attention", type=int, default=6)
@@ -30,7 +31,7 @@ parser.add_argument("--tokenizer_length", type=int, default=512)
 
 parser.add_argument("--model_type", type=str, default="sl")
 parser.add_argument("--slmodel", type=str, default="gast_human")
-parser.add_argument("--rlmodel", type=str, default="rl")
+parser.add_argument("--rlmodel", type=str, default="")
 
 opts = parser.parse_args()
 opts.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
