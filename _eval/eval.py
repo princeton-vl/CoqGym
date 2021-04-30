@@ -81,7 +81,7 @@ for f in test_files:
 
                 run_log.info(f'Seen {total_count} ({round(total_count/13137, 8)} %) of proofs')
     except:
-        print(traceback.format_exc())
+        run_log.info(traceback.format_exc())
         res_log.info(f"Skipped {f}")
         skipped += 1
         continue
