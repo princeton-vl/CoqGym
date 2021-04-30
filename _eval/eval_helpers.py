@@ -40,7 +40,7 @@ def padd_gc(c):
         return c[0:10]
         
     while len(c) < 10:
-        empty = {'ident': '', 'text': '', 'ast': Tree(data=None, children=[]), 'sexp': ''}
+        empty = {'ident': '', 'text': '', 'ast': Tree(data="constr__constr", children=[]), 'sexp': ''}
         c.append(empty)
 
     return c
@@ -50,7 +50,7 @@ def padd_lc(c):
         return c[0:10]
         
     while len(c) < 10:
-        empty = {'ident': '', 'text': '', 'ast': Tree(data=None, children=[]), 'sexp': ''}
+        empty = {'ident': '', 'text': '', 'ast': Tree(data"constr__constr", children=[]), 'sexp': ''}
         c.append(empty)
 
     return c
