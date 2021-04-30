@@ -8,7 +8,7 @@ import torch.nn.functional as F
 from torch_geometric.nn import GCNConv, global_sort_pool
 from torch_geometric.utils import remove_self_loops
 
-from helpers import get_tactic_targets, get_tactics_true, get_args_true, get_tactics_pred, prep_asts, get_gc_targets, get_gc_pred
+from _SL.helpers import get_tactic_targets, get_tactics_true, get_args_true, get_tactics_pred, prep_asts, get_gc_targets, get_gc_pred
 
 class GastGC(nn.Module):
     def __init__(self, opts):
