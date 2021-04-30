@@ -31,7 +31,7 @@ def process_global_context(state):
 
     for const in toplevel_consts[-10:]:
         ast = sexp_cache[const['sexp']]
-        global_context.append({'ident': const['qualid'], 'text': const['type'], 'ast': term_parser.parse(ast), 'sexp': const['sexp']})
+        global_context.append({'qualid': const['qualid'], 'text': const['type'], 'ast': term_parser.parse(ast), 'sexp': const['sexp']})
     
     return padd_gc(global_context)
 
@@ -40,7 +40,7 @@ def padd_gc(c):
         return c[0:10]
         
     while len(c) < 10:
-        empty = {'ident': '', 'text': '', 'ast': Tree(data=None, children=None), 'sexp': ''}
+        empty = {'ident': '', 'text': '', 'ast': Tree(data=None, children=[]), 'sexp': ''}
         c.append(empty)
 
     return c
@@ -50,7 +50,7 @@ def padd_lc(c):
         return c[0:10]
         
     while len(c) < 10:
-        empty = {'ident': '', 'text': '', 'ast': Tree(data=None, children=None), 'sexp': ''}
+        empty = {'ident': '', 'text': '', 'ast': Tree(data=None, children=[]), 'sexp': ''}
         c.append(empty)
 
     return c
