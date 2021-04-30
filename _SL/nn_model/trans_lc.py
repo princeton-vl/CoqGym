@@ -18,9 +18,9 @@ class TransLC(nn.Module):
                                  num_hidden_layers=self.opts.num_hidden,
                                  num_attention_heads=self.opts.num_attention,
                                  vocab_size = 28996) #30522
-
-        self.bert= BertForSequenceClassification.from_pretrained('bert-base-uncased', config=self.config)
-        #self.bert = BertForSequenceClassification(config=self.config)
+        
+        #self.bert= BertForSequenceClassification.from_pretrained('bert-base-uncased', config=self.config)
+        self.bert = BertForSequenceClassification(config=self.config)
         self.softmax = nn.Softmax(dim=1)
         
     def forward(self, batch): 
