@@ -61,35 +61,15 @@ def state_id(state):
 def get_core_path(opts):
     
     if opts.model_type == "rl":
-        if opts.rl_type == "rl":
-            path = "rl/rl"
-        elif opts.rl_type == "im_a":
-            path = "rl/im_a"
-        elif opts.rl_type == "im_h":
-            path = "rl/im_h"
-        elif opts.rl_type == "im_s":
-            path = "rl/im_s"
+        path = f"rl/{opts.rl_model}/"
     elif opts.model_type == "sl":
-        if opts.sl_model == "gast_human":
-            path = "sl/gast_h"
-        elif opts.sl_model == "gast_all":
-            path = "sl/gast_a"
-        elif opts.sl_model == "gast_synthetic":
-            path = "sl/gast_s"
-        elif opts.sl_model == "trans_human":
-            path = "sl/trans_h"
-        elif opts.sl_model == "trans_all":
-            path = "sl/trans_a"
-        elif opts.sl_model == "trans_synthetic":
-            path = "sl/trans_s"
-        elif opts.sl_model == "optimal":
-            path = "sl/optimal"
+        path = f"rl/{opts.sl_model}/"
 
     return path
 
 def setup_loggers(opts):
     core = get_core_path(opts)
-    run_path, res_path = f"./logs/{core}_run.log", f"./logs/{core}_res.log"
+    run_path, res_path = f"./logs/{core}run.log", f"./logs/{core}res.log"
 
     try:
         os.remove(run_path)
