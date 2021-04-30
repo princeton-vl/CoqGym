@@ -90,8 +90,6 @@ class SLAgent(Agent):
         log.info(self.lcmodel)
         log.info(self.gcmodel)
 
-        log.info(f"loading from \n{tacmodel_path}\n{lcmodel_path}\n{gcmodel_path}")
-
         if opts.device.type == "cpu":
             taccheck = torch.load(tacmodel_path, map_location="cpu")
             lccheck = torch.load(lcmodel_path, map_location="cpu")
@@ -104,6 +102,8 @@ class SLAgent(Agent):
         self.tacmodel.load_state_dict(taccheck["state_dict"])
         self.lcmodel.load_state_dict(lccheck["state_dict"])
         self.gcmodel.load_state_dict(gccheck["state_dict"])
+        
+        log.info(f"\nloading from\n{tacmodel_path}\n{lcmodel_path}\n{gcmodel_path}")
 
         self.tacmodel.to(opts.device)
         self.lcmodel.to(opts.device)
