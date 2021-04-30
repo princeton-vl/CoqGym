@@ -32,8 +32,8 @@ parser.add_argument("--num_attention", type=int, default=6)
 parser.add_argument("--tokenizer_length", type=int, default=512)
 
 parser.add_argument("--model_type", type=str, default="sl")
-parser.add_argument("--slmodel", type=str, default="gast_human")
-parser.add_argument("--rlmodel", type=str, default="")
+parser.add_argument("--sl_model", type=str, default="gast_human")
+parser.add_argument("--rl_model", type=str, default="")
 
 opts = parser.parse_args()
 opts.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
