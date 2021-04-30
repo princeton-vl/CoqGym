@@ -79,8 +79,8 @@ for f in test_files:
                 if res:
                     current_correct += 1
                     correct += 1
-
-                run_log.info(f'Seen {total_count} ({round(total_count/13137, 8)} %) of proofs')
+                    
+                run_log.info(f'{proof_name} -> {res}, {script}. Seen {total_count} ({round(total_count/13137, 4)} %) of proofs')
     except:
         run_log.info(traceback.format_exc())
         res_log.info(f"Skipped {f}")
@@ -88,23 +88,22 @@ for f in test_files:
         continue
 
     file_count += 1
-              
     proj_count += current_count
     proj_correct += current_correct
 
     if current_proj != last_proj:
         total_proj_count += 1
-        proj_acc = round(last_proj_correct/last_proj_count, 8)
-        res_log.info(f"{last_proj}: \t {last_proj_correct}/{last_proj_count} ({proj_acc})".expandtabs(100))
+        proj_acc = round(last_proj_correct/last_proj_count, 6)
+        res_log.info(f"{last_proj}: \t {last_proj_correct}/{last_proj_count} ({proj_acc})".expandtabs(80))
         res_log.info("-----------------")
         
         
     acc = round(current_correct/current_count, 8)
-    res_log.info(f"{f}: \t {current_correct}/{current_count} ({acc})".expandtabs(100))
+    res_log.info(f"{f}: \t {current_correct}/{current_count} ({acc})".expandtabs(80))
      
     last_proj = current_proj
 
 acc = round(correct/total_count, 8)
-res_log.info(f"Total: \t {correct}/{total_count} ({acc})".expandtabs(100))
+res_log.info(f"Total: \t {correct}/{total_count} ({acc})".expandtabs(80))
 res_log.info(f"Skipped {skipped} files.")
 
