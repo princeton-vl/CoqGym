@@ -19,9 +19,10 @@ class Agent(ABC):
 
 
     def update_state(self, local_state):
-        gc = self.state[2]
-        goal, lc = eval_helpers.process_local_env(local_state)
-        self.state = (goal, lc, gc)
+        if local_state['result'] == "PROVING":
+            gc = self.state[2]
+            goal, lc = eval_helpers.process_local_env(local_state)
+            self.state = (goal, lc, gc)
         
         
     def make_action(self, action):
