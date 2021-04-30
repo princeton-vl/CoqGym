@@ -1,6 +1,6 @@
 import json, torch
 import torch.nn as nn
-from helpers import get_tactic_targets, get_tactics_true, get_args_true, get_tactics_pred, prep_asts
+from _SL.helpers import get_tactic_targets, get_tactics_true, get_args_true, get_tactics_pred, prep_asts
 from transformers import BertConfig, BertForSequenceClassification
 from transformers import BertTokenizer, BasicTokenizer, PreTrainedTokenizer
 
