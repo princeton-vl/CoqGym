@@ -36,7 +36,7 @@ class Agent(ABC):
 
     def prove(self, proof_env):
         res, script = self.prove_DFS(proof_env)
-        return {"proved": res, "script": script} 
+        return res, script
 
     def prove_DFS(self, proof_env):
         self.reset(proof_env)
