@@ -20,7 +20,7 @@ class SLAgent(Agent):
             self.lcmodel = GastLC(opts)
             self.gcmodel = GastGC(opts)
             if "human" in opts.sl_model:
-                tacmodel_path = "../_SL/models/best/acc/human/trans_tac.pth"
+                tacmodel_path = "../_SL/models/best/acc/human/gast_tac.pth"
                 lcmodel_path = "../_SL/models/best/acc/human/gast_lc.pth"
                 gcmodel_path = "../_SL/models/best/acc/human/gast_gc.pth"
             elif "all" in opts.sl_model:
