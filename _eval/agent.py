@@ -1,9 +1,11 @@
+import json
 from abc import ABC, abstractmethod
 import eval_helpers
 
 class Agent(ABC):
     def __init__(self, opts):
         self.opts = opts
+        with open(self.opts.tactics) as f: self.tactics = json.load(f)
         
         ''' environment and state '''
         self.proof_env = None
