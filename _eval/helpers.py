@@ -44,10 +44,10 @@ def padd_gc(c):
     return c
 
 def padd_lc(c):
-    if len(c) > 20:
-        return c[0:20]
+    if len(c) > 10:
+        return c[0:10]
         
-    while len(c) < 20:
+    while len(c) < 10:
         empty = {'ident': '', 'text': '', 'ast': Tree(data=None, children=None), 'sexp': ''}
         c.append(empty)
 
