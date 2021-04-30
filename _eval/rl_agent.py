@@ -10,13 +10,13 @@ class RLAgent(Agent):
         
         log.info(self.Q)
 
-        if opts.rlmodel == "rl":
+        if opts.rl_model == "rl":
             model_path = "../_RL/models/rl_q000.pth"
-        elif opts.rlmodel == "im_a":
+        elif opts.rl_model == "im_a":
             model_path = "../_RL/models/im_a_q000.pth"
-        elif opts.rlmodel == "im_s":
+        elif opts.rl_model == "im_s":
             model_path = "../_RL/models/im_s_q000.pth"
-        elif opts.rlmodel == "im_h":
+        elif opts.rl_model == "im_h":
             model_path = "../_RL/models/im_h_q000.pth"
         
         log.info(f"loading from {model_path}")
