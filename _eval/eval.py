@@ -2,7 +2,7 @@ import argparse, os, sys, torch, json
 sys.setrecursionlimit(100000)
 sys.path.append(os.path.abspath('../'))
 
-import helpers
+import eval_helpers
 from eval_env import FileEnv
 
 from rl_agent import RLAgent
@@ -38,7 +38,7 @@ parser.add_argument("--rlmodel", type=str, default="")
 opts = parser.parse_args()
 opts.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-run_log, res_log = helpers.setup_loggers(opts)
+run_log, res_log = eval_helpers.setup_loggers(opts)
 res_log.info(opts)
 
 if opts.model_type == "sl":
@@ -47,7 +47,7 @@ elif opts.model_type == "rl":
     agent = RLAgent(opts, res_log)
 
 
-_, _, test_files = helpers.files_on_split(opts)
+_, _, test_files = eval_helpers.files_on_split(opts)
 
 total_count = 0
 file_count = 0
