@@ -15,70 +15,70 @@ class SLAgent(Agent):
     def __init__(self, opts, log):
         super().__init__(opts)
 
-        if "gast" in opts.slmodel:
+        if "gast" in opts.sl_model:
             self.tacmodel = GastTac(opts)
             self.lcmodel = GastLC(opts)
             self.gcmodel = GastGC(opts)
-            if "human" in opts.slmodel:
+            if "human" in opts.sl_model:
                 tacmodel_path = "../_SL/models/best/acc/human/gast_tac.pth"
                 lcmodel_path = "../_SL/models/best/acc/human/gast_lc.pth"
                 gcmodel_path = "../_SL/models/best/acc/human/gast_gc.pth"
-            elif "all" in opts.slmodel:
+            elif "all" in opts.sl_model:
                 tacmodel_path = "../_SL/models/best/acc/all/gast_tac.pth"
                 lcmodel_path = "../_SL/models/best/acc/all/gast_lc.pth"
                 gcmodel_path = "../_SL/models/best/acc/all/gast_gc.pth"
-            elif "synthetic" in opts.slmodel:
+            elif "synthetic" in opts.sl_model:
                 tacmodel_path = "../_SL/models/best/acc/synthetic/gast_tac.pth"
                 lcmodel_path = "../_SL/models/best/acc/synthetic/gast_lc.pth"
                 gcmodel_path = "../_SL/models/best/acc/synthetic/gast_gc.pth"
-            elif "overall" in opts.slmodel:
+            elif "overall" in opts.sl_model:
                 tacmodel_path = "../_SL/models/best/acc/synthetic/gast_tac.pth"
                 lcmodel_path = "../_SL/models/best/acc/synthetic/gast_lc.pth"
                 gcmodel_path = "../_SL/models/best/acc/synthetic/gast_gc.pth"
 
-        elif "trans" in opts.slmodel:
+        elif "trans" in opts.sl_model:
             self.tacmodel = TransTac(opts)
             self.lcmodel = TransLC(opts)
             self.gcmodel = TransGC(opts)
-            if "human" in opts.slmodel:
+            if "human" in opts.sl_model:
                 tacmodel_path = "../_SL/models/best/acc/human/trans_tac.pth"
                 lcmodel_path = "../_SL/models/best/acc/human/trans_lc.pth"
                 gcmodel_path = "../_SL/models/best/acc/human/trans_gc.pth"
-            elif "all" in opts.slmodel:
+            elif "all" in opts.sl_model:
                 tacmodel_path = "../_SL/models/best/acc/all/trans_tac.pth"
                 lcmodel_path = "../_SL/models/best/acc/all/trans_lc.pth"
                 gcmodel_path = "../_SL/models/best/acc/all/trans_gc.pth"
-            elif "synthetic" in opts.slmodel:
+            elif "synthetic" in opts.sl_model:
                 tacmodel_path = "../_SL/models/best/acc/synthetic/trans_tac.pth"
                 lcmodel_path = "../_SL/models/best/acc/synthetic/trans_lc.pth"
                 gcmodel_path = "../_SL/models/best/acc/synthetic/trans_gc.pth"
-            elif "overall" in opts.slmodel:
+            elif "overall" in opts.sl_model:
                 tacmodel_path = "../_SL/models/best/acc/synthetic/trans_tac.pth"
                 lcmodel_path = "../_SL/models/best/acc/synthetic/trans_lc.pth"
                 gcmodel_path = "../_SL/models/best/acc/synthetic/trans_gc.pth"
 
-        elif "best_human" in opts.slmodel:
+        elif "best_human" in opts.sl_model:
             self.tacmodel = TransTac(opts)
             self.lcmodel = GastLC(opts)
             self.gcmodel = GastGC(opts)
             tacmodel_path = "../_SL/models/best/acc/human/trans_tac.pth"
             lcmodel_path = "../_SL/models/best/acc/human/gast_lc.pth"
             gcmodel_path = "../_SL/models/best/acc/human/gast_gc.pth"
-        elif "best_all" in opts.slmodel:
+        elif "best_all" in opts.sl_model:
             self.tacmodel = TransTac(opts)
             self.lcmodel = GastLC(opts)
             self.gcmodel = GastGC(opts)
             tacmodel_path = "../_SL/models/best/acc/all/trans_tac.pth"
             lcmodel_path = "../_SL/models/best/acc/all/gast_lc.pth"
             gcmodel_path = "../_SL/models/best/acc/all/gast_gc.pth"
-        elif "best_synthetic" in opts.slmodel:
+        elif "best_synthetic" in opts.sl_model:
             self.tacmodel = TransTac(opts)
             self.lcmodel = GastLC(opts)
             self.gcmodel = GastGC(opts)
             tacmodel_path = "../_SL/models/best/acc/synthetic/trans_tac.pth"
             lcmodel_path = "../_SL/models/best/acc/synthetic/gast_lc.pth"
             gcmodel_path = "../_SL/models/best/acc/synthetic/gast_gc.pth"
-        elif "best_overall" in opts.slmodel:
+        elif "best_overall" in opts.sl_model:
             self.tacmodel = TransTac(opts)
             self.lcmodel = GastLC(opts)
             self.gcmodel = GastGC(opts)
