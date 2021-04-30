@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-import helpers
+import eval_helpers
 
 class Agent(ABC):
     def __init__(self, opts):
@@ -13,14 +13,14 @@ class Agent(ABC):
     def reset(self, proof_env):
         self.proof_env = proof_env
         local_state = proof_env.init()
-        goal, lc = helpers.process_local_env(local_state)
-        gc = helpers.process_global_context(local_state)
+        goal, lc = eval_helpers.process_local_env(local_state)
+        gc = eval_helpers.process_global_context(local_state)
         self.state = (goal, lc, gc)
 
 
     def update_state(self, local_state):
         gc = self.state[2]
-        goal, lc = helpers.process_local_env(local_state)
+        goal, lc = eval_helpers.process_local_env(local_state)
         self.state = (goal, lc, gc)
         
         
@@ -38,7 +38,7 @@ class Agent(ABC):
     def prove_DFS(self, proof_env):
         self.reset(proof_env)
         node_ids = set() # keep track of all nodes seen so far
-        root_id = helpers.state_id(self.state)
+        root_id = eval_helpers.state_id(self.state)
         node_ids.add(root_id)
         
         # initialize the stack
@@ -71,7 +71,7 @@ class Agent(ABC):
             else:                
                 assert result == "PROVING"
                 script.append(tac)
-                sig = helpers.state_id(self.state)
+                sig = eval_helpers.state_id(self.state)
 
                 if sig in node_ids or len(script) >= self.opts.depth_limit:
                     local_state = self.proof_env.step("Undo.")
