@@ -10,7 +10,7 @@ from _SL.nn_model.trans_lc import TransLC
 from _SL.nn_model.trans_gc import TransGC
 
 
-class RLAgent(Agent):
+class SLAgent(Agent):
 
     def __init__(self, opts, log):
         super().__init__(opts)
