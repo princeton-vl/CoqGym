@@ -122,7 +122,7 @@ class SLAgent(Agent):
         res = []
         for index in indices:
             tac = self.tactics[index]
-            tac = self.prep_tac(self.opts, tac, arg_probs)
+            tac = self.prep_tac(tac, arg_probs)
             res.append(tac)
 
         return res
