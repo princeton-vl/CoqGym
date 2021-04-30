@@ -1,11 +1,13 @@
-import argparse, os, sys, torch, json, helpers
+import argparse, os, sys, torch, json
 sys.setrecursionlimit(100000)
 sys.path.append(os.path.abspath('../'))
+
+import helpers
+from eval_env import FileEnv
 
 from rl_agent import RLAgent
 from sl_agent import SLAgent
 
-from eval_env import FileEnv
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--datapath", type=str, default="../data")
