@@ -10,7 +10,7 @@ from sl_agent import SLAgent
 
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--datapath", type=str, default="../data")
+parser.add_argument("--data", type=str, default="../data")
 parser.add_argument("--nonterminals", type=str, default="../_RL/jsons/nonterminals.json")
 parser.add_argument("--tactics", type=str, default="../_RL/jsons/tactics.json")
 parser.add_argument("--split", type=str, default="../projs_split.json")
