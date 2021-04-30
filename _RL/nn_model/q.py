@@ -8,7 +8,7 @@ from torch_geometric.nn import GCNConv, global_sort_pool
 from torch_geometric.utils import remove_self_loops
 
 from gallina import traverse_postorder
-import helpers
+import _RL.helpers
 
 class Q(nn.Module):
     def __init__(self, opts):
