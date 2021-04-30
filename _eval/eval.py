@@ -71,7 +71,7 @@ for f in test_files:
         with FileEnv(f, max_num_tactics=opts.max_num_tacs, timeout=opts.timeout) as file_env:
             for proof_env in file_env:
                 proof_name = proof_env.proof["name"]
-                res, script = agent.test(proof_env)
+                res, script = agent.prove(proof_env)
 
                 total_count += 1
                 current_count += 1
