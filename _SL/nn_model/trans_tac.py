@@ -17,7 +17,7 @@ class TransTac(nn.Module):
                                  num_labels = len(self.tactics),
                                  num_hidden_layers=self.opts.num_hidden,
                                  num_attention_heads=self.opts.num_attention,
-                                 vocab_size = len(self.tokenizer))
+                                 vocab_size = 30522)
 
         self.bert= BertForSequenceClassification.from_pretrained('bert-base-uncased', config=self.config)
         #self.bert = BertForSequenceClassification(config=self.config)
