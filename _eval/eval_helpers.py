@@ -66,7 +66,9 @@ def get_core_path(opts):
         path = f"rl/{opts.rl_model}/"
     elif opts.model_type == "sl":
         path = f"sl/{opts.sl_model}/"
-
+    
+    if opts.blacklist:
+        path = f"{path}B"
     return path
 
 def setup_loggers(opts):
