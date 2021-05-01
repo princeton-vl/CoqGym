@@ -33,7 +33,7 @@ class SLAgent(Agent):
                 gcmodel_path = "../_SL/models/best/acc/synthetic/gast_gc.pth"
             elif "overall" in opts.sl_model:
                 tacmodel_path = "../_SL/models/best/acc/synthetic/gast_tac.pth"
-                lcmodel_path = "../_SL/models/best/acc/synthetic/gast_lc.pth"
+                lcmodel_path = "../_SL/models/best/acc/human/gast_lc.pth"
                 gcmodel_path = "../_SL/models/best/acc/synthetic/gast_gc.pth"
 
         elif "trans" in opts.sl_model:
@@ -54,7 +54,7 @@ class SLAgent(Agent):
                 gcmodel_path = "../_SL/models/best/acc/synthetic/trans_gc.pth"
             elif "overall" in opts.sl_model:
                 tacmodel_path = "../_SL/models/best/acc/synthetic/trans_tac.pth"
-                lcmodel_path = "../_SL/models/best/acc/synthetic/trans_lc.pth"
+                lcmodel_path = "../_SL/models/best/acc/human/trans_lc.pth"
                 gcmodel_path = "../_SL/models/best/acc/synthetic/trans_gc.pth"
 
         elif "best_human" in opts.sl_model:
