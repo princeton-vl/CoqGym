@@ -67,7 +67,7 @@ class Agent(ABC):
             else:
                 tac = stack[-1].pop(0)
             
-            if tac in self.blacklist.keys() and self.blacklist[tac] >= 4:
+            if self.opts.blacklist and tac in self.blacklist.keys() and self.blacklist[tac] >= 4:
                 continue
             
             result = self.make_action(tac)
