@@ -16,6 +16,7 @@ parser.add_argument("--tactics", type=str, default="../_RL/jsons/tactics.json")
 parser.add_argument("--split", type=str, default="../projs_split.json")
 parser.add_argument("--sexp_cache", type=str, default="../sexp_cache")
 
+parser.add_argument("--blacklist", type=bool, default=False)
 parser.add_argument("--num_tac_candidates", type=int, default=10)
 parser.add_argument("--depth_limit", type=int, default=50)
 parser.add_argument("--max_num_tacs", type=int, default=300)
