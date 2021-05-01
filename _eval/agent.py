@@ -35,7 +35,7 @@ class Agent(ABC):
         local_state = self.proof_env.step(f'{action}.')
         result = local_state['result']
         self.update_state(local_state)
-        self.blacklist = self.blacklist.get(action, 0) + 1
+        self.blacklist[action] = self.blacklist.get(action, 0) + 1
         return result
 
 
