@@ -10,6 +10,9 @@ class Agent(ABC):
         ''' environment and state '''
         self.proof_env = None
         self.state = None # triplet -> (goal, local context, global context)        
+        
+        ''' blacklist (to avoid infinite loop) '''
+        self.blacklist = {}
 
 
     def reset(self, proof_env):
@@ -18,6 +21,7 @@ class Agent(ABC):
         goal, lc = eval_helpers.process_local_env(local_state)
         gc = eval_helpers.process_global_context(local_state)
         self.state = (goal, lc, gc)
+        self.blacklist = {}
 
 
     def update_state(self, local_state):
@@ -31,6 +35,7 @@ class Agent(ABC):
         local_state = self.proof_env.step(f'{action}.')
         result = local_state['result']
         self.update_state(local_state)
+        self.blacklist = self.blacklist.get(action, 0) + 1
         return result
 
 
@@ -61,6 +66,9 @@ class Agent(ABC):
                 continue
             else:
                 tac = stack[-1].pop(0)
+            
+            if tac in self.blacklist.keys() and self.blacklist[tac] >= 4:
+                continue
             
             result = self.make_action(tac)
 
