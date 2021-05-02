@@ -70,7 +70,7 @@ for f in test_files:
         proj_acc = round(last_proj_correct/max(last_proj_count, 1), 6)
         res_log.info(f"{last_proj}: \t {last_proj_correct}/{last_proj_count} ({proj_acc})".expandtabs(80))
         acc = round(correct/total_count, 6)
-        res_log.info(f"Current total: \t {correct}/{total_count} ({total_acc})".expandtabs(80))
+        res_log.info(f"Current total: \t {correct}/{total_count} ({acc})".expandtabs(80))
         res_log.info(f"Skipped {skipped} files so far...")
         res_log.info("-----------------")
         
