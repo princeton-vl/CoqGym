@@ -65,7 +65,11 @@ for f in test_files:
         last_proj_count = proj_count
         last_proj_correct = proj_correct
         proj_count = 0
-        proj_correct = 0    
+        proj_correct = 0
+        total_proj_count += 1
+        proj_acc = round(last_proj_correct/max(last_proj_count, 1), 6)
+        res_log.info(f"{last_proj}: \t {last_proj_correct}/{last_proj_count} ({proj_acc})".expandtabs(80))
+        res_log.info("-----------------")
         
     current_count = 0
     current_correct = 0
@@ -91,13 +95,6 @@ for f in test_files:
     file_count += 1
     proj_count += current_count
     proj_correct += current_correct
-
-    if current_proj != last_proj:
-        total_proj_count += 1
-        proj_acc = round(last_proj_correct/last_proj_count, 6)
-        res_log.info(f"{last_proj}: \t {last_proj_correct}/{last_proj_count} ({proj_acc})".expandtabs(80))
-        res_log.info("-----------------")
-        
         
     acc = round(current_correct/current_count, 8)
     res_log.info(f"{f}: \t {current_correct}/{current_count} ({acc})".expandtabs(80))
