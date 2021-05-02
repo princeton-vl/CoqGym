@@ -69,6 +69,16 @@ def get_core_path(opts):
     
     if opts.blacklist:
         path = f"{path}B"
+
+    if opts.depth_limit == 5:
+        path = f"{path}D5"
+    
+    if opts.depth_limit == 10:
+        path = f"{path}D10"
+
+    if opts.depth_limit == 25:
+        path = f"{path}D25"
+        
     return path
 
 def setup_loggers(opts):
