@@ -69,6 +69,9 @@ for f in test_files:
         total_proj_count += 1
         proj_acc = round(last_proj_correct/max(last_proj_count, 1), 6)
         res_log.info(f"{last_proj}: \t {last_proj_correct}/{last_proj_count} ({proj_acc})".expandtabs(80))
+        acc = round(correct/total_count, 6)
+        res_log.info(f"Current total: \t {correct}/{total_count} ({total_acc})".expandtabs(80))
+        res_log.info(f"Skipped {skipped} files so far...")
         res_log.info("-----------------")
         
     current_count = 0
@@ -96,12 +99,12 @@ for f in test_files:
     proj_count += current_count
     proj_correct += current_correct
         
-    acc = round(current_correct/current_count, 8)
+    acc = round(current_correct/current_count, 6)
     res_log.info(f"{f}: \t {current_correct}/{current_count} ({acc})".expandtabs(80))
      
     last_proj = current_proj
 
-acc = round(correct/total_count, 8)
+acc = round(correct/total_count, 6)
 res_log.info(f"Total: \t {correct}/{total_count} ({acc})".expandtabs(80))
 res_log.info(f"Skipped {skipped} files.")
 
