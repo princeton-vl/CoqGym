@@ -78,6 +78,12 @@ def get_core_path(opts):
 
     if opts.depth_limit == 25:
         path = f"{path}D25"
+
+    if opts.depth_limit == 100:
+        path = f"{path}D100"
+
+    if opts.depth_limit == 1000:
+        path = f"{path}D1000"
         
     return path
 
