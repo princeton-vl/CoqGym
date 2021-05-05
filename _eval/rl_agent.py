@@ -34,7 +34,7 @@ class RLAgent(Agent):
         actions = self.get_actions()
         q_values = self.Q(self.state)
 
-        topk, indices = torch.topk(input=q_values, k=10, dim=0, largest=True)
+        topk, indices = torch.topk(input=q_values, k=self.opts.num_tac_candidates, dim=0, largest=True)
         candidates = []
         for i in indices:
             candidates.append(actions[i])

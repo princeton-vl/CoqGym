@@ -84,6 +84,21 @@ def get_core_path(opts):
 
     if opts.depth_limit == 1000:
         path = f"{path}D1000"
+
+    if opts.num_tac_candidates == 2:
+        path = f"{path}T2"
+    
+    if opts.num_tac_candidates == 5:
+        path = f"{path}T5"
+
+    if opts.num_tac_candidates == 20:
+        path = f"{path}T20"
+
+    if opts.num_tac_candidates == 30:
+        path = f"{path}T30"
+
+    if opts.num_tac_candidates == 49:
+        path = f"{path}T49"
         
     return path
 
