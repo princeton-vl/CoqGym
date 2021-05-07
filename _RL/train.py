@@ -111,7 +111,7 @@ parser.add_argument('--nonterminals', type=str, default='./jsons/nonterminals.js
 
 # run
 parser.add_argument('--replay_batchsize', type=int, default=32)
-parser.add_argument('--sl_batchsize', type=int, default=32)
+parser.add_argument('--sl_batchsize', type=int, default=256)
 parser.add_argument('--episodes', type=int, default=1)
 
 parser.add_argument('--proof_type', type=str, default='synthetic')

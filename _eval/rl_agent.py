@@ -1,90 +1,95 @@
 from agent import Agent
 import torch, json
+
+
 from _RL.nn_model.q import Q
+from _SL.nn_model.gast_lc import GastLC
+from _SL.nn_model.gast_gc import GastGC
+
 
 class RLAgent(Agent):
 
     def __init__(self, opts, log):
         super().__init__(opts)
-        self.Q = Q(opts)
         
-        log.info(self.Q)
-
         if opts.rl_model == "rl":
-            model_path = "../_RL/models/rl_q000.pth"
-        elif opts.rl_model == "im_a":
-            model_path = "../_RL/models/im_a_q000.pth"
-        elif opts.rl_model == "im_s":
-            model_path = "../_RL/models/im_s_q000.pth"
-        elif opts.rl_model == "im_h":
-            model_path = "../_RL/models/im_h_q000.pth"
-        
-        log.info(f"loading from {model_path}")
+            tacmodel_path = "../_RL/models/rl_q.pth"
+        elif opts.rl_model == "im":
+            tacmodel_path = "../_RL/models/im_q.pth"
+        elif opts.rl_model == "rl5":
+            tacmodel_path = "../_RL/models/rl5_q.pth"
+        elif opts.rl_model == "im5":
+            tacmodel_path = "../_RL/models/im5_q.pth"
+        lcmodel_path = "../_SL/models/best/acc/human/gast_lc.pth"
+        gcmodel_path = "../_SL/models/best/acc/synthetic/gast_gc.pth"
 
+        self.tacmodel = Q(opts)
+        self.lcmodel = GastLC(opts)
+        self.gcmodel = GastGC(opts)
         if opts.device.type == "cpu":
-            check = torch.load(model_path, map_location="cpu")
+            taccheck = torch.load(tacmodel_path, map_location="cpu")
+            lccheck = torch.load(lcmodel_path, map_location="cpu")
+            gccheck = torch.load(gcmodel_path, map_location="cpu")
         else:
-            check = torch.load(model_path)
-        
-        self.Q.load_state_dict(check["state_dict"])
-        self.Q.to(opts.device)
-        self.Q.eval()
+            taccheck = torch.load(tacmodel_path)
+            lccheck = torch.load(lcmodel_path)
+            gccheck = torch.load(gcmodel_path)
+        self.tacmodel.load_state_dict(taccheck["state_dict"])
+        self.lcmodel.load_state_dict(lccheck["state_dict"])
+        self.gcmodel.load_state_dict(gccheck["state_dict"])
+        self.tacmodel.to(opts.device)
+        self.lcmodel.to(opts.device)
+        self.gcmodel.to(opts.device)
+        self.tacmodel.eval()
+        self.lcmodel.eval()
+        self.gcmodel.eval()
 
     def get_candidates(self):
-        actions = self.get_actions()
-        q_values = self.Q(self.state)
-
-        topk, indices = torch.topk(input=q_values, k=self.opts.num_tac_candidates, dim=0, largest=True)
-        candidates = []
-        for i in indices:
-            candidates.append(actions[i])
-        return candidates
-
-
-    def get_actions(self):
-        goal, lc, gc = self.state[0], self.state[1], self.state[2]        
-        with open(self.opts.tactics_sorted) as f: tactics_sorted = json.load(f)
-        non_args = tactics_sorted['non_args']
-        gc_args = tactics_sorted['gc_args']
-        lc_args = tactics_sorted['lc_args']
+        goal, lc, gc = self.state[0], self.state[1], self.state[2]
+        tactic_probs = self.tacmodel.prove(goal, lc, gc)
+        topk, indices = torch.topk(input=tactic_probs, k=self.opts.num_tac_candidates, dim=0, largest=True)
+        arg_probs = self.get_arg_probs(goal, lc, gc)
 
         res = []
-        for tactic in non_args:
-            tmp = self.prep_tac(tactic, lc, gc)
-            res += tmp
-        for tactic in lc_args:
-            tmp = self.prep_tac(tactic, lc, gc)
-            res += tmp
-        for tactic in gc_args:
-            tmp = self.prep_tac(tactic, lc, gc)
-            res += tmp
+        for index in indices:
+            tac = self.tactics[index]
+            tac = self.prep_tac(tac, arg_probs)
+            res.append(tac)
 
-        assert len(res) == self.opts.action_space
         return res
 
-    def prep_tac(self, tactic, lc, gc):
-        res = []
+    def get_arg_probs(self, goal, lc, gc):
+        gcprobs = self.gcmodel.prove(goal, lc, gc)
+        lcprobs = self.lcmodel.prove(goal, lc, gc)
+
+        lc_ids = [c["ident"] for c in lc]
+        gc_ids = [c["qualid"] for c in gc]
+        
+        res = {"lc": {}, "gc": {}}
+        for i in range(10):
+            if i >= len(gc_ids):
+                res["gc"][gcprobs[i]] = ""
+            else:
+                res["gc"][gcprobs[i]] = gc_ids[i]
+
+        for i in range(10):
+            if i >= len(lc_ids):
+                res["lc"][lcprobs[i]] = ""
+            else:
+                res["lc"][lcprobs[i]] = lc_ids[i]
+                   
+        return res
+
+    def prep_tac(self, tactic, arg_probs):
+        gc_arg = arg_probs["gc"][max(arg_probs["gc"].keys())]
+        lc_arg = arg_probs["lc"][max(arg_probs["lc"].keys())]      
 
         # froced theorem
-        if tactic in ['apply', 'rewrite', 'unfold', 'destruct', 'elim', 'case', 'generalize', 'exact']:
-            i = 0
-            while len(res) < 10:
-                if i < len(gc):
-                    res.append(f"{tactic} {gc[i]['ident']}")
-                else:
-                    res.append(f"{tactic} NONE")
-                i += 1            
+        if tactic in ["apply", "rewrite", "unfold", "destruct", "elim", "case", "generalize", "exact"]:
+            tactic = f"{tactic} {gc_arg}"
 
         # forced assumption
-        elif tactic in ['induction', 'exists', 'revert', 'inversion_clear', 'injection', 'contradict']:
-            i = 0
-            while len(res) < 20:
-                if i < len(lc):
-                    res.append(f"{tactic} {lc[i]['ident']}")
-                else:
-                    res.append(f"{tactic} NONE")
-                i += 1
-        else:
-            res.append(tactic)
-    
-        return res
+        elif tactic in ["induction", "exists", "revert", "inversion_clear", "injection", "contradict"]:
+            tactic = f"{tactic} {lc_arg}"
+
+        return tactic
