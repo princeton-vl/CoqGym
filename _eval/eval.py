@@ -104,6 +104,7 @@ for f in test_files:
      
     last_proj = current_proj
 
+
 acc = round(correct/total_count, 6)
 res_log.info(f"Total: \t {correct}/{total_count} ({acc})".expandtabs(80))
 res_log.info(f"Skipped {skipped} files.")

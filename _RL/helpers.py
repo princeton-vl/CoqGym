@@ -57,6 +57,10 @@ def get_core_path(opts):
 
     if opts.episodes > 1:
         path = f"{path}_ep{opts.episodes}"
+    
+    if opts.dropout > 0:
+         path = f"{path}_reg"
+
     return path
 
 def setup_loggers(opts):

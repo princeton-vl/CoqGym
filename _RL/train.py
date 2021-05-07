@@ -128,7 +128,8 @@ parser.add_argument('--embedding_dim', type=int, default=256)
 parser.add_argument('--sortk', type=int, default=30)
 parser.add_argument('--lr', type=float, default=1e-3)
 parser.add_argument('--lr_sl', type=float, default=1e-3)
-parser.add_argument('--dropout', type=float, default=0.5)
+parser.add_argument('--l2', type=float, default=5e-6)
+parser.add_argument('--dropout', type=float, default=0.7)
 
 # rewards
 parser.add_argument('--error_punishment', type=float, default=-1.0)
@@ -156,8 +157,8 @@ res_log.info(opts)
 # agent
 agent = Agent(opts)
 res_log.info(agent.Q)
-optimizer = torch.optim.RMSprop(agent.Q.parameters())
-sl_optimizer = torch.optim.Adam(agent.Q.parameters(), lr=opts.lr_sl)
+optimizer = torch.optim.RMSprop(agent.Q.parameters(), weight_decay=opts.l2)
+sl_optimizer = torch.optim.Adam(agent.Q.parameters(), lr=opts.lr_sl, weight_decay=opts.l2)
 
 # dataset
 train_files, valid_files, test_files = helpers.files_on_split(opts)
@@ -218,8 +219,11 @@ for f in train_files:
                     if len(agent.replay) >= opts.replay_batchsize:
                         replay_train(agent.replay)
                         agent.replay.clear()
+                    
+                    if total % 1000 == 0:
+                        agent.update_target_Q()
 
-                    run_log.info(f'Seen {total} ({round(total/(opts.episodes*57719), 8)} %) of proofs')
+                    run_log.info(f'Seen {total} ({round(total/(57719), 8)} %) of proofs')
             
             acc = round(correct/max(count, 1), 8)
             eps_end = agent.get_eps_tresh()

@@ -198,6 +198,7 @@ class FileEnv:
 
     def __next__(self):
         if self.next_proof_idx >= len(self.proofs):  # no more theorem
+            self.serapi.shutdown()
             raise StopIteration
 
         next_proof = self.proofs[self.next_proof_idx]
