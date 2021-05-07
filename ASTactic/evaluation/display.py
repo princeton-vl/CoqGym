@@ -11,6 +11,7 @@ num_fail = defaultdict(int)
 avg_time = 0
 
 for f in glob(os.path.join(sys.argv[1], "*.json")):
+    print(f)
     results = json.load(open(f))["results"]
     for r in results:
         proj = r["filename"].split(os.path.sep)[2]
