@@ -52,14 +52,9 @@ def get_files(opts, split, log):
 def get_core_path(opts):
     if opts.model_type == 'rl':
         path = "rl"
-    elif opts.model_type == 'rl-im':
-        if opts.proof_type == 'human':
-            path = 'im_h'
-        elif opts.proof_type == 'synthetic':
-            path = 'im_s'
-        elif opts.proof_type == 'all':
-            path = 'im_a'
-    
+    elif opts.model_type == 'im':
+        path = 'im'
+
     if opts.episodes > 1:
         path = f"{path}_ep{opts.episodes}"
     return path
@@ -181,9 +176,6 @@ def process_local_env(state):
 
         goals.append(goal)
         local_contexts.append(local_context)
-    
-    for i, lc in enumerate(local_contexts):
-        local_contexts[i] = padd_lc(lc)
 
     return goals[0], local_contexts[0]
 
@@ -193,26 +185,26 @@ def process_global_context(state):
 
     for const in toplevel_consts[-10:]:
         ast = sexp_cache[const['sexp']]
-        global_context.append({'ident': const['qualid'], 'text': const['type'], 'ast': term_parser.parse(ast), 'sexp': const['sexp']})
+        global_context.append({'qualid': const['qualid'], 'text': const['type'], 'ast': term_parser.parse(ast), 'sexp': const['sexp']})
     
-    return padd_gc(global_context)
+    return global_context
 
 def padd_gc(c):
     if len(c) > 10:
         return c[0:10]
         
     while len(c) < 10:
-        empty = {'ident': '', 'text': '', 'ast': Tree(data=None, children=None), 'sexp': ''}
+        empty = {'ident': '', 'text': '', 'ast': Tree(data="constr__constr", children=[]), 'sexp': ''}
         c.append(empty)
 
     return c
 
 def padd_lc(c):
-    if len(c) > 20:
-        return c[0:20]
+    if len(c) > 10:
+        return c[0:10]
         
-    while len(c) < 20:
-        empty = {'ident': '', 'text': '', 'ast': Tree(data=None, children=None), 'sexp': ''}
+    while len(c) < 10:
+        empty = {'ident': '', 'text': '', 'ast': Tree(data="constr__constr", children=[]), 'sexp': ''}
         c.append(empty)
 
     return c

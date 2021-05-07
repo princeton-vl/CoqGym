@@ -1,9 +1,11 @@
-import torch, random, math
+import torch, random, math, json
 from datetime import datetime
 
 from _RL.nn_model.q import Q
+from _SL.nn_model.gast_lc import GastLC
+from _SL.nn_model.gast_gc import GastGC
 
-import helpers
+import _RL.helpers as helpers
 
 class ReplayMemory(object):
     def __init__(self, opts):
@@ -40,7 +42,6 @@ class Agent:
         ''' statistics '''
         self.num_steps = 0
         self.error_count = 0
-        self.tot_reward = 0
 
         ''' record valid search '''
         self.script = []
@@ -56,20 +57,32 @@ class Agent:
         self.proof_env = None
         self.state = None # triplet -> (goal, local context, global context)
 
-        ''' greylist '''
-        self.action_count = {}
-        self.greylist = []
+        with open(self.opts.tactics) as f:  self.tactics = json.load(f)
+
+        lcmodel_path = "../_SL/models/best/acc/human/gast_lc.pth"
+        gcmodel_path = "../_SL/models/best/acc/synthetic/gast_gc.pth"
+        self.lcmodel = GastLC(opts)
+        self.gcmodel = GastGC(opts)
+        if opts.device.type == "cpu":
+            lccheck = torch.load(lcmodel_path, map_location="cpu")
+            gccheck = torch.load(gcmodel_path, map_location="cpu")
+        else:
+            lccheck = torch.load(lcmodel_path)
+            gccheck = torch.load(gcmodel_path)
+        self.lcmodel.load_state_dict(lccheck["state_dict"])
+        self.gcmodel.load_state_dict(gccheck["state_dict"])
+        self.lcmodel.to(opts.device)
+        self.gcmodel.to(opts.device)
+        self.lcmodel.eval()
+        self.gcmodel.eval()
         
 
 
     def reset(self, proof_env):
         
         self.error_count = 0
-        self.tot_reward = 0
 
         self.script = []
-        self.action_count = {}
-        self.greylist = []
 
         self.proof_env = proof_env
 
@@ -93,10 +106,6 @@ class Agent:
         local_state = self.proof_env.step(f'{action}.')
         result = local_state['result']
 
-        self.action_count[action] = self.action_count.get(action, 0) + 1
-        if self.action_count[action] > 5:
-            self.greylist.append(action)
-
         if result not in ['SUCCESS', 'MAX_NUM_TACTICS_REACHED', 'MAX_TIME_REACHED']:
             assert result != 'ERROR'
             assert not self.is_loop(prev_state, local_state)
@@ -119,8 +128,8 @@ class Agent:
         while True:
             ''' get Q value and eps-greedy action for current state '''
             q_values = self.Q(self.state)
-            actions = helpers.get_actions(self.opts, self.state)
-            action, q, action_tensor = self.eps_greedy_action(actions, q_values)
+            actions = self.tactics
+            action, q = self.eps_greedy_action(actions, q_values)
 
             if action == "":
                 valid_proof = False
@@ -130,7 +139,6 @@ class Agent:
                 out = {
                     'res': valid_proof,
                     'error_count': self.error_count,
-                    'rewards': self.tot_reward,
                     'replay': (len(self.replay.memory), replay_stats),
                     'script': self.script
                 }
@@ -142,9 +150,6 @@ class Agent:
             ''' make action -> update state and get reward '''
             reward, result = self.make_action(action)
             
-            self.tot_reward += reward
-
-
             ''' calc targets and update replay '''
             if result in ['PROVING']:
                 _q_values = self.target_Q(self.state)
@@ -164,7 +169,6 @@ class Agent:
                 out = {
                     'res': valid_proof,
                     'error_count': self.error_count,
-                    'rewards': self.tot_reward,
                     'replay': (len(self.replay.memory), replay_stats),
                     'script': self.script
                 }
@@ -186,22 +190,19 @@ class Agent:
         else:
             index = random.randint(0, len(actions)-1)
             q = q_values[index]
-            action = actions[index]
-            action_tensor = torch.zeros(self.opts.action_space).to(self.opts.device)
-            action_tensor[index] = 1
-            return action, q, action_tensor
-    
+            tac = actions[index]
+            arg_probs = self.get_arg_probs(self.state[0], self.state[1], self.state[2])
+            action = self.prep_tac(tac, arg_probs)
+            return action, q
 
     def best_action(self, actions, q_values):
-        q = max(q_values)
-        index = torch.argmax(q_values)
-        action = actions[index]
-
         top, indices = torch.topk(input=q_values, k=len(q_values), dim=0, largest=True)
         index_index = 0
         index = indices[index_index]
         q = top[index]
-        action = actions[index]
+        tac = actions[index]
+        arg_probs = self.get_arg_probs(self.state[0], self.state[1], self.state[2])
+        action = self.prep_tac(tac, arg_probs)
         while not self.check_legality(action):
             index_index += 1
             self.error_count += 1
@@ -211,17 +212,11 @@ class Agent:
             index = indices[index_index]
             q = top[index]
             action = actions[index]
-
-        action_tensor = torch.zeros(self.opts.action_space).to(self.opts.device)
-        action_tensor[index] = 1
         
-        return action, q, action_tensor
+        return action, q
 
 
     def check_legality(self, action):
-
-        if action in self.greylist:
-            return False
 
         response = self.proof_env.step(f'{action}.')
         self.proof_env.step(f'Undo.')
@@ -245,3 +240,40 @@ class Agent:
         old_id = helpers.state_id(prev_state)
         new_id = helpers.state_id(new_state)
         return old_id == new_id
+
+
+    def get_arg_probs(self, goal, lc, gc):
+        gcprobs = self.gcmodel.prove(goal, lc, gc)
+        lcprobs = self.lcmodel.prove(goal, lc, gc)
+
+        lc_ids = [c["ident"] for c in lc]
+        gc_ids = [c["qualid"] for c in gc]
+        
+        res = {"lc": {}, "gc": {}}
+        for i in range(10):
+            if i >= len(gc_ids):
+                res["gc"][gcprobs[i]] = ""
+            else:
+                res["gc"][gcprobs[i]] = gc_ids[i]
+
+        for i in range(10):
+            if i >= len(lc_ids):
+                res["lc"][lcprobs[i]] = ""
+            else:
+                res["lc"][lcprobs[i]] = lc_ids[i]
+                   
+        return res
+
+    def prep_tac(self, tactic, arg_probs):
+        gc_arg = arg_probs["gc"][max(arg_probs["gc"].keys())]
+        lc_arg = arg_probs["lc"][max(arg_probs["lc"].keys())]      
+
+        # froced theorem
+        if tactic in ["apply", "rewrite", "unfold", "destruct", "elim", "case", "generalize", "exact"]:
+            tactic = f"{tactic} {gc_arg}"
+
+        # forced assumption
+        elif tactic in ["induction", "exists", "revert", "inversion_clear", "injection", "contradict"]:
+            tactic = f"{tactic} {lc_arg}"
+
+        return tactic

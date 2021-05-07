@@ -1,4 +1,4 @@
-import argparse, os, sys, torch, json, traceback
+import argparse, os, sys, torch, json, traceback, gc
 sys.setrecursionlimit(100000)
 sys.path.append(os.path.abspath('../'))
 
@@ -89,6 +89,7 @@ for f in test_files:
                     correct += 1
                     
                 run_log.info(f'{proof_name} -> {res}, {script}. Seen {total_count} ({round(total_count/13137, 4)} %) of proofs')
+                gc.collect()
     except:
         run_log.info(traceback.format_exc())
         res_log.info(f"Skipped {f}")
