@@ -38,7 +38,6 @@ def sl_train(dataloader):
     global proof_step_index
     count = 0
     for i, example in enumerate(dataloader):
-        proof_step_index += 1
         if i < proof_step_index:
             continue
         if count >= opts.sl_batchsize:
@@ -59,6 +58,7 @@ def sl_train(dataloader):
         
         run_log.info(f"sl on {count} proof.")
         count += 1
+        proof_step_index += 1
 
     res_log.info(f'trained supervised learning on {count} {opts.proof_type} proof steps')
 
