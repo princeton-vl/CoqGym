@@ -43,8 +43,8 @@ def get_files(opts, split, log):
     for i, file_name in enumerate(files):
         log.info(f"{i} -> {i/len(files)}")
         current_file_path = f"{filepath}/{file_name}"
-        if filter_f(opts, current_file_path):
-            res.append(current_file_path)
+        #if filter_f(opts, current_file_path):
+        res.append(current_file_path)
 
     return res
 
