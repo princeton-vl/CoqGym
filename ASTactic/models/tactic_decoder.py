@@ -607,7 +607,7 @@ class TacticDecoder(nn.Module):
                     node.expand(action)
                 new_beam.append(ast)
                 new_frontiers.append(stack)
-                new_log_likelihood.append(log_cond_prob)
+                new_log_likelihood.append(log_likelihood[idx] + log_cond_prob)
             beam = new_beam
             frontiers = new_frontiers
             log_likelihood = new_log_likelihood
