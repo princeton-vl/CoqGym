@@ -65,7 +65,7 @@ def get_core_path(opts):
     if opts.model_type == "rl":
         path = f"rl/{opts.rl_model}/"
     elif opts.model_type == "sl":
-        path = f"sl2/{opts.sl_model}/"
+        path = f"sl/{opts.sl_model}/"
         
     if opts.depth_limit == 5:
         path = f"{path}D5"
