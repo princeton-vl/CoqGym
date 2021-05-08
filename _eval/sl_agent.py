@@ -48,7 +48,7 @@ class SLAgent(Agent):
                 tacmodel_path = "../_SL/models/best/acc/all/trans_tac.pth"
                 lcmodel_path = "../_SL/models/best/acc/all/trans_lc.pth"
                 gcmodel_path = "../_SL/models/best/acc/all/trans_gc.pth"
-            elif "trans_ynthetic" in opts.sl_model:
+            elif "trans_synthetic" in opts.sl_model:
                 tacmodel_path = "../_SL/models/best/acc/synthetic/trans_tac.pth"
                 lcmodel_path = "../_SL/models/best/acc/synthetic/trans_lc.pth"
                 gcmodel_path = "../_SL/models/best/acc/synthetic/trans_gc.pth"
