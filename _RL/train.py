@@ -19,7 +19,7 @@ neutral_memories = 0
 tot_replay_count = 0
 tactics_json = json.load(open('./jsons/tactics.json'))
 
-def get_tactic_target(opts, tactic_app):
+def get_tactic_target(tactic_app):
     global tactics_json
     tactic = get_tactic_true(tactic_app)            
     label = torch.tensor(tactics_json.index(tactic))         
