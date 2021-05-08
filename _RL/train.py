@@ -214,7 +214,7 @@ for f in train_files:
                     if total % 1000 == 0:
                         agent.update_target_Q()
 
-                    run_log.info(f'Seen {total} ({round(total/(57719), 8)} %) of proofs')
+                    run_log.info(f'Seen {total} ({round(total/(43844), 8)} %) of proofs')
             
             acc = round(correct/max(count, 1), 8)
             eps_end = agent.get_eps_tresh()
@@ -237,7 +237,7 @@ for f in train_files:
             res_log.info(f'skipped {f}')
             continue
     
-    if total > 57719:
+    if total > 43844:
         res_log.info("Reached 57,719 proofs, ending it here.")
         break
     
