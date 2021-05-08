@@ -47,20 +47,23 @@ def sl_train(dataloader):
         
         if not example['is_synthetic']:
             continue
-        goal = example['goal']
-        lc = example['local_context']
-        gc = example['env']
-        state = (goal, lc, gc)
-        tac = example['tactic']['text']
-        label = get_tactic_target(tac)
-        pred = agent.Q(state)
-        loss = F.cross_entropy(pred.view(1, len(pred)), label.view(1))
-        sl_optimizer.zero_grad()
-        loss.backward()
-        sl_optimizer.step()
-        
-        run_log.info(f"sl on {count} proof.")
-        count += 1
+            
+        try:
+            goal = example['goal']
+            lc = example['local_context']
+            gc = example['env']
+            state = (goal, lc, gc)
+            tac = example['tactic']['text']
+            label = get_tactic_target(tac)
+            pred = agent.Q(state)
+            loss = F.cross_entropy(pred.view(1, len(pred)), label.view(1))
+            sl_optimizer.zero_grad()
+            loss.backward()
+            sl_optimizer.step()
+            count += 1
+            run_log.info(f"sl on {count} proof.")
+        except:
+            pass
         proof_step_index += 1
 
     res_log.info(f'trained supervised learning on {count} {opts.proof_type} proof steps')
