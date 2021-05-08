@@ -154,13 +154,11 @@ optimizer = torch.optim.RMSprop(agent.Q.parameters(), weight_decay=opts.l2)
 sl_optimizer = torch.optim.Adam(agent.Q.parameters(), lr=opts.lr_sl, weight_decay=opts.l2)
 
 # dataset
-train_files, valid_files, test_files = helpers.files_on_split(opts)
-train_files = train_files + valid_files
+train_files, _, _ = helpers.files_on_split(opts)
 
 if 'im' in opts.model_type: 
     train_steps = helpers.get_files(opts, "train", run_log)
-    valid_steps = helpers.get_files(opts, "valid", run_log)
-    proof_steps = DataLoader(helpers.ProofStepData(train_steps + valid_steps), None, num_workers=0)
+    proof_steps = DataLoader(helpers.ProofStepData(train_steps), None, num_workers=0)
 
 
 
