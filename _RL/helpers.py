@@ -62,7 +62,7 @@ def get_core_path(opts):
          path = f"{path}_reg"
             
     if opts.lr == 1e-5:
-        path = "{path}_lowlr"
+        path = f"{path}_lowlr"
 
     return path
 
