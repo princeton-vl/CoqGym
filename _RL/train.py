@@ -113,7 +113,7 @@ parser.add_argument('--model_type', type=str, default='rl')
 # proof search
 parser.add_argument('--depth_limit', type=int, default=50)
 parser.add_argument('--max_num_tacs', type=int, default=50)
-parser.add_argument('--timeout', type=int, default=5)
+parser.add_argument('--timeout', type=int, default=3)
 parser.add_argument('--action_space', type=int, default=49)
 
 # GNN
