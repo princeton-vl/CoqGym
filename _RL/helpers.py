@@ -60,6 +60,9 @@ def get_core_path(opts):
     
     if opts.dropout > 0:
          path = f"{path}_reg"
+            
+    if opts.lr == 1e-5:
+        path = "{path}_lowlr"
 
     return path
 
