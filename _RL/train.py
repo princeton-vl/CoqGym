@@ -140,7 +140,7 @@ parser.add_argument('--success_reward', type=float, default=1)
 # RL
 parser.add_argument('--epsilon_start', type=float, default=1.0)
 parser.add_argument('--epsilon_end', type=float, default=0.1)
-parser.add_argument('--epsilon_decay', type=float, default=8e4)
+parser.add_argument('--epsilon_decay', type=float, default=1e4)
 parser.add_argument('--discount', type=float, default=0.5)
 
 
