@@ -219,7 +219,8 @@ for f in train_files:
                         replay_train(agent.replay)
                         agent.replay.clear()
                     
-                    if total % 1000 == 0:
+                    if total % 100 == 0:
+                        res_log.info('updated target Q')
                         agent.update_target_Q()
 
                     run_log.info(f'Seen {total} ({round(total/(43844), 8)} %) of proofs')
