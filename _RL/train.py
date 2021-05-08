@@ -44,9 +44,11 @@ def sl_train(dataloader):
             res_log.info(f'trained supervised learning on {count} {opts.proof_type} proof steps')
             return
         
+        if not example['is_synthetic']:
+            continue
         goal = example['goal']
         lc = example['local_context']
-        gc = example['env'][j]
+        gc = example['env']
         state = (goal, lc, gc)
         tac = example['tactic']['text']
         label = get_tactic_target(tac)
