@@ -56,6 +56,8 @@ def sl_train(dataloader):
         sl_optimizer.zero_grad()
         loss.backward()
         sl_optimizer.step()
+        
+        run_log.info(f"sl on {count} proof.")
         count += 1
 
     res_log.info(f'trained supervised learning on {count} {opts.proof_type} proof steps')
