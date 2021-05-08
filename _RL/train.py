@@ -37,33 +37,26 @@ proof_step_index = 0
 def sl_train(dataloader):
     global proof_step_index
     count = 0
-    for i, batch in enumerate(dataloader):
+    for i, example in enumerate(dataloader):
         proof_step_index += 1
         if i < proof_step_index:
             continue
         if count >= opts.sl_batchsize:
             res_log.info(f'trained supervised learning on {count} {opts.proof_type} proof steps')
             return
-
-        for j in range(len(batch['goal'])):
-            
-            goal = batch['goal'][j]
-            lc = batch['local_context'][j]
-            gc = batch['env'][j]
-            state = (goal, lc, gc)
-
-
-            tac = batch['tactic'][j]['text']
-   
-            label = get_tactic_target(tac)
-            pred = agent.Q(state)
-
-            loss = F.cross_entropy(pred.view(1, len(pred)), label.view(1))
-            sl_optimizer.zero_grad()
-            loss.backward()
-            sl_optimizer.step()
         
-            count += 1
+        goal = example['goal']
+        lc = example['local_context']
+        gc = example['env'][j]
+        state = (goal, lc, gc)
+        tac = example['tactic']['text']
+        label = get_tactic_target(tac)
+        pred = agent.Q(state)
+        loss = F.cross_entropy(pred.view(1, len(pred)), label.view(1))
+        sl_optimizer.zero_grad()
+        loss.backward()
+        sl_optimizer.step()
+        count += 1
 
     res_log.info(f'trained supervised learning on {count} {opts.proof_type} proof steps')
 
@@ -167,7 +160,7 @@ train_files = train_files + valid_files
 if 'im' in opts.model_type: 
     train_steps = helpers.get_files(opts, "train", run_log)
     valid_steps = helpers.get_files(opts, "valid", run_log)
-    proof_steps = DataLoader(helpers.ProofStepData(train_steps + valid_steps), None, collate_fn=helpers.merge, num_workers=0)
+    proof_steps = DataLoader(helpers.ProofStepData(train_steps + valid_steps), None, num_workers=0)
 
 
 
