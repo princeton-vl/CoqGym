@@ -219,7 +219,7 @@ for f in train_files:
                         replay_train(agent.replay)
                         agent.replay.clear()
                     
-                    if total % 50 == 0:
+                    if total % 100 == 0:
                         run_log.info('updated target Q')
                         agent.update_target_Q()
 
