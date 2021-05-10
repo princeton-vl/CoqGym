@@ -56,13 +56,10 @@ def get_core_path(opts):
         path = 'im'
 
     if opts.episodes > 1:
-        path = f"{path}_ep{opts.episodes}"
+        path = f"{path}_{opts.episodes}"
     
     if opts.dropout > 0:
          path = f"{path}_reg"
-            
-    if opts.lr == 1e-5:
-        path = f"{path}_lowlr"
 
     return path
 

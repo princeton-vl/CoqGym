@@ -121,13 +121,13 @@ parser.add_argument('--model_type', type=str, default='rl')
 # proof search
 parser.add_argument('--depth_limit', type=int, default=50)
 parser.add_argument('--max_num_tacs', type=int, default=50)
-parser.add_argument('--timeout', type=int, default=3)
+parser.add_argument('--timeout', type=int, default=2)
 parser.add_argument('--action_space', type=int, default=49)
 
 # GNN
 parser.add_argument('--embedding_dim', type=int, default=256)
 parser.add_argument('--sortk', type=int, default=30)
-parser.add_argument('--lr', type=float, default=1e-3)
+parser.add_argument('--lr', type=float, default=1e-4)
 parser.add_argument('--lr_sl', type=float, default=1e-3)
 parser.add_argument('--l2', type=float, default=5e-6)
 parser.add_argument('--dropout', type=float, default=0.7)
@@ -158,7 +158,7 @@ res_log.info(opts)
 # agent
 agent = Agent(opts)
 res_log.info(agent.Q)
-optimizer = torch.optim.RMSprop(agent.Q.parameters(), weight_decay=opts.l2)
+optimizer = torch.optim.Adam(agent.Q.parameters(), lr=opts.lr, weight_decay=opts.l2)
 sl_optimizer = torch.optim.Adam(agent.Q.parameters(), lr=opts.lr_sl, weight_decay=opts.l2)
 
 # dataset
@@ -174,11 +174,9 @@ save_count = 0
 skipped = 0
 total = 0
 last_hundred = []
+savesteps = [10000, 20000, 30000]
 for f in train_files:
     res_log.info('')
-
-    if opts.model_type == 'im':
-        sl_train(proof_steps)
 
     if opts.episodes > 1:
         agent.num_steps = 0
@@ -223,7 +221,19 @@ for f in train_files:
                         run_log.info('updated target Q')
                         agent.update_target_Q()
 
-                    run_log.info(f'Seen {total} ({round(total/(43844), 8)} %) of proofs')
+                    if total % 1000 == 0:
+                        if opts.model_type == 'im':
+                            sl_train(proof_steps)
+                    
+                    if total in savesteps:
+                        if total == 10000:
+                            torch.save({'state_dict': agent.Q.state_dict()}, f"{opts.savepath}_1q.pth")
+                        elif total == 20000:
+                            torch.save({'state_dict': agent.Q.state_dict()}, f"{opts.savepath}_2q.pth")
+                        elif total == 30000:
+                            torch.save({'state_dict': agent.Q.state_dict()}, f"{opts.savepath}_3q.pth")
+
+                    run_log.info(f'Seen {total} ({round(total/(40000), 8)} %) of proofs')
             
             acc = round(correct/max(count, 1), 8)
             eps_end = agent.get_eps_tresh()
@@ -246,11 +256,11 @@ for f in train_files:
             res_log.info(f'skipped {f}')
             continue
     
-    if total > 43844:
-        res_log.info("Reached 57,719 proofs, ending it here.")
+    if total > 40000:
+        res_log.info("Reached 40,000 proofs, ending it here.")
         break
     
 
-torch.save({'state_dict': agent.Q.state_dict()}, f"{opts.savepath}_q.pth")
+torch.save({'state_dict': agent.Q.state_dict()}, f"{opts.savepath}_4q.pth")
 
 
