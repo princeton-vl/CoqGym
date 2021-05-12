@@ -19,12 +19,10 @@ class SLAgent(Agent):
             self.tacmodel = GastTac(opts)
             self.lcmodel = GastLC(opts)
             self.gcmodel = GastGC(opts)
+            tacmodel_path = "../_SL/models/best/acc/human/gast_tac.pth"
             lcmodel_path = "../_SL/models/best/acc/human/gast_lc.pth"
             gcmodel_path = "../_SL/models/best/acc/synthetic/gast_gc.pth"
-            if opts.rl_model == "5":
-                tacmodel_path = "../_RL/models/rl_5_2q.pth"
-            elif opts.rl_model == "5_reg":
-                tacmodel_path = "../_RL/models/rl_5_reg_2q.pth"
+            
         else:
             if "gast" in opts.sl_model:
                 self.tacmodel = GastTac(opts)

@@ -111,26 +111,26 @@ parser.add_argument('--generic_args', type=str, default='./jsons/generic_args.js
 parser.add_argument('--nonterminals', type=str, default='./jsons/nonterminals.json')
 
 # run
-parser.add_argument('--replay_batchsize', type=int, default=32)
-parser.add_argument('--sl_batchsize', type=int, default=256)
-parser.add_argument('--episodes', type=int, default=1)
+parser.add_argument('--replay_batchsize', type=int, default=256)
+parser.add_argument('--sl_batchsize', type=int, default=2048)
 
 parser.add_argument('--proof_type', type=str, default='synthetic')
-parser.add_argument('--model_type', type=str, default='rl')
+parser.add_argument('--model_type', type=str, default="wide")
+parser.add_argument('--episodes', type=int, default=1)
 
 # proof search
 parser.add_argument('--depth_limit', type=int, default=50)
 parser.add_argument('--max_num_tacs', type=int, default=50)
-parser.add_argument('--timeout', type=int, default=2)
+parser.add_argument('--timeout', type=int, default=3)
 parser.add_argument('--action_space', type=int, default=49)
 
 # GNN
 parser.add_argument('--embedding_dim', type=int, default=256)
 parser.add_argument('--sortk', type=int, default=30)
-parser.add_argument('--lr', type=float, default=1e-4)
+parser.add_argument('--lr', type=float, default=1e-5)
 parser.add_argument('--lr_sl', type=float, default=1e-3)
-parser.add_argument('--l2', type=float, default=5e-6)
-parser.add_argument('--dropout', type=float, default=0.7)
+parser.add_argument('--l2', type=float, default=1e-6)
+parser.add_argument('--dropout', type=float, default=0.1)
 
 # rewards
 parser.add_argument('--error_punishment', type=float, default=-1.0)
@@ -139,16 +139,22 @@ parser.add_argument('--success_reward', type=float, default=1)
 
 # RL
 parser.add_argument('--epsilon_start', type=float, default=1.0)
-parser.add_argument('--epsilon_end', type=float, default=0.1)
-parser.add_argument('--epsilon_decay', type=float, default=1e4)
+parser.add_argument('--epsilon_end', type=float, default=0.2)
+parser.add_argument('--epsilon_decay', type=float, default=0.1)
 parser.add_argument('--discount', type=float, default=0.5)
 
 
 opts = parser.parse_args()
 opts.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 opts.savepath = f"./models/{helpers.get_core_path(opts)}"
-if opts.episodes > 1:
-    opts.epsilon_decay = 2e1
+
+if opts.model_type == "deep":
+    opts.episodes = 10
+    opts.epsilon_decay = 3e1
+else:
+    opts.episodes = 1
+    opts.epsilon_decay = 3e3
+
 
 # loggers
 run_log, res_log = helpers.setup_loggers(opts)
@@ -164,21 +170,17 @@ sl_optimizer = torch.optim.Adam(agent.Q.parameters(), lr=opts.lr_sl, weight_deca
 # dataset
 train_files, _, _ = helpers.files_on_split(opts)
 
-if 'im' in opts.model_type: 
-    train_steps = helpers.get_files(opts, "train", run_log)
-    proof_steps = DataLoader(helpers.ProofStepData(train_steps), None, num_workers=0)
-
-
+train_steps = helpers.get_files(opts, "train", run_log)
+proof_steps = DataLoader(helpers.ProofStepData(train_steps), None, num_workers=0)
 
 save_count = 0
 skipped = 0
 total = 0
 last_hundred = []
-savesteps = [10000, 20000, 30000]
 for f in train_files:
     res_log.info('')
 
-    if opts.episodes > 1:
+    if opts.episodes == 10:
         agent.num_steps = 0
 
     for n in range(opts.episodes):
@@ -191,6 +193,15 @@ for f in train_files:
         try:
             with FileEnv(f, max_num_tactics=opts.max_num_tacs, timeout=opts.timeout) as file_env:
                 for proof_env in file_env:
+                    if total % 200 == 0:
+                        run_log.info('updated target Q')
+                        agent.update_target_Q()
+
+                    if total % 1000 == 0:
+                        torch.save({'state_dict': agent.Q.state_dict()}, f"{opts.savepath}_{total}q.pth")
+                        sl_train(proof_steps)
+                        agent.update_target_Q()
+
                     name = proof_env.proof['name'] 
 
                     res = agent.train(proof_env)
@@ -216,24 +227,8 @@ for f in train_files:
                     if len(agent.replay) >= opts.replay_batchsize:
                         replay_train(agent.replay)
                         agent.replay.clear()
-                    
-                    if total % 100 == 0:
-                        run_log.info('updated target Q')
-                        agent.update_target_Q()
 
-                    if total % 1000 == 0:
-                        if opts.model_type == 'im':
-                            sl_train(proof_steps)
-                    
-                    if total in savesteps:
-                        if total == 10000:
-                            torch.save({'state_dict': agent.Q.state_dict()}, f"{opts.savepath}_1q.pth")
-                        elif total == 20000:
-                            torch.save({'state_dict': agent.Q.state_dict()}, f"{opts.savepath}_2q.pth")
-                        elif total == 30000:
-                            torch.save({'state_dict': agent.Q.state_dict()}, f"{opts.savepath}_3q.pth")
-
-                    run_log.info(f'Seen {total} ({round(total/(40000), 8)} %) of proofs')
+                    run_log.info(f'Seen {total} ({round(total/(43844), 6)}) of train proofs')
             
             acc = round(correct/max(count, 1), 8)
             eps_end = agent.get_eps_tresh()
@@ -252,15 +247,7 @@ for f in train_files:
             exit()
         except Exception as e:
             skipped += 1
-            traceback.print_exc()
+            run_log.info(traceback.format_exc())
             res_log.info(f'skipped {f}')
             continue
-    
-    if total > 40000:
-        res_log.info("Reached 40,000 proofs, ending it here.")
-        break
-    
-
-torch.save({'state_dict': agent.Q.state_dict()}, f"{opts.savepath}_4q.pth")
-
 

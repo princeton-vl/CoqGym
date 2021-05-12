@@ -50,16 +50,10 @@ def get_files(opts, split, log):
 
 
 def get_core_path(opts):
-    if opts.model_type == 'rl':
-        path = "rl"
-    elif opts.model_type == 'im':
-        path = 'im'
-
-    if opts.episodes > 1:
-        path = f"{path}_{opts.episodes}"
-    
-    if opts.dropout > 0:
-         path = f"{path}_reg"
+    if opts.model_type == 'wide':
+        path = "wide"
+    else:
+        path = "deep"
 
     return path
 

@@ -19,8 +19,11 @@ class ReplayMemory(object):
         self.memory = []
         
     def push(self, pred, target, reward):
-        self.memory.append((pred, target, reward))
-
+        if reward == 1.0:
+            self.memory.append((pred, target, reward))
+        elif len(self.memory) < 256:
+            self.memory.append((pred, target, reward))
+        
     def sample(self, batch_size):
         res = []
         for example in self.memory:

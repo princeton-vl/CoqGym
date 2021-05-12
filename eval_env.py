@@ -161,7 +161,7 @@ class FileEnv:
         self.serapi = self.initialize_serapi()
 
     def initialize_serapi(self):
-        serapi = SerAPI(timeout=1200) # 10
+        serapi = SerAPI(timeout=10) # 1200
         if self.with_hammer is not None:
             atp_limit = 29 * self.hammer_timeout // 60
             reconstr_limit = 28 * self.hammer_timeout // 60
@@ -198,7 +198,6 @@ class FileEnv:
 
     def __next__(self):
         if self.next_proof_idx >= len(self.proofs):  # no more theorem
-            self.serapi.shutdown()
             raise StopIteration
 
         next_proof = self.proofs[self.next_proof_idx]
