@@ -161,7 +161,7 @@ class FileEnv:
         self.serapi = self.initialize_serapi()
 
     def initialize_serapi(self):
-        serapi = SerAPI(timeout=10) # 1200
+        serapi = SerAPI(timeout=1200) # 10
         if self.with_hammer is not None:
             atp_limit = 29 * self.hammer_timeout // 60
             reconstr_limit = 28 * self.hammer_timeout // 60

@@ -96,7 +96,16 @@ def get_core_path(opts):
 
     if opts.num_tac_candidates == 49:
         path = f"{path}T49"
-        
+
+    if opts.split2 == 1:
+        path = f"{path}1"
+    elif opts.split2 == 2:
+        path = f"{path}2"
+    elif opts.split2 == 3:
+        path = f"{path}3"
+    elif opts.split2 == 4:
+        path = f"{path}4"
+
     return path
 
 def setup_loggers(opts):

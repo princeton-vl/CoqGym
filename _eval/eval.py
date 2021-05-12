@@ -23,6 +23,8 @@ parser.add_argument("--timeout", type=int, default=600)
 
 parser.add_argument("--dropout", type=str, default=0.0)
 
+parser.add_argument("--split2", type=int, default=1)
+
 # gast
 parser.add_argument("--embedding_dim", type=int, default=256)
 parser.add_argument("--sortk", type=int, default=30)
@@ -42,13 +44,13 @@ opts.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 run_log, res_log = eval_helpers.setup_loggers(opts)
 res_log.info(opts)
 
-if opts.model_type == "sl":
-    agent = SLAgent(opts, res_log)
-elif opts.model_type == "rl":
-    agent = RLAgent(opts, res_log)
+agent = SLAgent(opts, res_log)
 
 
 _, _, test_files = eval_helpers.files_on_split(opts)
+if opts.split2 == 1:
+    test_files = test_files[0:125]
+
 
 total_count = 0
 file_count = 0
