@@ -191,7 +191,7 @@ for f in train_files:
         eps_start = agent.get_eps_tresh()
 
         try:
-            with FileEnv(f, max_num_tactics=opts.max_num_tacs, timeout=opts.timeout) as file_env:
+            with FileEnv(f, max_num_tactics=opts.max_num_tacs, timeout=opts.timeout, testmode=False) as file_env:
                 for proof_env in file_env:
                     if total % 200 == 0:
                         run_log.info('updated target Q')

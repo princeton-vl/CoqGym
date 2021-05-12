@@ -23,7 +23,7 @@ parser.add_argument("--timeout", type=int, default=600)
 
 parser.add_argument("--dropout", type=str, default=0.0)
 
-parser.add_argument("--split2", type=int, default=1)
+parser.add_argument("--split2", type=int, default=0)
 
 # gast
 parser.add_argument("--embedding_dim", type=int, default=256)
@@ -48,8 +48,17 @@ agent = SLAgent(opts, res_log)
 
 
 _, _, test_files = eval_helpers.files_on_split(opts)
+part1 = len(test_files)//4
+part2 = len(test_files)//2
+part3 = len(test_files)//4 + len(test_files)//2
 if opts.split2 == 1:
-    test_files = test_files[0:125]
+    test_files = test_files[0:part1]
+elif opts.split2 == 2:
+    test_files = test_files[part1:part2]
+elif opts.split2 == 3:
+    test_files = test_files[part2:part3]
+elif opts.split2 == 4:
+    test_files = test_files[part3:]
 
 
 total_count = 0

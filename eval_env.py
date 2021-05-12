@@ -144,7 +144,7 @@ class FileEnv:
     """
 
     def __init__(
-        self, filename, max_num_tactics, timeout, with_hammer=None, hammer_timeout=None
+        self, filename, max_num_tactics, timeout, with_hammer=None, hammer_timeout=None, testmode=True
     ):
         """
         filename - the json file in CoqGym
@@ -159,9 +159,13 @@ class FileEnv:
         self.with_hammer = with_hammer
         self.hammer_timeout = hammer_timeout
         self.serapi = self.initialize_serapi()
+        self.testmode = testmode
 
     def initialize_serapi(self):
-        serapi = SerAPI(timeout=10) # 1200
+        if self.testmode:
+            serapi = SerAPI(timeout=1200)
+        else:
+            serapi = SerAPI(timeout=10)
         if self.with_hammer is not None:
             atp_limit = 29 * self.hammer_timeout // 60
             reconstr_limit = 28 * self.hammer_timeout // 60
