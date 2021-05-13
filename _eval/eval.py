@@ -48,17 +48,16 @@ agent = SLAgent(opts, res_log)
 
 
 _, _, test_files = eval_helpers.files_on_split(opts)
-part1 = len(test_files)//4
-part2 = len(test_files)//2
-part3 = len(test_files)//4 + len(test_files)//2
 if opts.split2 == 1:
-    test_files = test_files[0:part1]
+    test_files = test_files[0:125]
 elif opts.split2 == 2:
-    test_files = test_files[part1:part2]
+    test_files = test_files[125:300]
 elif opts.split2 == 3:
-    test_files = test_files[part2:part3]
+    test_files = test_files[300:488]
 elif opts.split2 == 4:
-    test_files = test_files[part3:]
+    test_files = test_files[488:]
+
+
 
 
 total_count = 0

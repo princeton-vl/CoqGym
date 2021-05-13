@@ -158,8 +158,9 @@ class FileEnv:
         self.timeout = timeout
         self.with_hammer = with_hammer
         self.hammer_timeout = hammer_timeout
-        self.serapi = self.initialize_serapi()
         self.testmode = testmode
+        self.serapi = self.initialize_serapi()
+        
 
     def initialize_serapi(self):
         if self.testmode:
