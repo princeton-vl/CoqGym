@@ -129,8 +129,8 @@ parser.add_argument('--embedding_dim', type=int, default=256)
 parser.add_argument('--sortk', type=int, default=30)
 parser.add_argument('--lr', type=float, default=1e-5)
 parser.add_argument('--lr_sl', type=float, default=1e-3)
-parser.add_argument('--l2', type=float, default=1e-6)
-parser.add_argument('--dropout', type=float, default=0.1)
+parser.add_argument('--l2', type=float, default=1e-5)
+parser.add_argument('--dropout', type=float, default=0.5)
 
 # rewards
 parser.add_argument('--error_punishment', type=float, default=-1.0)
