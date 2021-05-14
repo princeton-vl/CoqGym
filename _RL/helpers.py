@@ -54,6 +54,9 @@ def get_core_path(opts):
         path = "wide"
     else:
         path = "deep"
+        
+    if opts.dropout >= 0.5:
+        path = f"{path}_reg"
 
     return path
 
