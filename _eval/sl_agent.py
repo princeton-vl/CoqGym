@@ -9,13 +9,22 @@ from _SL.nn_model.trans_tac import TransTac
 from _SL.nn_model.trans_lc import TransLC
 from _SL.nn_model.trans_gc import TransGC
 
+from random_guesser import RandomTac
+from random_guesser import RandomLC
+from random_guesser import RandomGC
+
 
 class SLAgent(Agent):
 
     def __init__(self, opts, log):
         super().__init__(opts)
 
-        if opts.model_type == "rl":
+        if opts.model_type == "random_guesser":
+            self.tacmodel = RandomTac()
+            self.lcmodel = RandomLC()
+            self.gcmodel = RandomGC()
+            return
+        elif opts.model_type == "rl":
             self.tacmodel = GastTac(opts)
             self.lcmodel = GastLC(opts)
             self.gcmodel = GastGC(opts)
