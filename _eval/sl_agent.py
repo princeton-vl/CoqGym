@@ -19,7 +19,15 @@ class SLAgent(Agent):
             self.tacmodel = GastTac(opts)
             self.lcmodel = GastLC(opts)
             self.gcmodel = GastGC(opts)
-            tacmodel_path = "../_SL/models/best/acc/human/gast_tac.pth"
+            if opts.rl_model == "deep":
+                tacmodel_path = "../_RL/models/deep_20000q.pth"
+            elif opts.rl_model == "wide":
+                tacmodel_path = "../_RL/models/wide_20000q.pth"
+            elif opts.rl_model == "deep_reg":
+                tacmodel_path = "../_RL/models/deep_reg_20000q.pth"
+            elif opts.rl_model == "wide_reg":
+                tacmodel_path = "../_RL/models/wide_reg_20000q.pth"
+                
             lcmodel_path = "../_SL/models/best/acc/human/gast_lc.pth"
             gcmodel_path = "../_SL/models/best/acc/synthetic/gast_gc.pth"
             
