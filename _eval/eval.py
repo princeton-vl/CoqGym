@@ -86,7 +86,11 @@ for f in test_files:
     current_count = 0
     current_correct = 0
     try:
-        with FileEnv(f, max_num_tactics=opts.max_num_tacs, timeout=opts.timeout) as file_env:
+        if opts.model_type == "random_guesser":
+            testmode=False
+        else:
+            restmode=True
+        with FileEnv(f, max_num_tactics=opts.max_num_tacs, timeout=opts.timeout, testmode=testmode) as file_env:
             for proof_env in file_env:
                 proof_name = proof_env.proof["name"]
                 res, script = agent.prove(proof_env)
