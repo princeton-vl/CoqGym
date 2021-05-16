@@ -112,7 +112,7 @@ parser.add_argument('--nonterminals', type=str, default='./jsons/nonterminals.js
 
 # run
 parser.add_argument('--replay_batchsize', type=int, default=256)
-parser.add_argument('--sl_batchsize', type=int, default=2048)
+parser.add_argument('--sl_batchsize', type=int, default=4000)
 
 parser.add_argument('--proof_type', type=str, default='synthetic')
 parser.add_argument('--model_type', type=str, default="wide")
