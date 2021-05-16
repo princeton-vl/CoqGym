@@ -51,9 +51,9 @@ def get_files(opts, split, log):
 
 def get_core_path(opts):
     if opts.model_type == 'wide':
-        path = "wide"
+        path = "wide2"
     else:
-        path = "deep"
+        path = "deep2"
         
     if opts.dropout >= 0.5:
         path = f"{path}_reg"
