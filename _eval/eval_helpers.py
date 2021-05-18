@@ -64,9 +64,9 @@ def get_core_path(opts):
     
     if opts.model_type == "rl":
         if "deep" in opts.rl_model:
-            path = f"rl/{opts.rl_model}/10k"
+            path = f"rl/{opts.rl_model}/20k"
         else:
-            path = f"rl/{opts.rl_model}/10k"
+            path = f"rl/{opts.rl_model}/20k"
         
     elif opts.model_type == "sl":
         path = f"sl/{opts.sl_model}/"
