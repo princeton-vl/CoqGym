@@ -29,22 +29,22 @@ class SLAgent(Agent):
             self.lcmodel = GastLC(opts)
             self.gcmodel = GastGC(opts)
             if opts.rl_model == "deep":
-                tacmodel_path = "../_RL/models/deep_30000q.pth"
+                tacmodel_path = "../_RL/models/deep_10000q.pth"
             elif opts.rl_model == "wide":
-                tacmodel_path = "../_RL/models/wide_20000q.pth"
+                tacmodel_path = "../_RL/models/wide_10000q.pth"
             elif opts.rl_model == "deep_reg":
-                tacmodel_path = "../_RL/models/deep_reg_30000q.pth"
+                tacmodel_path = "../_RL/models/deep_reg_10000q.pth"
             elif opts.rl_model == "wide_reg":
-                tacmodel_path = "../_RL/models/wide_reg_20000q.pth"
+                tacmodel_path = "../_RL/models/wide_reg_10000q.pth"
                 
             elif opts.rl_model == "deep2":
-                tacmodel_path = "../_RL/models/deep_20000q.pth"
+                tacmodel_path = "../_RL/models/deep2_10000q.pth"
             elif opts.rl_model == "wide2":
-                tacmodel_path = "../_RL/models/wide_20000q.pth"
+                tacmodel_path = "../_RL/models/wide2_10000q.pth"
             elif opts.rl_model == "deep2_reg":
-                tacmodel_path = "../_RL/models/deep_reg_20000q.pth"
+                tacmodel_path = "../_RL/models/deep2_reg_10000q.pth"
             elif opts.rl_model == "wide2_reg":
-                tacmodel_path = "../_RL/models/wide_reg_20000q.pth"
+                tacmodel_path = "../_RL/models/wide2_reg_10000q.pth"
                 
             lcmodel_path = "../_SL/models/best/acc/human/gast_lc.pth"
             gcmodel_path = "../_SL/models/best/acc/synthetic/gast_gc.pth"
