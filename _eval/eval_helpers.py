@@ -63,7 +63,11 @@ def state_id(state):
 def get_core_path(opts):
     
     if opts.model_type == "rl":
-        path = f"rl/{opts.rl_model}/"
+        if "deep" in opts.rl_model:
+            path = f"rl/{opts.rl_model}/30k"
+        else:
+            path = f"rl/{opts.rl_model}/"
+        
     elif opts.model_type == "sl":
         path = f"sl/{opts.sl_model}/"
     elif opts.model_type == "random_guesser":
