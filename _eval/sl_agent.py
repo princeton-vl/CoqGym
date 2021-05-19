@@ -16,7 +16,7 @@ from random_guesser import RandomGC
 
 class SLAgent(Agent):
 
-    def __init__(self, opts, log):
+    def __init__(self, opts):
         super().__init__(opts)
 
         if opts.model_type == "random_guesser":
@@ -29,11 +29,11 @@ class SLAgent(Agent):
             self.lcmodel = GastLC(opts)
             self.gcmodel = GastGC(opts)
             if opts.rl_model == "deep":
-                tacmodel_path = "../_RL/models/deep_20000q.pth"
+                tacmodel_path = "../_RL/models/deep_1000q.pth"
             elif opts.rl_model == "wide":
                 tacmodel_path = "../_RL/models/wide_20000q.pth"
             elif opts.rl_model == "deep_reg":
-                tacmodel_path = "../_RL/models/deep_reg_20000q.pth"
+                tacmodel_path = "../_RL/models/deep_reg_38000q.pth"
             elif opts.rl_model == "wide_reg":
                 tacmodel_path = "../_RL/models/wide_reg_20000q.pth"
                 
@@ -42,7 +42,7 @@ class SLAgent(Agent):
             elif opts.rl_model == "wide2":
                 tacmodel_path = "../_RL/models/wide2_10000q.pth"
             elif opts.rl_model == "deep2_reg":
-                tacmodel_path = "../_RL/models/deep2_reg_10000q.pth"
+                tacmodel_path = "../_RL/models/deep2_reg_20000q.pth"
             elif opts.rl_model == "wide2_reg":
                 tacmodel_path = "../_RL/models/wide2_reg_10000q.pth"
                 
@@ -121,10 +121,6 @@ class SLAgent(Agent):
                 lcmodel_path = "../_SL/models/best/acc/human/gast_lc.pth"
                 gcmodel_path = "../_SL/models/best/acc/synthetic/gast_gc.pth"
 
-    
-        log.info(self.tacmodel)
-        log.info(self.lcmodel)
-        log.info(self.gcmodel)
 
         if opts.device.type == "cpu":
             taccheck = torch.load(tacmodel_path, map_location="cpu")
@@ -139,8 +135,6 @@ class SLAgent(Agent):
         self.lcmodel.load_state_dict(lccheck["state_dict"])
         self.gcmodel.load_state_dict(gccheck["state_dict"])
         
-        log.info(f"\nloading from\n{tacmodel_path}\n{lcmodel_path}\n{gcmodel_path}")
-
         self.tacmodel.to(opts.device)
         self.lcmodel.to(opts.device)
         self.gcmodel.to(opts.device)
