@@ -50,19 +50,13 @@ def get_files(opts, split, log):
 
 
 def get_core_path(opts):
-    if opts.model_type == 'wide':
-        path = "wide2"
-    else:
-        path = "deep2"
-        
-    if opts.dropout >= 0.5:
-        path = f"{path}_reg"
+    path = "last/"
 
     return path
 
 def setup_loggers(opts):
     core = get_core_path(opts)
-    run_path, res_path = f"./logs/{core}_run.log", f"./logs/{core}_res.log"
+    run_path, res_path = f"./logs/{core}run.log", f"./logs/{core}res.log"
 
     try:
         os.remove(run_path)

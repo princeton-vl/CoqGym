@@ -17,56 +17,6 @@ pos_memories = 0
 neg_memories = 0
 neutral_memories = 0
 tot_replay_count = 0
-tactics_json = json.load(open('./jsons/tactics.json'))
-
-def get_tactic_target(tactic_app):
-    global tactics_json
-    tactic = get_tactic_true(tactic_app)            
-    label = torch.tensor(tactics_json.index(tactic))         
-    return label
-
-
-def get_tactic_true(tactic_application):
-    if tactic_application.startswith("simple induction"):
-        return "simple induction"
-    else:
-        all_actions = tactic_application.split(" ")
-        return all_actions[0]
-
-
-proof_step_index = 0
-def sl_train(dataloader):
-    global proof_step_index
-    count = 0
-    for i, example in enumerate(dataloader):
-        if i < proof_step_index:
-            continue
-        if count >= opts.sl_batchsize:
-            res_log.info(f'trained supervised learning on {count} {opts.proof_type} proof steps')
-            return
-        
-        if not example['is_synthetic']:
-            continue
-            
-        try:
-            goal = example['goal']
-            lc = example['local_context']
-            gc = example['env']
-            state = (goal, lc, gc)
-            tac = example['tactic']['text']
-            label = get_tactic_target(tac)
-            pred = agent.Q(state)
-            loss = F.cross_entropy(pred.view(1, len(pred)), label.view(1))
-            sl_optimizer.zero_grad()
-            loss.backward()
-            sl_optimizer.step()
-            count += 1
-            run_log.info(f"sl on {count} proof.")
-        except:
-            pass
-        proof_step_index += 1
-
-    res_log.info(f'trained supervised learning on {count} {opts.proof_type} proof steps')
 
 def replay_train(replay_buffer):
     global pos_memories
@@ -111,7 +61,7 @@ parser.add_argument('--generic_args', type=str, default='./jsons/generic_args.js
 parser.add_argument('--nonterminals', type=str, default='./jsons/nonterminals.json')
 
 # run
-parser.add_argument('--replay_batchsize', type=int, default=256)
+parser.add_argument('--replay_batchsize', type=int, default=32)
 parser.add_argument('--sl_batchsize', type=int, default=4000)
 
 parser.add_argument('--proof_type', type=str, default='synthetic')
@@ -138,7 +88,7 @@ parser.add_argument('--neutral_reward', type=float, default=0)
 parser.add_argument('--success_reward', type=float, default=1)
 
 # RL
-parser.add_argument('--epsilon_start', type=float, default=1.0)
+parser.add_argument('--epsilon_start', type=float, default=0.2)
 parser.add_argument('--epsilon_end', type=float, default=0.2)
 parser.add_argument('--epsilon_decay', type=float, default=0.1)
 parser.add_argument('--discount', type=float, default=0.5)
@@ -148,12 +98,9 @@ opts = parser.parse_args()
 opts.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 opts.savepath = f"./models/{helpers.get_core_path(opts)}"
 
-if opts.model_type == "deep":
-    opts.episodes = 10
-    opts.epsilon_decay = 3e1
-else:
-    opts.episodes = 1
-    opts.epsilon_decay = 3e3
+
+opts.episodes = 1
+opts.epsilon_decay = 3e2
 
 
 # loggers
@@ -180,9 +127,6 @@ last_hundred = []
 for f in train_files:
     res_log.info('')
 
-    if opts.episodes == 10:
-        agent.num_steps = 0
-
     for n in range(opts.episodes):
         
         res_log.info(f'Episode: {n}')
@@ -193,13 +137,12 @@ for f in train_files:
         try:
             with FileEnv(f, max_num_tactics=opts.max_num_tacs, timeout=opts.timeout, testmode=False) as file_env:
                 for proof_env in file_env:
-                    if total % 200 == 0:
+                    if total % 100 == 0:
                         run_log.info('updated target Q')
                         agent.update_target_Q()
 
                     if total % 100 == 0:
-                        torch.save({'state_dict': agent.Q.state_dict()}, f"{opts.savepath}_{total}q.pth")
-                        sl_train(proof_steps)
+                        torch.save({'state_dict': agent.Q.state_dict()}, f"models/last/{total}q.pth")
                         agent.update_target_Q()
 
                     name = proof_env.proof['name'] 
@@ -211,18 +154,7 @@ for f in train_files:
                     agent.num_steps += 1
                     garbage.collect()
                     if res['res']:
-                        if len(last_hundred) < 1000:
-                            last_hundred.append(1)
-                        else:
-                            last_hundred = last_hundred[1:]
-                            last_hundred.append(1)
                         correct += 1
-                    else:
-                        if len(last_hundred) < 1000:
-                            last_hundred.append(0)
-                        else:
-                            last_hundred = last_hundred[1:]
-                            last_hundred.append(0)
 
                     if len(agent.replay) >= opts.replay_batchsize:
                         replay_train(agent.replay)
@@ -238,10 +170,7 @@ for f in train_files:
             neg_memories = 0
             neutral_memories = 0
             tot_replay_count = 0
-            if len(last_hundred) == 1000:
-                res_log.info(f'eps: {eps_start} -> {eps_end}, trail: {sum(last_hundred)}')
-            else:
-                res_log.info(f'eps: {eps_start} -> {eps_end}, trail: N/A')
+            res_log.info(f'eps: {eps_start} -> {eps_end}, trail: N/A')
             
         except KeyboardInterrupt:
             exit()

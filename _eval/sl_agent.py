@@ -36,6 +36,8 @@ class SLAgent(Agent):
                 tacmodel_path = "../_RL/models/deep_reg_38000q.pth"
             elif opts.rl_model == "wide_reg":
                 tacmodel_path = "../_RL/models/wide_reg_20000q.pth"
+            elif opts.rl_model == "last":
+                tacmodel_path = "../_RL/models/last/3000q.pth"
                 
             elif opts.rl_model == "deep2":
                 tacmodel_path = "../_RL/models/deep2_10000q.pth"

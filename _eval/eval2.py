@@ -50,7 +50,7 @@ def go(f):
     correct = 0
     skipped = 0
     try:
-        with FileEnv(f, max_num_tactics=300, timeout=600) as file_env:
+        with FileEnv(f, max_num_tactics=300, timeout=120) as file_env:
             for proof_env in file_env:
                 proof_name = proof_env.proof["name"]
                 res, script = agent.prove(proof_env)

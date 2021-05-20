@@ -53,8 +53,17 @@ class Agent:
         self.replay = ReplayMemory(self.opts)
 
         ''' deep Q networks '''
+        tacmodel_path = "../_SL/models/best/acc/synthetic/gast_tac.pth"
+        if opts.device.type == "cpu":
+            taccheck = torch.load(tacmodel_path, map_location="cpu")
+        else:
+            taccheck = torch.load(tacmodel_path)
         self.Q = Q(self.opts)
         self.target_Q = Q(self.opts) # added for more robust/stable training
+        self.Q.load_state_dict(taccheck["state_dict"])
+        self.target_Q.load_state_dict(taccheck["state_dict"])
+        self.Q.to(opts.device)
+        self.target_Q.to(opts.device)
 
         ''' environment and state '''
         self.proof_env = None
