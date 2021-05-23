@@ -4,6 +4,9 @@ from torch.utils.data import Dataset
 from gallina import traverse_postorder
 
 def get_core_path(opts):
+
+    path = f"/conf/{opts.model}"
+    """
     path = ""
     if 'gast' in opts.model_type:
         path = f"{path}/gast"
@@ -26,6 +29,7 @@ def get_core_path(opts):
         path = f"{path}_reg"
 
     path = f"{path}_pre"
+    """
 
     return path
 
