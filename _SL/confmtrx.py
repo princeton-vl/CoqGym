@@ -114,6 +114,7 @@ num_correct = 0
 for i, batch in enumerate(valid):
     if not goodtogo(opts, batch):
         continue
+
     preds, true, loss = model(batch)
 
     gc.collect()
