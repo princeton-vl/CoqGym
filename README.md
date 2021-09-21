@@ -13,7 +13,7 @@ International Conference on Machine Learning (ICML) 2019
   title={Learning to Prove Theorems via Interacting with Proof Assistants},
   author={Yang, Kaiyu and Deng, Jia},
   booktitle={International Conference on Machine Learning (ICML)},
-  year={2019},
+  year={2019}
 }
 ```
 
