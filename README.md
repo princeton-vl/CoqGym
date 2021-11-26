@@ -113,7 +113,7 @@ Now you are ready to interact with CoqGym! Run `python eval_env.py` to check if 
 
 ## 2. Using CoqGym in a Container
 
-As a less painful alternative to [installing CoqGym](#1-installing-coqgym) from scratch, we provide a pre-built Singularity container.
+As a less painful alternative to [installing CoqGym](#1-installing-coqgym) from scratch, we provide a pre-built Singularity container (There is also a 3rd-party [docker image](https://hub.docker.com/r/innochainver/coqgym) that may be useful).
 Feel free to skip these steps if you have finished installing CoqGym.
 Currently we do not support GPUs for the container, therefore you have to complete the installation steps manually if you want to train models on CoqGym using GPUs.
 
