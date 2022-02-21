@@ -190,7 +190,7 @@ Consult the [glossary](#33-glossary) for the terminology.
 ```
 
 
-The format for a proof is as follows, taking the [`get_set_same`](https://github.com/princeton-vl/CoqGym/blob/9267aeb9acd82b7735d0228c4f366f7b843a852b/coq_projects/StructTact/Assoc.v#L47) in `coq_projects/StructTact/Assoc.v` as an example.
+The format for a proof is as follows, taking the [`get_set_same`](https://github.com/princeton-vl/CoqGym/tree/master/coq_projects/StructTact/Assoc.v#L47) in `coq_projects/StructTact/Assoc.v` as an example.
 
 
 ```
