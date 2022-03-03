@@ -120,7 +120,7 @@ Currently we do not support GPUs for the container, therefore you have to comple
 
 ### 2.1 Dependencies
 
-* [Singularity](https://singularity.lbl.gov/)
+* [Singularity (a.k.a. Apptainer)](https://apptainer.org/)
 
 
 ### 2.2 Downloading the Pre-built Container Image
@@ -145,7 +145,7 @@ We provide a [Singularity recipe](./Singularity) from which you can build the co
 1. Run `sudo singularity build coq_gym.simg Singularity` to build the container image `coq_gym.simg`
 
 
-*Caveat*: If you run out of disk space when building the container, it may because your `/tmp` directory is not large enough. See https://singularity.lbl.gov/build-environment#temporary-folders for a workaround.
+*Caveat*: If you run out of disk space when building the container, it may because your `/tmp` directory is not large enough. See https://sylabs.io/guides/3.0/user-guide/build_env.html#temporary-folders for a workaround.
 
 
 
