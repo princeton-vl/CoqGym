@@ -8,7 +8,7 @@ Code for the paper:
 [Kaiyu Yang](https://www.cs.princeton.edu/~kaiyuy/) and [Jia Deng](https://www.cs.princeton.edu/~jiadeng/)  
 International Conference on Machine Learning (ICML) 2019   
 
-```
+```bibtex
 @inproceedings{yang2019coqgym,
   title={Learning to Prove Theorems via Interacting with Proof Assistants},
   author={Yang, Kaiyu and Deng, Jia},
