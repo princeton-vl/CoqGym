@@ -1,4 +1,5 @@
 # CoqGym
+TEST
 
 ![Example proof](images/example_proof.jpg)
 
