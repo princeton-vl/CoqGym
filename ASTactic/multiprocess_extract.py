@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# Author: danjenson
+
 import argparse
 import json
 import multiprocessing as mp
