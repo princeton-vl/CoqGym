@@ -2,11 +2,11 @@
 
 ![Example proof](images/example_proof.jpg)
 
-Code for the paper:  
+Code for the paper:
 
-[Learning to Prove Theorems via Interacting with Proof Assistants](https://arxiv.org/abs/1905.09381)      
-[Kaiyu Yang](https://www.cs.princeton.edu/~kaiyuy/) and [Jia Deng](https://www.cs.princeton.edu/~jiadeng/)  
-International Conference on Machine Learning (ICML) 2019   
+[Learning to Prove Theorems via Interacting with Proof Assistants](https://arxiv.org/abs/1905.09381)
+[Kaiyu Yang](https://www.cs.princeton.edu/~kaiyuy/) and [Jia Deng](https://www.cs.princeton.edu/~jiadeng/)
+International Conference on Machine Learning (ICML) 2019
 
 ```bibtex
 @inproceedings{yang2019coqgym,
@@ -22,39 +22,39 @@ For potential bugs, please open an issue. For any other questions, please ask in
 
 ## Table of Contents
 
-1. [Installing CoqGym](#1-installing-coqgym)  
-    &nbsp; &nbsp;  1.1 [Dependencies](#11-dependencies)  
-    &nbsp; &nbsp;  1.2 [Building Coq, SerAPI, CoqHammer, and the Coq Projects](#12-building-coq-serapi-coqhammer-and-the-coq-projects)  
-    &nbsp; &nbsp;  1.3 [Extracting the Proofs from Coq Code](#13-extracting-the-proofs-from-coq-code-optional)  
-    &nbsp; &nbsp;  1.4 [Downloading the Pre-extracted Proofs](#14-downloading-the-pre-extracted-proofs-recommended)  
-2. [Using CoqGym in a Container](#2-using-coqgym-in-a-container)   
-    &nbsp; &nbsp;  2.1 [Dependencies](#21-dependencies)  
-    &nbsp; &nbsp;  2.2 [Downloading the Pre-built Container Image](#22-downloading-the-pre-built-container-image)  
-    &nbsp; &nbsp;  2.3 [Using the Container](#23-using-the-container)  
-    &nbsp; &nbsp;  2.4 [Building the Container by Yourself](#24-building-the-container-by-yourself)   
-3. [Data Format](#3-data-format)   
-    &nbsp; &nbsp;  3.1 [JSON Files](#31-json-files)   
-    &nbsp; &nbsp;  3.2 [LMDB File](#32-lmdb-file)   
-    &nbsp; &nbsp;  3.3 [Gloassary](#33-glossary)    
-4. [Data Utilities](#4-data-utilities)   
-    &nbsp; &nbsp;  4.1 [Interacting with CoqGym](#41-interacting-with-coqgym)   
-    &nbsp; &nbsp;  4.2 [Parsing Coq Terms](#42-parsing-coq-terms)   
-    &nbsp; &nbsp;  4.3 [Computing Dataset Statistics](#43-computing-dataset-statistics)   
-5. [The ASTactic Model](#5-the-astactic-model)  
-    &nbsp; &nbsp;  5.1 [Prerequisites](#51-prerequisites)  
-    &nbsp; &nbsp;  5.2 [Extracting Proof Steps](#52-extracting-proof-steps)  
-    &nbsp; &nbsp;  5.3 [Training](#53-training)  
-    &nbsp; &nbsp;  5.4 [Testing](#54-testing)  
+1. [Installing CoqGym](#1-installing-coqgym)
+    &nbsp; &nbsp;  1.1 [Dependencies](#11-dependencies)
+    &nbsp; &nbsp;  1.2 [Building Coq, SerAPI, CoqHammer, and the Coq Projects](#12-building-coq-serapi-coqhammer-and-the-coq-projects)
+    &nbsp; &nbsp;  1.3 [Extracting the Proofs from Coq Code](#13-extracting-the-proofs-from-coq-code-optional)
+    &nbsp; &nbsp;  1.4 [Downloading the Pre-extracted Proofs](#14-downloading-the-pre-extracted-proofs-recommended)
+2. [Using CoqGym in a Container](#2-using-coqgym-in-a-container)
+    &nbsp; &nbsp;  2.1 [Dependencies](#21-dependencies)
+    &nbsp; &nbsp;  2.2 [Downloading the Pre-built Container Image](#22-downloading-the-pre-built-container-image)
+    &nbsp; &nbsp;  2.3 [Using the Container](#23-using-the-container)
+    &nbsp; &nbsp;  2.4 [Building the Container by Yourself](#24-building-the-container-by-yourself)
+3. [Data Format](#3-data-format)
+    &nbsp; &nbsp;  3.1 [JSON Files](#31-json-files)
+    &nbsp; &nbsp;  3.2 [LMDB File](#32-lmdb-file)
+    &nbsp; &nbsp;  3.3 [Gloassary](#33-glossary)
+4. [Data Utilities](#4-data-utilities)
+    &nbsp; &nbsp;  4.1 [Interacting with CoqGym](#41-interacting-with-coqgym)
+    &nbsp; &nbsp;  4.2 [Parsing Coq Terms](#42-parsing-coq-terms)
+    &nbsp; &nbsp;  4.3 [Computing Dataset Statistics](#43-computing-dataset-statistics)
+5. [The ASTactic Model](#5-the-astactic-model)
+    &nbsp; &nbsp;  5.1 [Prerequisites](#51-prerequisites)
+    &nbsp; &nbsp;  5.2 [Extracting Proof Steps](#52-extracting-proof-steps)
+    &nbsp; &nbsp;  5.3 [Training](#53-training)
+    &nbsp; &nbsp;  5.4 [Testing](#54-testing)
 6. [Credits](#6-credits)
 7. [Contributing](#7-contributing)
-    
-    
+
+
 ---
 
 ## 1. Installing CoqGym
 
 
-Follow these steps to obtain the CoqGym dataset and build the environment for interacting with it. 
+Follow these steps to obtain the CoqGym dataset and build the environment for interacting with it.
 Alternatively, you may also use CoqGym in a [container](#2-using-coqgym-in-a-container).
 
 
@@ -82,13 +82,13 @@ Alternatively, you may also use CoqGym in a [container](#2-using-coqgym-in-a-con
 We include the code for extracting CoqGym from Coq source code. However, it is not guaranteed to reproduce exactly the same data. The timeout and other miscellaneous errors during the data extraction may be machine-dependent. For example, a faster machine is likely to have fewer timeout errors and thus can extract more proofs.
 For benchmark purpose, please download and use our pre-extracted version of CoqGym.
 
-1. Check all Coq files and locate the proofs:   
-    For each `*.meta` file in `./coq_projects/`, run `python check_proofs.py --file /path/to/*.meta`   
+1. Check all Coq files and locate the proofs:
+    For each `*.meta` file in `./coq_projects/`, run `python check_proofs.py --file /path/to/*.meta`
     Now you have generated a `*.json` file in `./data/` corresponding to each `*.meta` file. The `proofs` field of the JSON object is a list containing the proof names.
-    
-2. Extract the proofs:  
-    For each `*.meta` file and each proof, run:  
-    `python extract_proof.py --file /path/to/*.meta --proof $PROOF_NAME`  
+
+2. Extract the proofs:
+    For each `*.meta` file and each proof, run:
+    `python extract_proof.py --file /path/to/*.meta --proof $PROOF_NAME`
     `python extract_synthetic_proofs.py --file /path/to/*.meta --proof $PROOF_NAME`
 
 3. Post-processing: `python postprocess.py`
@@ -132,13 +132,13 @@ The container image can be downloaded [here](https://drive.google.com/drive/fold
 1. Start a shell session inside the container: `singularity shell coq_gym.simg`
 1. Run `source /.bashrc && cd /CoqGym && eval $(opam env) && conda activate coq_gym`
 
-You are now ready to use CoqGym! Try `python eval_env.py` to see if it terminates normally without raising an error.  
+You are now ready to use CoqGym! Try `python eval_env.py` to see if it terminates normally without raising an error.
 For further instructions about how to use a Singularity container, please consult the documentation of Singularity.
 
 
-### 2.4 Building the Container by Yourself 
+### 2.4 Building the Container by Yourself
 
-We provide a [Singularity recipe](./Singularity) from which you can build the container by yourself. 
+We provide a [Singularity recipe](./Singularity) from which you can build the container by yourself.
 
 1. You need to be on a Linux machine of which you have sudo privileges.
 1. Download the dataset [here](https://drive.google.com/drive/folders/149m_17VkYYkl0kdSB4AI8zodCuTmPaA6?usp=sharing) and put the files in your `CoqGym/` directory.
@@ -164,9 +164,9 @@ The dataset contains three parts:
 
 ### 3.1 JSON Files
 
-Each `*.json` file in `data/` corresponds to a Coq source file `*.v` in `coq_projects/`. For example, `data/StructTact/Assoc.json` corresponds to [coq_projects/StructTact/Assoc.v](https://github.com/princeton-vl/CoqGym/blob/master/coq_projects/StructTact/Assoc.v). 
+Each `*.json` file in `data/` corresponds to a Coq source file `*.v` in `coq_projects/`. For example, `data/StructTact/Assoc.json` corresponds to [coq_projects/StructTact/Assoc.v](https://github.com/princeton-vl/CoqGym/blob/master/coq_projects/StructTact/Assoc.v).
 
-The format of the JSON files is described below. 
+The format of the JSON files is described below.
 The hash codes are used as keys to query the LMDB `sexp_cache`.
 Consult the [glossary](#33-glossary) for the terminology.
 ```
@@ -197,7 +197,7 @@ The format for a proof is as follows, taking the [`get_set_same`](https://github
 {
     'name': get_set_same,             # the name of the theorem
     'line_nb': 118,                   # the theorem is defined in $file_data['vernac_cmds'][$line_nb]
-    
+
     'env_delta': {                          # the global environment relative to the previous proof in the same file
         'add' : {                           # entries that should be added to the environment
             'constants' : [
@@ -209,7 +209,7 @@ The format for a proof is as follows, taking the [`get_set_same`](https://github
                     'sort': 'Prop',                                        # the sort [2] of the constant (the type of its type) [2]
                     'opaque': False,                                       # whether the constant is opaque or transparent [3]
                     'sexp': '333b2895c8e62d21856476bf89fa9681c9058bb9'     # the S-expression [4] of the constant produced by SerAPI
-            },   
+            },
             ...
             ],
             'inductives' : [
@@ -229,7 +229,7 @@ The format for a proof is as follows, taking the [`get_set_same`](https://github
                     'sexp': '31537cb98179ad7d2de0dd2cc783b4672b34b25b'
             }
             ...
-            
+
             ],
         },
         'subtract' : {                      # entries that should be removed from the environment
@@ -237,18 +237,18 @@ The format for a proof is as follows, taking the [`get_set_same`](https://github
             'inductives' : [],
         },
     },
-    
+
     'steps': [                        # a list of proof steps
         {
-            'command': ['induction l; intros; simpl; repeat (break_match; simpl); subst; congruence.', 'VernacExtend', 'f6d2cb314d72d23562e5f2ef2657bd2589d44794'],        # (raw command, command type, command AST (in hash code)) the Coq command (usually a tactic but also includes other commands such as +, -, *, etc.) 
+            'command': ['induction l; intros; simpl; repeat (break_match; simpl); subst; congruence.', 'VernacExtend', 'f6d2cb314d72d23562e5f2ef2657bd2589d44794'],        # (raw command, command type, command AST (in hash code)) the Coq command (usually a tactic but also includes other commands such as +, -, *, etc.)
             'goal_ids': {             # the IDs of the goals in the current proof step
-                'fg': [27],           # focused goals 
+                'fg': [27],           # focused goals
                 'bg': [] .            # unfocused goals
             }
         }
         ...
-    ],      
-    
+    ],
+
     'goals' {                         # the goals
         27': {                        # $goal_id -> goal
                  'id': 27,            # the goal ID
@@ -258,11 +258,11 @@ The format for a proof is as follows, taking the [`get_set_same`](https://github
                      {'idents': ['K_eq_dec'], 'term': [], 'type': "forall k k' : K, sumbool (@eq K k k') (not (@eq K k k'))", 'sexp': '5f5f5bcf9e10621f8c0c4642c0eba3ff36cbfff8'},
                  ],
              }
-    },    
-    
+    },
+
     'proof_tree' : {                  # the proof tree
         'goal_id': 27, 'children': []
-    },                     
+    },
 }
 ```
 
@@ -277,7 +277,7 @@ print(sexp_cache['333b2895c8e62d21856476bf89fa9681c9058bb9'])
 
 ### 3.3 Glossary
 
-1. [qualified identifier](https://coq.inria.fr/distrib/current/refman/language/gallina-specification-language.html#qualified-identifiers-and-simple-identifiers) 
+1. [qualified identifier](https://coq.inria.fr/distrib/current/refman/language/gallina-specification-language.html#qualified-identifiers-and-simple-identifiers)
 2. [sort](https://coq.inria.fr/distrib/current/refman/language/gallina-specification-language.html#sorts)
 3. [opaque, transparent](https://coq.inria.fr/distrib/current/refman/language/gallina-specification-language.html#sorts)
 4. [S-expression](https://en.wikipedia.org/wiki/S-expression)
@@ -292,25 +292,25 @@ print(sexp_cache['333b2895c8e62d21856476bf89fa9681c9058bb9'])
 
 ## 4. Data Utilities
 
-We include some tools for interacting with CoqGym, but they are NOT a part of the dataset. 
+We include some tools for interacting with CoqGym, but they are NOT a part of the dataset.
 You may implement your own tools for similar purposes.
 
 
 ### 4.1 Interacting with CoqGym
 
-`eval_env.py` enables the interaction with the proofs in CoqGym. 
+`eval_env.py` enables the interaction with the proofs in CoqGym.
 See [ASTactic/agent.py](ASTactic/agent.py) for examples.
 
 
 ### 4.2 Parsing Coq Terms
 
-* `gallina.py`: a parser the S-expressions of Coq terms. 
-It may be useful for learning the embeddings of the term ASTs. 
+* `gallina.py`: a parser the S-expressions of Coq terms.
+It may be useful for learning the embeddings of the term ASTs.
 
 * `utils.py`: functions for iterating through all proofs or Coq files in the dataset.
 
 
-### 4.3 Computing Dataset Statistics 
+### 4.3 Computing Dataset Statistics
 
 * `stats/count_human_proofs.py`: count the number of human-written proofs in CoqGym.
 
@@ -326,7 +326,7 @@ It may be useful for learning the embeddings of the term ASTs.
 
 ![ASTactic](/images/astactic.jpg)
 
-Here we describe how to train and test the ASTactic model on CoqGym. 
+Here we describe how to train and test the ASTactic model on CoqGym.
 The following content is NOT a part of the CoqGym dataset, and therefore you do not need it if you only want to access the data.
 
 ### 5.1 Prerequisites
@@ -341,10 +341,10 @@ The following content is NOT a part of the CoqGym dataset, and therefore you do 
 ### 5.2 Extracting Proof Steps
 
 The ASTactic model is trained on individual proof steps, rather than entire proofs.
-After obtaining the CoqGym dataset, run `python extract_proof_steps.py`. This can take a while, and you have the option to run it in parallel, please see the `--filter` option in the source code for details.
+After obtaining the CoqGym dataset, run `python extract_proof_steps.py`. This can take a while and requires a lot of memory. To help with this, we have provided an alternative script `multiprocess_extract.py` which executes the proof step extraction as a series of manageable batch jobs.
 
 
-The extracted proof steps are in `proof_steps/`. You can double-check the number of proof steps to make sure everything works as expected: 
+The extracted proof steps are in `proof_steps/`. You can double-check the number of proof steps to make sure everything works as expected:
 
 Directory |  # files
 ------------ | -------------
@@ -354,23 +354,23 @@ proof_steps/valid | 68,180
 
 ### 5.3 Training
 
-To train on the proof steps in training + validation set: `python main.py --no_validation --exp_id astactic`  
+To train on the proof steps in training + validation set: `python main.py --no_validation --exp_id astactic`
 The "astactic" above is an experiment ID, and you may change it to other IDs. Model checkpoints will be saved to `runs/astactic/checkpoints/`. See `options.py` for command line options.
 
 A pre-trained model can be downloaded [here](https://drive.google.com/drive/folders/1AzLaEpoGS3BPMUz9Bl63MHAFRqlF4CtH?usp=sharing).
 
 
-### 5.4 Testing 
+### 5.4 Testing
 
 Assuming you want to test the model checkpoint `runs/astactic/checkpoints/model_003.pth` on the proof `get_set_same` in `../data/StructTact/Assoc.json`:
 
-* Testing ASTactic:   
+* Testing ASTactic:
     `python evaluate.py ours ours-TEST --path runs/astactic/checkpoints/model_003.pth --file ../data/StructTact/Assoc.json --proof "get_set_same"`
 
-* Testing an automated tactic X (may be "auto", "trivial", "easy", "intuition", or "hammer"):   
-    `python -u evaluate.py X X-TEST --file ../data/StructTact/Assoc.json --proof "get_set_same"` 
+* Testing an automated tactic X (may be "auto", "trivial", "easy", "intuition", or "hammer"):
+    `python -u evaluate.py X X-TEST --file ../data/StructTact/Assoc.json --proof "get_set_same"`
 
-* Testing ASTactic+X:   
+* Testing ASTactic+X:
     `python -u evaluate.py ours+X ours+X-TEST --path runs/astactic/checkpoints/model_003.pth --file ../data/StructTact/Assoc.json --proof "get_set_same"`
 
 
@@ -384,4 +384,4 @@ Assuming you want to test the model checkpoint `runs/astactic/checkpoints/model_
 
 ## 7. Contributing
 
-We welcome and appreciate contributions from the community. For bug fixes and relatively minor changes (such as comments, typos, etc.), feel free to submit a pull request directly. For anything beyond, please first post in [Discussions](https://github.com/princeton-vl/CoqGym/discussions) before implementing. 
+We welcome and appreciate contributions from the community. For bug fixes and relatively minor changes (such as comments, typos, etc.), feel free to submit a pull request directly. For anything beyond, please first post in [Discussions](https://github.com/princeton-vl/CoqGym/discussions) before implementing.
