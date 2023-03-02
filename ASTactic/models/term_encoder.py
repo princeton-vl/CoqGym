@@ -8,6 +8,9 @@ from itertools import chain
 from lark.tree import Tree
 import os
 from gallina import traverse_postorder
+import torch_geometric.nn as gnn
+from torch_geometric.nn import GCNConv
+import gc
 import pdb
 
 
@@ -69,127 +72,71 @@ nonterminals = [
     "constr__pcofixpoint___constr__constr____constr__constr",
 ]
 
+class TermEncoder(gnn.MessagePassing):
 
-class InputOutputUpdateGate(nn.Module):
-    def __init__(self, hidden_dim, nonlinear):
-        super().__init__()
-        self.nonlinear = nonlinear
-        k = 1.0 / math.sqrt(hidden_dim)
-        self.W = nn.Parameter(torch.Tensor(hidden_dim, len(nonterminals) + hidden_dim))
-        nn.init.uniform_(self.W, -k, k)
-        self.b = nn.Parameter(torch.Tensor(hidden_dim))
-        nn.init.uniform_(self.b, -k, k)
-
-    def forward(self, xh):
-        return self.nonlinear(F.linear(xh, self.W, self.b))
-
-
-class ForgetGates(nn.Module):
-    def __init__(self, hidden_dim, opts):
-        super().__init__()
-        self.hidden_dim = hidden_dim
-        self.opts = opts
-        k = 1.0 / math.sqrt(hidden_dim)
-        # the weight for the input
-        self.W_if = nn.Parameter(torch.Tensor(hidden_dim, len(nonterminals)))
-        nn.init.uniform_(self.W_if, -k, k)
-        # the weight for the hidden
-        self.W_hf = nn.Parameter(torch.Tensor(hidden_dim, hidden_dim))
-        nn.init.uniform_(self.W_hf, -k, k)
-        # the bias
-        self.b_f = nn.Parameter(torch.Tensor(hidden_dim))
-        nn.init.uniform_(self.b_f, -k, k)
-
-    def forward(self, x, h_children, c_children):
-        c_remain = torch.zeros(x.size(0), self.hidden_dim).to(self.opts.device)
-
-        Wx = F.linear(x, self.W_if)
-        all_h = list(chain(*h_children))
-        if all_h == []:
-            return c_remain
-        Uh = F.linear(torch.stack(all_h), self.W_hf, self.b_f)
-        i = 0
-        for j, h in enumerate(h_children):
-            if h == []:
-                continue
-            f_gates = torch.sigmoid(Wx[j] + Uh[i : i + len(h)])
-            i += len(h)
-            c_remain[j] = (f_gates * torch.stack(c_children[j])).sum(dim=0)
-
-        return c_remain
-
-
-class TermEncoder(nn.Module):
     def __init__(self, opts):
-        super().__init__()
+        super().__init__(aggr='max')
         self.opts = opts
-        self.input_gate = InputOutputUpdateGate(
-            opts.term_embedding_dim, nonlinear=torch.sigmoid
-        )
-        self.forget_gates = ForgetGates(opts.term_embedding_dim, opts)
-        self.output_gate = InputOutputUpdateGate(
-            opts.term_embedding_dim, nonlinear=torch.sigmoid
-        )
-        self.update_cell = InputOutputUpdateGate(
-            opts.term_embedding_dim, nonlinear=torch.tanh
-        )
+        self.conv1 = GCNConv(1, 16)
+        self.conv2 = GCNConv(16, 126)
 
-    def forward(self, term_asts):
-        # the height of a node determines when it can be processed
-        height2nodes = defaultdict(set)
 
-        def get_height(node):
-            height2nodes[node.height].add(node)
+    def forward(self, asts):
+        # ipdb.set_trace()
+        if len(asts) == 0:
+            return [torch.zeros(len(asts), self.opts.term_embedding_dim).to(self.opts.device)]
+        embeddings = []
+        for i, ast in enumerate(asts):
+            edge_index = self.create_edge_index(ast)
+            if not len(edge_index):
+                x = torch.zeros(self.opts.term_embedding_dim).to(self.opts.device)
+            else:
+                x = self.create_x(ast)
+                x = self.conv1(x, edge_index)
+                x = F.relu(x)
+                x = F.dropout(x, training=self.training)
+                x = self.conv2(x, edge_index)
+                x = x.flatten()
+                reshaper = nn.Linear(len(x), self.opts.term_embedding_dim)
+                x = reshaper(x)
 
-        for ast in term_asts:
-            traverse_postorder(ast, get_height)
+            embeddings.append(x)
+            del edge_index, x
+            gc.collect()
+        return torch.stack(embeddings).to(self.opts.device)
 
-        memory_cells = {}  # node -> memory cell
-        hidden_states = {}  # node -> hidden state
-        # return torch.zeros(len(term_asts), self.opts.term_embedding_dim).to(self.opts.device)
+    def message(self, x_i, x_j):
+        # x_i has shape [E, F_in]
+        # x_j has shape [E, F_in]
+        edge_features = torch.cat([x_i, x_j - x_i], dim=1)  # shape [E, 2 * F_in]
+        return self.mlp(edge_features)  # shape [E, F_out]
 
-        # compute the embedding for each node
-        for height in sorted(height2nodes.keys()):
-            nodes_at_height = list(height2nodes[height])
-            # sum up the hidden states of the children
-            h_sum = []
-            c_remains = []
-            x = torch.zeros(
-                len(nodes_at_height), len(nonterminals), device=self.opts.device
-            ).scatter_(
-                1,
-                torch.tensor(
-                    [nonterminals.index(node.data) for node in nodes_at_height],
-                    device=self.opts.device,
-                ).unsqueeze(1),
-                1.0,
-            )
+    def create_edge_index(self, ast):
+        index_map = {}
+        counter = [0]
+        def index_callbck(node):
+            index_map[node.meta] = counter[-1]
+            counter.append(counter[-1]+1)
 
-            h_sum = torch.zeros(len(nodes_at_height), self.opts.term_embedding_dim).to(
-                self.opts.device
-            )
-            h_children = []
-            c_children = []
-            for j, node in enumerate(nodes_at_height):
-                h_children.append([])
-                c_children.append([])
-                for c in node.children:
-                    h = hidden_states[c]
-                    h_sum[j] += h
-                    h_children[-1].append(h)
-                    c_children[-1].append(memory_cells[c])
-            c_remains = self.forget_gates(x, h_children, c_children)
+        traverse_postorder(ast, index_callbck)
 
-            # gates
-            xh = torch.cat([x, h_sum], dim=1)
-            i_gate = self.input_gate(xh)
-            o_gate = self.output_gate(xh)
-            u = self.update_cell(xh)
-            cells = i_gate * u + c_remains
-            hiddens = o_gate * torch.tanh(cells)
+        edge_index = []
+        def callbck(node):
+            for child in node.children:
+                parent_child = [index_map[node.meta], index_map[child.meta]]
+                child_parent = [index_map[child.meta], index_map[node.meta]]
+                edge_index.append(parent_child)
+                edge_index.append(child_parent)
 
-            for i, node in enumerate(nodes_at_height):
-                memory_cells[node] = cells[i]
-                hidden_states[node] = hiddens[i]
+        traverse_postorder(ast, callbck)
 
-        return torch.stack([hidden_states[ast] for ast in term_asts])
+        return torch.tensor(edge_index, dtype=torch.long).t().contiguous()
+
+    def create_x(self, ast):
+        x = []
+        def callbck(node):
+            x.append([nonterminals.index(node.data)])
+
+        traverse_postorder(ast, callbck)
+
+        return torch.tensor(x, dtype=torch.float)
