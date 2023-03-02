@@ -73,8 +73,8 @@ def process_proof(filename, proof_data):
         is_synthetic = False
     global num_discarded
 
-    if args.filter and not md5(filename.encode()).hexdigest().startswith(args.filter):
-        return
+    if args.filter != filename.split(os.path.sep)[2]
+        return  # skip proof folders not included in filter flag
 
     proj = filename.split(os.path.sep)[2]
     if proj in projs_split["projs_train"]:
