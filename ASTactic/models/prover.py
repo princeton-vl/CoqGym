@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 from tac_grammar import CFG
 from .tactic_decoder import TacticDecoder
-from .term_encoder import TermEncoder
+from .term_encoder_gnn import TermEncoder
 import pdb
 import os
 from itertools import chain
