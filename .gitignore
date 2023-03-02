@@ -140,3 +140,13 @@ cython_debug/
 *.vo
 *.pyc
 coq_projects/
+
+data/
+coq/
+coq-serapi/
+._data
+coqhammer/
+proof_steps/
+sexp_cache*
+*.json
+runs/
