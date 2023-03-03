@@ -1,18 +1,19 @@
+import gc
+import math
+import os
+import pdb
+from collections import defaultdict
+from itertools import chain
+from time import time
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import math
-from collections import defaultdict
-from time import time
-from itertools import chain
-from lark.tree import Tree
-import os
-from gallina import traverse_postorder
 import torch_geometric.nn as gnn
+from lark.tree import Tree
 from torch_geometric.nn import GCNConv
-import gc
-import pdb
 
+from gallina import traverse_postorder
 
 nonterminals = [
     "constr__constr",
@@ -72,26 +73,29 @@ nonterminals = [
     "constr__pcofixpoint___constr__constr____constr__constr",
 ]
 
-class TermEncoder(gnn.MessagePassing):
 
+class TermEncoder(gnn.MessagePassing):
     def __init__(self, opts):
-        super().__init__(aggr='max')
+        super().__init__(aggr="max")
         self.opts = opts
         self.conv1 = GCNConv(1, 16)
         self.conv2 = GCNConv(16, 126)
 
-
     def forward(self, asts):
         # ipdb.set_trace()
         if len(asts) == 0:
-            return [torch.zeros(len(asts), self.opts.term_embedding_dim).to(self.opts.device)]
+            return [
+                torch.zeros(len(asts), self.opts.term_embedding_dim).to(
+                    self.opts.device
+                )
+            ]
         embeddings = []
         for i, ast in enumerate(asts):
-            edge_index = self.create_edge_index(ast)
+            edge_index = self.create_edge_index(ast).to(self.opts.device)
             if not len(edge_index):
                 x = torch.zeros(self.opts.term_embedding_dim).to(self.opts.device)
             else:
-                x = self.create_x(ast)
+                x = self.create_x(ast).to(self.opts.device)
                 x = self.conv1(x, edge_index)
                 x = F.relu(x)
                 x = F.dropout(x, training=self.training)
@@ -114,13 +118,15 @@ class TermEncoder(gnn.MessagePassing):
     def create_edge_index(self, ast):
         index_map = {}
         counter = [0]
+
         def index_callbck(node):
             index_map[node.meta] = counter[-1]
-            counter.append(counter[-1]+1)
+            counter.append(counter[-1] + 1)
 
         traverse_postorder(ast, index_callbck)
 
         edge_index = []
+
         def callbck(node):
             for child in node.children:
                 parent_child = [index_map[node.meta], index_map[child.meta]]
@@ -134,6 +140,7 @@ class TermEncoder(gnn.MessagePassing):
 
     def create_x(self, ast):
         x = []
+
         def callbck(node):
             x.append([nonterminals.index(node.data)])
 
