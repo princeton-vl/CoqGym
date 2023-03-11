@@ -49,7 +49,7 @@ For potential bugs, please open an issue. For any other questions, please ask in
 
 ## 1. Installing CoqGym
 
-We recommend [using CoqGym in Docker](#2-using-coqgym-in-docker), as CoqGym has many dependencies and is nontrivial to set up correctly. If Docker is not an option, here are the steps to obtain the CoqGym dataset and build the interaction environment natively.
+We recommend [using CoqGym in Docker](#2-using-coqgym-in-docker), as CoqGym has many dependencies and is nontrivial to set up correctly. If Docker is not an option, below are steps to obtain the CoqGym dataset and build the interaction environment natively:
 
 
 ### 1.1 Dependencies
