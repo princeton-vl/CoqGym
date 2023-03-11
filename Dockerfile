@@ -1,4 +1,3 @@
-
 FROM nvcr.io/nvidia/pytorch:23.02-py3
 
 WORKDIR /workspace/CoqGym
@@ -15,8 +14,6 @@ RUN pip install lark-parser==0.6.5 lmdb pandas pexpect progressbar2 sexpdata
 RUN source install.sh
 
 ENV PATH="/workspace/CoqGym/coq/bin:/root/.opam/4.07.1+flambda/bin":$PATH
-RUN which coqtop
-RUN which sertop
 
 RUN cd coq_projects && make && cd ..
 
