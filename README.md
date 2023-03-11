@@ -51,7 +51,7 @@ For potential bugs, please open an issue. For any other questions, please ask in
 
 
 Follow these steps to obtain the CoqGym dataset and build the environment for interacting with it. 
-Alternatively, you may also use CoqGym in a [container](#2-using-coqgym-in-a-container).
+Alternatively, you may also use CoqGym in [Docker](#2-using-coqgym-in-docker).
 
 
 ### 1.1 Dependencies
