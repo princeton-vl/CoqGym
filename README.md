@@ -109,7 +109,7 @@ Now you are ready to interact with CoqGym! Run `python eval_env.py` to check if 
 
 ## 2. Using CoqGym in Docker
 
-As a less painful alternative to [installing CoqGym](#1-installing-coqgym) from scratch, we provide a [Docker image with everything pre-installed](https://hub.docker.com/r/yangky11/coq-gym). The image is built from this [Dockerfile](./Dockerfile). It includes the CoqGym dataset, proof steps extracted from the dataset, our pre-trained ASTactic model, and all necessary dependencies such as OPAM, Z3, CVC4, Vampire, and E Prover. You shouldn't need to download anything else if you choose to use the Docker image.
+As a less painful alternative to [installing CoqGym](#1-installing-coqgym) from scratch, we provide a [Docker image with everything pre-installed](https://hub.docker.com/r/yangky11/coq-gym). The image was built from this [Dockerfile](./Dockerfile). It includes the CoqGym dataset, proof steps extracted from the dataset, our pre-trained ASTactic model, and all necessary dependencies such as OPAM, Z3, CVC4, Vampire, and E Prover. You shouldn't need to download anything else if you choose to use the Docker image.
 
 
 
