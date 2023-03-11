@@ -27,11 +27,7 @@ For potential bugs, please open an issue. For any other questions, please ask in
     &nbsp; &nbsp;  1.2 [Building Coq, SerAPI, CoqHammer, and the Coq Projects](#12-building-coq-serapi-coqhammer-and-the-coq-projects)  
     &nbsp; &nbsp;  1.3 [Extracting the Proofs from Coq Code](#13-extracting-the-proofs-from-coq-code-optional)  
     &nbsp; &nbsp;  1.4 [Downloading the Pre-extracted Proofs](#14-downloading-the-pre-extracted-proofs-recommended)  
-2. [Using CoqGym in a Container](#2-using-coqgym-in-a-container)   
-    &nbsp; &nbsp;  2.1 [Dependencies](#21-dependencies)  
-    &nbsp; &nbsp;  2.2 [Downloading the Pre-built Container Image](#22-downloading-the-pre-built-container-image)  
-    &nbsp; &nbsp;  2.3 [Using the Container](#23-using-the-container)  
-    &nbsp; &nbsp;  2.4 [Building the Container by Yourself](#24-building-the-container-by-yourself)   
+2. [Using CoqGym in Docker](#2-using-coqgym-in-docker)   
 3. [Data Format](#3-data-format)   
     &nbsp; &nbsp;  3.1 [JSON Files](#31-json-files)   
     &nbsp; &nbsp;  3.2 [LMDB File](#32-lmdb-file)   
@@ -111,41 +107,9 @@ Now you are ready to interact with CoqGym! Run `python eval_env.py` to check if 
 ---
 
 
-## 2. Using CoqGym in a Container
+## 2. Using CoqGym in Docker
 
-As a less painful alternative to [installing CoqGym](#1-installing-coqgym) from scratch, we provide a pre-built Singularity container (There is also a 3rd-party [docker image](https://hub.docker.com/r/innochainver/coqgym) that may be useful).
-Feel free to skip these steps if you have finished installing CoqGym.
-Currently we do not support GPUs for the container, therefore you have to complete the installation steps manually if you want to train models on CoqGym using GPUs.
-
-
-### 2.1 Dependencies
-
-* [Singularity (a.k.a. Apptainer)](https://apptainer.org/)
-
-
-### 2.2 Downloading the Pre-built Container Image
-
-The container image can be downloaded [here](https://drive.google.com/drive/folders/13Rwa5no6W4MwSvdjRrENAdDCQqTWhcqy?usp=sharing).
-
-### 2.3 Using the Container
-
-1. Start a shell session inside the container: `singularity shell coq_gym.simg`
-1. Run `source /.bashrc && cd /CoqGym && eval $(opam env) && conda activate coq_gym`
-
-You are now ready to use CoqGym! Try `python eval_env.py` to see if it terminates normally without raising an error.  
-For further instructions about how to use a Singularity container, please consult the documentation of Singularity.
-
-
-### 2.4 Building the Container by Yourself 
-
-We provide a [Singularity recipe](./Singularity) from which you can build the container by yourself. 
-
-1. You need to be on a Linux machine of which you have sudo privileges.
-1. Download the dataset [here](https://drive.google.com/drive/folders/149m_17VkYYkl0kdSB4AI8zodCuTmPaA6?usp=sharing) and put the files in your `CoqGym/` directory.
-1. Run `sudo singularity build coq_gym.simg Singularity` to build the container image `coq_gym.simg`
-
-
-*Caveat*: If you run out of disk space when building the container, it may because your `/tmp` directory is not large enough. See https://sylabs.io/guides/3.0/user-guide/build_env.html#temporary-folders for a workaround.
+As a less painful alternative to [installing CoqGym](#1-installing-coqgym) from scratch, we provide a [Docker image with everything pre-installed](https://hub.docker.com/r/yangky11/coq-gym). The image is built from this [Dockerfile](./Dockerfile). It includes the CoqGym dataset, proof steps extracted from the dataset, our pre-trained ASTactic model, and all necessary dependencies such as OPAM, Z3, CVC4, Vampire, and E Prover. You shouldn't need to download anything else if you choose to use the Docker image.
 
 
 
