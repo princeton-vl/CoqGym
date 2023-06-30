@@ -5,7 +5,7 @@
 Code for the paper:  
 
 [Learning to Prove Theorems via Interacting with Proof Assistants](https://arxiv.org/abs/1905.09381)      
-[Kaiyu Yang](https://www.cs.princeton.edu/~kaiyuy/) and [Jia Deng](https://www.cs.princeton.edu/~jiadeng/)  
+[Kaiyu Yang](https://yangky11.github.io/) and [Jia Deng](https://www.cs.princeton.edu/~jiadeng/)  
 International Conference on Machine Learning (ICML) 2019   
 
 ```bibtex
@@ -69,12 +69,12 @@ We recommend [using CoqGym in Docker](#2-using-coqgym-in-docker), as CoqGym has 
 1. Build the Coq projects (can take a while): `cd coq_projects && make && cd ..`
 1. Create and activate the conda environment: `conda env create -f coq_gym.yml && conda activate coq_gym`
 
-*Note*: [Coq](https://github.com/coq/coq), [SerAPI](https://github.com/ejgallego/coq-serapi), [CoqHammer](https://github.com/lukaszcz/coqhammer), and the Coq projects in [coq_projects](./coq_projects) directory are indendent software projects with their own code repositories, but please follow the instructions above to build the specific versions we need.
+*Note*: [Coq](https://github.com/coq/coq), [SerAPI](https://github.com/ejgallego/coq-serapi), [CoqHammer](https://github.com/lukaszcz/coqhammer), and the Coq projects in [coq_projects](./coq_projects) directory are independent software projects with their own code repositories, but please follow the instructions above to build the specific versions we need.
 
 ### 1.3 Extracting the Proofs from Coq Code (Optional)
 
 We include the code for extracting CoqGym from Coq source code. However, it is not guaranteed to reproduce exactly the same data. The timeout and other miscellaneous errors during the data extraction may be machine-dependent. For example, a faster machine is likely to have fewer timeout errors and thus can extract more proofs.
-For benchmark purpose, please download and use our pre-extracted version of CoqGym.
+For benchmark purposes, please download and use our pre-extracted version of CoqGym.
 
 1. Check all Coq files and locate the proofs:   
     For each `*.meta` file in `./coq_projects/`, run `python check_proofs.py --file /path/to/*.meta`   
@@ -93,11 +93,11 @@ For benchmark purpose, please download and use our pre-extracted version of CoqG
 
 ### 1.4 Downloading the Pre-extracted Proofs (Recommended)
 
-1. Download the CoqGym dataset [here](https://drive.google.com/drive/folders/149m_17VkYYkl0kdSB4AI8zodCuTmPaA6?usp=sharing)
+1. Download the CoqGym dataset [here](https://zenodo.org/record/8101883).
 
 2. Unzip the data and set the paths: `python unzip_data.py`
 
-*Caveat*: The second step sets the absolute paths in the data. You have to re-do it whenever the absolote path of the `data/` directory changes (e.g. after moving the entire repo to another directory).
+*Caveat*: The second step sets the absolute paths in the data. You have to re-do it whenever the absolute path of the `data/` directory changes (e.g. after moving the entire repo to another directory).
 
 Now you are ready to interact with CoqGym! Run `python eval_env.py` to check if it terminates normally without raising an error.
 
@@ -319,7 +319,7 @@ proof_steps/valid | 68,180
 To train on the proof steps in training + validation set: `python main.py --no_validation --exp_id astactic`  
 The "astactic" above is an experiment ID, and you may change it to other IDs. Model checkpoints will be saved to `runs/astactic/checkpoints/`. See `options.py` for command line options.
 
-A pre-trained model can be downloaded [here](https://drive.google.com/drive/folders/1AzLaEpoGS3BPMUz9Bl63MHAFRqlF4CtH?usp=sharing).
+A pre-trained model can be downloaded [here](https://huggingface.co/kaiyuy/ASTactic).
 
 
 ### 5.4 Testing 
