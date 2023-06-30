@@ -93,7 +93,7 @@ For benchmark purposes, please download and use our pre-extracted version of Coq
 
 ### 1.4 Downloading the Pre-extracted Proofs (Recommended)
 
-1. Download the CoqGym dataset [here](https://zenodo.org/record/8101883).
+1. Download the CoqGym dataset from [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.8101883.svg)](https://doi.org/10.5281/zenodo.8101883).
 
 2. Unzip the data and set the paths: `python unzip_data.py`
 
